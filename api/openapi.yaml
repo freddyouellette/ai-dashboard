@@ -1,0 +1,233 @@
+openapi: 3.0.3
+info:
+  title: AI Dashboard API
+  # description: 
+  # termsOfService: http://swagger.io/terms/
+  # contact:
+  #   email: apiteam@swagger.io
+  # license:
+  #   name: Apache 2.0
+  #   url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+# externalDocs:
+#   description: Find out more about Swagger
+#   url: http://swagger.io
+# servers:
+#   - url: https://petstore3.swagger.io/api/v3
+tags:
+  - name: Bots
+    description: Create and manage your AI bots
+  - name: Chats
+    description: Create and manage your chats with your bots
+  - name: Chat Messages
+    description: Send and view messages from your chats
+paths:
+  /bots:
+    get:
+      tags:
+        - Bots
+      summary: Get all bots
+      operationId: getAllBots
+      responses:
+        '200':
+          description: Bots retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Bot'
+    post:
+      tags:
+        - Bots
+      summary: Create a bot
+      # description:
+      operationId: createBot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bot'
+      responses:
+        '200':
+          description: Bot created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bot'
+  /chats:
+    get:
+      tags:
+        - Chats
+      summary: Get all chats
+      operationId: ghats
+      responses:
+        '200':
+          description: Chats retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Chat'
+    post:
+      tags:
+        - Chats
+      summary: Create an empty chat with a bot
+      # description:
+      operationId: createChat
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Chat'
+      responses:
+        '200':
+          description: Chat created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+  /chat/{chat_uuid}/messages:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/chat_uuid'
+      tags:
+        - Chat Messages
+      summary: Get all messages in a chat
+      operationId: getAllMessages
+      responses:
+        '200':
+          description: Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Message'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/chat_uuid'
+      tags:
+        - Chat Messages
+      summary: Send a message to a bot in a chat
+      # description:
+      operationId: createMessage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+      responses:
+        '200':
+          description: Message created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  
+components:
+  schemas:
+    Bot:
+      type: object
+      required:
+        - name
+        - model
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "c290b787-3aa6-4895-8d6a-261e7c21646b"
+          readOnly: true
+        name:
+          type: string
+          description: "The name of the bot."
+          example: Jarvis
+        description:
+          type: string
+          description: "An optional short description of what this bot is used for."
+          example: "My life coach and secretary."
+        model:
+          type: string
+          description: "The OpenAI language model that will be used for this bot."
+          example: "gpt-4"
+        personality:
+          type: string
+          description: "An optional descripton of the bot's personality, in the 2nd person (using 'you'), that will be sent to the bot to determine how it will respond to you."
+          example: "You are my secretary and life coach. You help me plan my life and career. You help me brainstorm ideas and come up with plans. Your responses are short and to the point. Your responses challenge me to think in different ways. You are stern, honest, and direct."
+        user_history:
+          type: string
+          description: "An optional description of you, that will be sent to the AI bot to help them develop responses catered to you."
+          example: "My name is John Doe. I am a 23 year old male. I weigh 85kg and am 175cm tall. I live in Switzerland."
+    Chat:
+      type: object
+      required:
+        - bot_uuid
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "c290b787-3aa6-4895-8d6a-261e7c21646b"
+          readOnly: true
+        name:
+          type: string
+          description: "The name of the chat."
+          example: "Exercise Plan"
+        bot_uuid:
+          type: string
+          format: uuid
+          description: "The UUID of the bot you want to converse with"
+          example: "18674ee3-9aee-464d-b3ed-3192a37fae57"
+        initial_bot_prompt:
+          type: string
+          description: "A hidden initial prompt sent to the bot so that they can respond first to start the chat."
+          example: "Introduce yourself."
+    Message:
+      type: object
+      required:
+        - text
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "c290b787-3aa6-4895-8d6a-261e7c21646b"
+          readOnly: true
+        chat_uuid:
+          type: string
+          format: uuid
+          description: "The UUID of the chat this message belongs to"
+          example: "18674ee3-9aee-464d-b3ed-3192a37fae57"
+          readOnly: true
+        text:
+          type: string
+          description: "The text of the message."
+          example: "Come up with an exercise plan for the next week."
+        role:
+          type: string
+          enum:
+            - USER
+            - BOT
+            - SYSTEM
+          readOnly: true
+          description: "The role or author of the message."
+        tokens:
+          type: integer
+          description: "The number of tokens that the text represents."
+          example: 358
+          readOnly: true
+        created_datetime:
+          type: string
+          format: date-time
+          description: "The date and time the message was created."
+          example: "2021-08-01T12:34:56.789Z"
+          readOnly: true
+  parameters:
+    chat_uuid:
+      name: chat_uuid
+      in: path
+      description: "The UUID of the chat in which the messages reside"
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: "f196f8ae-cb4e-45eb-8b1a-8aec6131373b"
