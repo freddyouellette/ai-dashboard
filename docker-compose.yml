@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    container_name: ai-dashboard.db
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  devcontainer:
+    container_name: ai-dashboard.devcontainer
+    build:
+      context: .
+      dockerfile: ./local/devcontainer/Dockerfile
+    working_dir: /workspace
+    command: sleep infinity
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    volumes:
+      - .:/workspace
+    depends_on:
+      - db
+
+volumes:
+  db_data:

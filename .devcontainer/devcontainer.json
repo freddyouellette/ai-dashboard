@@ -1,6 +1,6 @@
 {
 	"name": "ai-dashboard",
-	"image": "houallet/alpine-go:1.1.2",
-	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+	"dockerComposeFile": "./../docker-compose.yml",
+	"service": "devcontainer",
 	"workspaceFolder": "/workspace"
 }
