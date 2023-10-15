@@ -2,3 +2,7 @@
 /.env
 /data
 /bin
+
+.DS_Store
+
+/web/node_modules

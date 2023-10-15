@@ -3,7 +3,8 @@ FROM alpine:3.17.0
 RUN apk add --no-cache \
 	go \
 	git \
-	make
+	make \
+	npm
 
 RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.52.2
 
