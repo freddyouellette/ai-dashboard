@@ -1,10 +1,11 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Bot struct {
 	gorm.Model
-	Uuid        string `json:"uuid"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	AiModel     string `json:"model"`

@@ -6,23 +6,37 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 )
 
-type BotService struct{}
+type BotRepository interface {
+	GetAll() ([]models.Bot, error)
+	GetByID(id uint) (models.Bot, error)
+}
 
-func NewBotService() *BotService {
-	return &BotService{}
+type BotService struct {
+	botRepository BotRepository
+}
+
+var (
+	ErrRepository = fmt.Errorf("repository error")
+)
+
+func NewBotService(botRepository BotRepository) *BotService {
+	return &BotService{
+		botRepository: botRepository,
+	}
 }
 
 func (s *BotService) GetBots() ([]models.Bot, error) {
-	return []models.Bot{{
-		Uuid:        "9f976d75-8aec-4d92-a9e5-c7e810f7051f",
-		Name:        "Bot 1",
-		Description: "Bot 1 description",
-		AiModel:     "Bot 1 model",
-		Personality: "Bot 1 personality",
-		UserHistory: "Bot 1 user history",
-	}}, nil
+	bots, err := s.botRepository.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", ErrRepository, err.Error())
+	}
+	return bots, nil
 }
 
-func (s *BotService) GetBotById(id string) (*models.Bot, error) {
-	return nil, fmt.Errorf("%w: %s", models.ErrResourceNotFound, fmt.Sprintf("bot with id %s not found", id))
+func (s *BotService) GetBotById(id uint) (*models.Bot, error) {
+	bot, err := s.botRepository.GetByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", ErrRepository, err.Error())
+	}
+	return &bot, nil
 }

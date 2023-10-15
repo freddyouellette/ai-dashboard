@@ -9,7 +9,7 @@ func NewRouter(controller *request_controller.RequestController) *mux.Router {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/bots", controller.HandleGetBotsRequest).Methods("GET")
-	router.HandleFunc("/bots/{bot_uuid}", controller.HandleGetBotRequest).Methods("GET")
+	router.HandleFunc("/bots/{bot_id}", controller.HandleGetBotRequest).Methods("GET")
 
 	return router
 }
