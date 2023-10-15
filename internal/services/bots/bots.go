@@ -9,6 +9,7 @@ import (
 type BotRepository interface {
 	GetAll() ([]models.Bot, error)
 	GetByID(id uint) (models.Bot, error)
+	Create(bot models.Bot) (models.Bot, error)
 }
 
 type BotService struct {
@@ -25,7 +26,7 @@ func NewBotService(botRepository BotRepository) *BotService {
 	}
 }
 
-func (s *BotService) GetBots() ([]models.Bot, error) {
+func (s *BotService) GetAll() ([]models.Bot, error) {
 	bots, err := s.botRepository.GetAll()
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrRepository, err.Error())
@@ -33,7 +34,15 @@ func (s *BotService) GetBots() ([]models.Bot, error) {
 	return bots, nil
 }
 
-func (s *BotService) GetBotById(id uint) (*models.Bot, error) {
+func (s *BotService) Create(bot models.Bot) (models.Bot, error) {
+	bot, err := s.botRepository.Create(bot)
+	if err != nil {
+		return bot, fmt.Errorf("%w: %s", ErrRepository, err.Error())
+	}
+	return bot, nil
+}
+
+func (s *BotService) GetById(id uint) (*models.Bot, error) {
 	bot, err := s.botRepository.GetByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrRepository, err.Error())

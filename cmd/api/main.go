@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/error_handler"
-	"github.com/freddyouellette/ai-dashboard/internal/api/request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/response_handler"
 	"github.com/freddyouellette/ai-dashboard/internal/api/router"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
@@ -31,7 +31,7 @@ func main() {
 	responseHandler := response_handler.NewResponseHandler(errorHandler)
 	botRepository := repositories.NewRepository[models.Bot](db)
 	botService := bots.NewBotService(botRepository)
-	requestController := request_controller.NewRequestController(
+	requestController := entity_request_controller.NewEntityRequestController[models.Bot](
 		responseHandler,
 		botService,
 	)
