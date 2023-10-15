@@ -11,7 +11,7 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/api/router"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories"
-	"github.com/freddyouellette/ai-dashboard/internal/services/bots"
+	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
 	_ "github.com/joho/godotenv/autoload"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -30,7 +30,7 @@ func main() {
 	errorHandler := error_handler.NewErrorHandler()
 	responseHandler := response_handler.NewResponseHandler(errorHandler)
 	botRepository := repositories.NewRepository[models.Bot](db)
-	botService := bots.NewBotService(botRepository)
+	botService := entity_service.NewEntityService[models.Bot](botRepository)
 	requestController := entity_request_controller.NewEntityRequestController[models.Bot](
 		responseHandler,
 		botService,
