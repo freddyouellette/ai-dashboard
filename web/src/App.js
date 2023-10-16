@@ -3,8 +3,31 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import './App.css';
 import { useState } from 'react';
+import axios from 'axios';
 
 function App() {
+	const [bots, setBots] = useState([])
+	
+	let upsertBot = (bot) => {
+		if (bot.id) {
+			// Update bot
+			let botIndex = bots.findIndex(b => b.id === bot.id);
+			if (botIndex !== -1) {
+				setBots([
+					...bots.slice(0, botIndex),
+					bot,
+					...bots.slice(botIndex + 1)
+				]);
+			}
+		} else {
+			// Create bot
+			setBots([
+				...bots,
+				bot
+			]);
+		}
+	}
+	
 	return (
 		<Row className="App h-100">
 			<Col className="sidebar text-white bg-dark h-100 p-0">
@@ -20,16 +43,21 @@ function App() {
 							</Button>
 						</Container>
 					</ListGroupItem>
-					<ListGroupItem className="bg-dark text-white border-bottom">
-						<Container className="text-start">
-							Bot Name
-						</Container>
-					</ListGroupItem>
+					{bots.map(bot => {
+						return (
+							<ListGroupItem key={bot.id} className="bg-dark text-white border-bottom">
+								<Container className="text-start">
+									<div><strong>{bot.name}</strong></div>
+									<div>{bot.description}</div>
+								</Container>
+							</ListGroupItem>
+						);
+					})}
 				</ListGroup>
 			</Col>
 			<Col className="col-8 h-100">
 				<Container>
-					<CreateBotForm />
+					<CreateBotForm upsertBotFunc={upsertBot} />
 				</Container>
 			</Col>
 		</Row>
@@ -40,14 +68,14 @@ function handleAddNewBotButtonClick() {
 	console.log("Add new bot button clicked");
 }
 
-function CreateBotForm() {
-	const [botData, setBotData] = useState({
-		name: "",
-		description: "",
-		model: "gpt-4",
-		personality: "",
-		user_history: ""
-	});
+function CreateBotForm({upsertBotFunc, botToUpdate = {
+	name: "",
+	description: "",
+	model: "gpt-4",
+	personality: "",
+	user_history: ""
+}}) {
+	const [botData, setBotData] = useState(botToUpdate);
 	
 	let handleChange = (event) => {
 		setBotData({
@@ -56,10 +84,16 @@ function CreateBotForm() {
 		});
 	}
 	
-	let handleSubmit = (event) => {
+	let handleSubmit = async (event) => {
 		event.preventDefault();
 		
-		console.log(botData);	
+		axios.post("http://localhost:8080/bots", botData)
+		.then(response => {
+			console.log(response);
+			upsertBotFunc(response.data);
+		}).catch(error => {
+			console.error(error);
+		})
 	}
 	
 	return (

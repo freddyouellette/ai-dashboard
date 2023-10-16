@@ -13,6 +13,7 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/repositories"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/rs/cors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -36,6 +37,8 @@ func main() {
 		botService,
 	)
 	router := router.NewRouter(requestController)
+
+	router = cors.Default().Handler(router)
 
 	http.Handle("/", router)
 	fmt.Println("Listening on port " + API_PORT)

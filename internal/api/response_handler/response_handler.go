@@ -30,5 +30,6 @@ func (h *ResponseHandler) HandleResponseObject(w http.ResponseWriter, response i
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write(responseJson)
 }
