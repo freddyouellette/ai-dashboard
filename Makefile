@@ -36,4 +36,4 @@ pipeline: build test lint ci-lint coverages
 
 app:
 	go run ./cmd/api/main.go &
-	cd ./web && npm start && cd ../
+	cd ./web && npm i && npm start && cd ../
