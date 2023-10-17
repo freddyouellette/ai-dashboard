@@ -2,17 +2,17 @@ package repositories
 
 import "gorm.io/gorm"
 
-type Repository[e any] struct {
+type EntityRepository[e any] struct {
 	db *gorm.DB
 }
 
-func NewRepository[e any](db *gorm.DB) *Repository[e] {
-	return &Repository[e]{
+func NewRepository[e any](db *gorm.DB) *EntityRepository[e] {
+	return &EntityRepository[e]{
 		db: db,
 	}
 }
 
-func (r *Repository[e]) GetAll() ([]e, error) {
+func (r *EntityRepository[e]) GetAll() ([]e, error) {
 	var entities []e
 	result := r.db.Find(&entities)
 	if result.Error != nil {
@@ -25,7 +25,7 @@ func (r *Repository[e]) GetAll() ([]e, error) {
 	return entities, nil
 }
 
-func (r *Repository[e]) GetByID(id uint) (e, error) {
+func (r *EntityRepository[e]) GetByID(id uint) (e, error) {
 	var entity e
 	result := r.db.First(&entity, id)
 	if result.Error != nil {
@@ -34,7 +34,7 @@ func (r *Repository[e]) GetByID(id uint) (e, error) {
 	return entity, nil
 }
 
-func (r *Repository[e]) Create(entity e) (e, error) {
+func (r *EntityRepository[e]) Create(entity e) (e, error) {
 	result := r.db.Create(&entity)
 	if result.Error != nil {
 		return entity, result.Error
@@ -42,7 +42,7 @@ func (r *Repository[e]) Create(entity e) (e, error) {
 	return entity, nil
 }
 
-func (r *Repository[e]) Update(entity e) (e, error) {
+func (r *EntityRepository[e]) Update(entity e) (e, error) {
 	result := r.db.Save(&entity)
 	if result.Error != nil {
 		return entity, result.Error
@@ -50,7 +50,7 @@ func (r *Repository[e]) Update(entity e) (e, error) {
 	return entity, nil
 }
 
-func (r *Repository[e]) Delete(entity e) error {
+func (r *EntityRepository[e]) Delete(entity e) error {
 	result := r.db.Delete(&entity)
 	if result.Error != nil {
 		return result.Error

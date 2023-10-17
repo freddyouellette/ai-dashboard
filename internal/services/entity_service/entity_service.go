@@ -8,6 +8,7 @@ type EntityRepository[e any] interface {
 	GetAll() ([]e, error)
 	GetByID(id uint) (e, error)
 	Create(entity e) (e, error)
+	Update(entity e) (e, error)
 }
 
 type EntityService[e any] struct {
@@ -34,6 +35,14 @@ func (s *EntityService[e]) GetAll() ([]e, error) {
 
 func (s *EntityService[e]) Create(entity e) (e, error) {
 	entity, err := s.entityRepository.Create(entity)
+	if err != nil {
+		return entity, fmt.Errorf("%w: %s", ErrRepository, err.Error())
+	}
+	return entity, nil
+}
+
+func (s *EntityService[e]) Update(entity e) (e, error) {
+	entity, err := s.entityRepository.Update(entity)
 	if err != nil {
 		return entity, fmt.Errorf("%w: %s", ErrRepository, err.Error())
 	}

@@ -18,6 +18,7 @@ type EntityService[e any] interface {
 	GetAll() ([]e, error)
 	GetById(id uint) (*e, error)
 	Create(entity e) (e, error)
+	Update(entity e) (e, error)
 }
 
 type EntityRequestController[e any] struct {
@@ -59,5 +60,16 @@ func (h *EntityRequestController[e]) HandleGetEntityByIdRequest(w http.ResponseW
 		return
 	}
 	responseObject, err := h.entityService.GetById(uint(entityId))
+	h.responseHandler.HandleResponseObject(w, responseObject, err)
+}
+
+func (h *EntityRequestController[e]) HandleUpdateEntityByIdRequest(w http.ResponseWriter, r *http.Request) {
+	var entity e
+	err := json.NewDecoder(r.Body).Decode(&entity)
+	if err != nil {
+		h.responseHandler.HandleResponseObject(w, nil, err)
+		return
+	}
+	responseObject, err := h.entityService.Update(entity)
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
 }

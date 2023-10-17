@@ -38,7 +38,8 @@ func main() {
 	)
 	router := router.NewRouter(requestController)
 
-	router = cors.Default().Handler(router)
+	router = cors.AllowAll().Handler(router)
+	// router = cors.Default().Handler(router)
 
 	http.Handle("/", router)
 	fmt.Println("Listening on port " + API_PORT)
