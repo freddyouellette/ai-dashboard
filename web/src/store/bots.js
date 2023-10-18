@@ -22,4 +22,4 @@ const botsSlice = createSlice({
 
 export const { upsertBot } = botsSlice.actions;
 export const { selectBots } = state => state.bots;
-export default botsSlice;
+export default botsSlice.reducer;

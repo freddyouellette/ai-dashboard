@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { botsSlice } from './bots'
+import botReducer from './bots'
+import pageReducer from './page'
 
 export default configureStore({
-  reducer: {
-	bots: botsSlice.reducer
-  }
-})
+	reducer: {
+		bots: botReducer,
+		page: pageReducer,
+	}, 
+}, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());

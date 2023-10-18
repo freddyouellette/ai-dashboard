@@ -5,52 +5,29 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import BotForm from './forms/BotForm';
-
-const PAGE_CONTENT_CREATE_BOT = "create-bot";
+import { useSelector, useDispatch } from 'react-redux'
+import { selectPageStatus, setBotToUpdate, PAGE_STATUSES } from './store/page'
 
 function App() {
+	const pageStatus = useSelector(selectPageStatus)
+	const dispatch = useDispatch()
+	
 	const [bots, setBots] = useState([])
-	const [pageContent, setPageContent] = useState(null)
-	let [botToUpdate, setBotToUpdate] = useState(null)
-	let setBotToUpdateAndRender = (bot) => {
-		setBotToUpdate(bot);
-		setPageContent(PAGE_CONTENT_CREATE_BOT);
-	}
 	
 	useEffect(() => {
 		axios.get("http://localhost:8080/bots")
 		.then(response => {
-			console.log("Bots", response.data);
+			console.log("Fetching Bots", response.data);
 			setBots(response.data);
 		}).catch(error => {
 			console.error(error);
 		})
 	}, [])
 	
-	let upsertBot = (bot) => {
-		if (bot.ID) {
-			// Update bot
-			let botIndex = bots.findIndex(b => b.ID === bot.ID);
-			if (botIndex !== -1) {
-				setBots([
-					...bots.slice(0, botIndex),
-					bot,
-					...bots.slice(botIndex + 1)
-				]);
-			}
-		} else {
-			// Create bot
-			setBots([
-				...bots,
-				bot
-			]);
-		}
-	}
-	
 	let content;
-	switch(pageContent) {
-		case PAGE_CONTENT_CREATE_BOT:
-			content = <BotForm upsertBotFunc={upsertBot} botToUpdate={botToUpdate} />;
+	switch(pageStatus) {
+		case PAGE_STATUSES.CREATE_BOT:
+			content = <BotForm />;
 		break;
 		default:
 			content = <div className="text-center text-italics">Select a bot</div>;
@@ -65,7 +42,7 @@ function App() {
 				<ListGroup className="list-group-flush">
 					<ListGroupItem className="bg-dark border-bottom">
 						<Container className="text-center">
-							<Button onClick={() => {setBotToUpdateAndRender(null)}}>
+							<Button onClick={() => {dispatch(setBotToUpdate(null))}}>
 								<FontAwesomeIcon icon={faPlus} className="me-2" />
 								Add New Bot
 							</Button>
@@ -77,7 +54,7 @@ function App() {
 								<Container className="text-start">
 									<div className="d-flex justify-content-between align-items-center">
 										<strong>{bot.name}</strong>
-										<FontAwesomeIcon icon={faEdit} className="ms-2 cursor-pointer" style={{"cursor": "pointer"}} onClick={() => {setBotToUpdateAndRender(bot)}} />
+										<FontAwesomeIcon icon={faEdit} className="ms-2 cursor-pointer" style={{"cursor": "pointer"}} onClick={() => {dispatch(setBotToUpdate(bot))}} />
 									</div>
 									<div>{bot.description}</div>
 								</Container>

@@ -1,20 +1,18 @@
-import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectBotToUpdate, setBotToUpdate } from '../store/page';
+import { upsertBot } from '../store/bots';
 
-export default function CreateBotForm({upsertBotFunc, botToUpdate}) {
-	const [botFormData, setBotFormData] = useState(null);
-	
-	// update the state if the botToUpdate prop changes
-	useEffect(() => {
-		setBotFormData(botToUpdate);
-	}, [botToUpdate])
+export default function CreateBotForm() {
+	const botFormData = useSelector(selectBotToUpdate);
+	const dispatch = useDispatch();
 	
 	let handleChange = (event) => {
-		setBotFormData({
+		dispatch(setBotToUpdate({
 			...botFormData,
 			[event.target.name]: event.target.value
-		});
+		}));
 	}
 	
 	let handleSubmit = async (event) => {
@@ -23,7 +21,7 @@ export default function CreateBotForm({upsertBotFunc, botToUpdate}) {
 		axios[botFormData.ID ? "put" : "post"]("http://localhost:8080/bots", botFormData)
 		.then(response => {
 			console.log(response);
-			upsertBotFunc(response.data);
+			dispatch(upsertBot(response.data));
 		}).catch(error => {
 			console.error(error);
 		})
