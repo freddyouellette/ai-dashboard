@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectBotToUpdate, setBotToUpdate } from '../store/page';
+import { selectBotToUpdate, goToBotEdit } from '../store/page';
 import { addOrUpdateBot } from '../store/bots';
 
 export default function CreateBotForm() {
@@ -9,7 +9,7 @@ export default function CreateBotForm() {
 	const dispatch = useDispatch();
 	
 	let handleChange = (event) => {
-		dispatch(setBotToUpdate({
+		dispatch(goToBotEdit({
 			...botFormData,
 			[event.target.name]: event.target.value
 		}));
