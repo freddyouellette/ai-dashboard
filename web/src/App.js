@@ -1,16 +1,12 @@
-import { Button, Col, Container, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEdit, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { Col, Container, Row } from 'react-bootstrap';
 import './App.css';
 import BotForm from './forms/BotForm';
-import { useSelector, useDispatch } from 'react-redux'
-import { selectPageStatus, setBotToUpdate, PAGE_STATUSES } from './store/page'
-import { selectBots } from './store/bots';
+import { useSelector } from 'react-redux'
+import { selectPageStatus, PAGE_STATUSES } from './store/page'
+import SidebarMenu from './components/SidebarMenu';
 
 function App() {
 	const pageStatus = useSelector(selectPageStatus)
-	const dispatch = useDispatch()
-	const bots = useSelector(selectBots)
 	
 	let content;
 	switch(pageStatus) {
@@ -27,29 +23,7 @@ function App() {
 				<Container>
 					<h1>AI Dashboard</h1>
 				</Container>
-				<ListGroup className="list-group-flush">
-					<ListGroupItem className="bg-dark border-bottom">
-						<Container className="text-center">
-							<Button onClick={() => {dispatch(setBotToUpdate(null))}}>
-								<FontAwesomeIcon icon={faPlus} className="me-2" />
-								Add New Bot
-							</Button>
-						</Container>
-					</ListGroupItem>
-					{bots.map(bot => {
-						return (
-							<ListGroupItem key={bot.ID} className="bg-dark text-white border-bottom">
-								<Container className="text-start">
-									<div className="d-flex justify-content-between align-items-center">
-										<strong>{bot.name}</strong>
-										<FontAwesomeIcon icon={faEdit} className="ms-2 cursor-pointer" style={{"cursor": "pointer"}} onClick={() => {dispatch(setBotToUpdate(bot))}} />
-									</div>
-									<div>{bot.description}</div>
-								</Container>
-							</ListGroupItem>
-						);
-					})}
-				</ListGroup>
+				<SidebarMenu />
 			</Col>
 			<Col className="col-8 h-100">
 				<Container>
