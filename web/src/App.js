@@ -2,27 +2,15 @@ import { Button, Col, Container, ListGroup, ListGroupItem, Row } from 'react-boo
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faPlus } from '@fortawesome/free-solid-svg-icons'
 import './App.css';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
 import BotForm from './forms/BotForm';
 import { useSelector, useDispatch } from 'react-redux'
 import { selectPageStatus, setBotToUpdate, PAGE_STATUSES } from './store/page'
+import { selectBots } from './store/bots';
 
 function App() {
 	const pageStatus = useSelector(selectPageStatus)
 	const dispatch = useDispatch()
-	
-	const [bots, setBots] = useState([])
-	
-	useEffect(() => {
-		axios.get("http://localhost:8080/bots")
-		.then(response => {
-			console.log("Fetching Bots", response.data);
-			setBots(response.data);
-		}).catch(error => {
-			console.error(error);
-		})
-	}, [])
+	const bots = useSelector(selectBots)
 	
 	let content;
 	switch(pageStatus) {

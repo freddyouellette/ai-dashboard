@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectBotToUpdate, setBotToUpdate } from '../store/page';
-import { upsertBot } from '../store/bots';
+import { addOrUpdateBot } from '../store/bots';
 
 export default function CreateBotForm() {
 	const botFormData = useSelector(selectBotToUpdate);
@@ -21,7 +21,7 @@ export default function CreateBotForm() {
 		axios[botFormData.ID ? "put" : "post"]("http://localhost:8080/bots", botFormData)
 		.then(response => {
 			console.log(response);
-			dispatch(upsertBot(response.data));
+			dispatch(addOrUpdateBot(response.data));
 		}).catch(error => {
 			console.error(error);
 		})
