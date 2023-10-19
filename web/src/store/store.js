@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import botReducer, { fetchBots } from './bots'
+import chatReducer from './chats'
 import pageReducer from './page'
 
 const store = configureStore({
 	reducer: {
 		bots: botReducer,
 		page: pageReducer,
+		chats: chatReducer,
 	}, 
 }, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 

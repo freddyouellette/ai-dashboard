@@ -22,10 +22,10 @@ const pageSlice = createSlice({
 	reducers: {
 		goToSidebarBotChatList: (state, action) => {
 			state.botSelected = action.payload;
-			state.status = PAGE_STATUSES.BOT_CHAT;
+			state.sidebarStatus = SIDEBAR_STATUSES.BOT_CHAT_LIST;
 		},
 		goToSidebarBotList: (state, action) => {
-			state.status = PAGE_STATUSES.BOT_LIST;
+			state.sidebarStatus = SIDEBAR_STATUSES.BOT_LIST;
 			state.botSelected = null;
 		},
 		goToBotChat: (state, action) => {
@@ -42,7 +42,7 @@ const pageSlice = createSlice({
 	}
 });
 
-export const { setBotSelected, setPageStatus, goToBotEdit } = pageSlice.actions;
+export const { goToSidebarBotChatList, goToSidebarBotList, setPageStatus, goToBotEdit, goToBotChat } = pageSlice.actions;
 export const selectPageStatus = state => state.page.status;
 export const selectSidebarStatus = state => state.page.sidebarStatus;
 export const selectBotToUpdate = state => state.page.botToUpdate;

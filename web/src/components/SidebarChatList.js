@@ -1,40 +1,44 @@
 import { useDispatch, useSelector } from "react-redux";
-import { selectBots } from "../store/bots";
 import { Button, Container, ListGroup, ListGroupItem } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { goToBotEdit, goToSidebarBotChatList } from "../store/page";
+import { faChevronLeft, faChevronRight, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { goToBotChat, goToSidebarBotList } from "../store/page";
+import { selectChats } from "../store/chats";
 
-export default function SidebarBotList() {
+export default function SidebarChatList() {
 	const dispatch = useDispatch();
-	const bots = useSelector(selectBots);
+	const chats = useSelector(selectChats);
 	
 	return (
 		<ListGroup className="list-group-flush">
 			<ListGroupItem className="bg-dark border-bottom">
 				<Container className="text-center">
-					<Button onClick={() => {dispatch(goToBotEdit(null))}}>
+					<Button className="btn-sm me-2" onClick={() => {dispatch(goToSidebarBotList())}}>
+						<FontAwesomeIcon icon={faChevronLeft} className="me-2" />
+						Back to Bot List
+					</Button>
+					<Button className="btn-sm" onClick={() => {dispatch(goToBotChat(null))}}>
 						<FontAwesomeIcon icon={faPlus} className="me-2" />
-						Add New Bot
+						New Chat
 					</Button>
 				</Container>
 			</ListGroupItem>
-			{bots.map(bot => {
+			{chats.map(chat => {
 				return (
 					<ListGroupItem 
-						key={bot.ID} 
+						key={chat.ID} 
 						className="bg-dark text-white border-bottom" 
 						style={{ "cursor": "pointer" }}
-						onClick={() => dispatch(goToSidebarBotChatList(bot))}>
+						onClick={() => dispatch(goToBotChat(chat))}>
 						<Container className="text-start">
 							<div className="d-flex justify-content-between">
 								<div className="flex-grow-1">
-									<strong>{bot.name}</strong>
-									<div>{bot.description}</div>
+									<strong>{chat.ID}</strong>
+									<div>{chat.date_created}</div>
 								</div>
 								<div className="d-flex align-items-center">
 									<FontAwesomeIcon 
-										icon={faArrowRight} 
+										icon={faChevronRight} 
 										className="ms-2 cursor-pointer" 
 										style={{"cursor": "pointer"}} 
 										/>
