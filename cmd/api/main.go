@@ -5,13 +5,19 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/chats_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
+	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/messages_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/error_handler"
 	"github.com/freddyouellette/ai-dashboard/internal/api/response_handler"
 	"github.com/freddyouellette/ai-dashboard/internal/api/router"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
-	"github.com/freddyouellette/ai-dashboard/internal/repositories"
+	"github.com/freddyouellette/ai-dashboard/internal/repositories/entity_repository"
+	"github.com/freddyouellette/ai-dashboard/internal/repositories/messages_repository"
+	"github.com/freddyouellette/ai-dashboard/internal/services/ai_api.go"
+	"github.com/freddyouellette/ai-dashboard/internal/services/chats_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
+	"github.com/freddyouellette/ai-dashboard/internal/services/messages_service"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/cors"
 	"gorm.io/driver/sqlite"
@@ -20,6 +26,7 @@ import (
 
 func main() {
 	API_PORT := os.Getenv("API_PORT")
+	OPENAI_ACCESS_TOKEN := os.Getenv("OPENAI_ACCESS_TOKEN")
 
 	db, err := gorm.Open(sqlite.Open("data/data.db"))
 	if err != nil {
@@ -30,13 +37,38 @@ func main() {
 
 	errorHandler := error_handler.NewErrorHandler()
 	responseHandler := response_handler.NewResponseHandler(errorHandler)
-	botRepository := repositories.NewRepository[models.Bot](db)
-	botService := entity_service.NewEntityService[models.Bot](botRepository)
-	requestController := entity_request_controller.NewEntityRequestController[models.Bot](
+	botsRepository := entity_repository.NewRepository[models.Bot](db)
+	botsService := entity_service.NewEntityService[models.Bot](botsRepository)
+	botsController := entity_request_controller.NewEntityRequestController[models.Bot](
 		responseHandler,
-		botService,
+		botsService,
 	)
-	router := router.NewRouter(requestController)
+	messagesRepository := messages_repository.NewMessagesRepository(
+		entity_repository.NewRepository[models.Message](db),
+		db,
+	)
+	messagesService := messages_service.NewMessagesService(
+		entity_service.NewEntityService[models.Message](messagesRepository),
+		messagesRepository,
+	)
+	chatsRepository := entity_repository.NewRepository[models.Chat](db)
+	aiApi := ai_api.NewAiApi(5000, 1.0, "https://api.openai.com/v1/chat/completions", OPENAI_ACCESS_TOKEN)
+	chatsService := chats_service.NewChatsService(
+		entity_service.NewEntityService[models.Chat](chatsRepository),
+		botsService,
+		messagesService,
+		aiApi,
+	)
+	chatsController := chats_controller.NewChatsController(
+		entity_request_controller.NewEntityRequestController[models.Chat](
+			responseHandler,
+			chatsService,
+		),
+		responseHandler,
+		chatsService,
+	)
+	messagesController := messages_controller.NewMessagesController(responseHandler, messagesService)
+	router := router.NewRouter(botsController, chatsController, messagesController)
 
 	router = cors.AllowAll().Handler(router)
 	// router = cors.Default().Handler(router)

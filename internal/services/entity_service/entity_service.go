@@ -5,10 +5,10 @@ import (
 )
 
 type EntityRepository[e any] interface {
-	GetAll() ([]e, error)
-	GetByID(id uint) (e, error)
-	Create(entity e) (e, error)
-	Update(entity e) (e, error)
+	GetAll() ([]*e, error)
+	GetByID(id uint) (*e, error)
+	Create(entity *e) (*e, error)
+	Update(entity *e) (*e, error)
 }
 
 type EntityService[e any] struct {
@@ -25,7 +25,7 @@ func NewEntityService[e any](entityRepository EntityRepository[e]) *EntityServic
 	}
 }
 
-func (s *EntityService[e]) GetAll() ([]e, error) {
+func (s *EntityService[e]) GetAll() ([]*e, error) {
 	entities, err := s.entityRepository.GetAll()
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrRepository, err.Error())
@@ -33,18 +33,18 @@ func (s *EntityService[e]) GetAll() ([]e, error) {
 	return entities, nil
 }
 
-func (s *EntityService[e]) Create(entity e) (e, error) {
+func (s *EntityService[e]) Create(entity *e) (*e, error) {
 	entity, err := s.entityRepository.Create(entity)
 	if err != nil {
-		return entity, fmt.Errorf("%w: %s", ErrRepository, err.Error())
+		return nil, fmt.Errorf("%w: %s", ErrRepository, err.Error())
 	}
 	return entity, nil
 }
 
-func (s *EntityService[e]) Update(entity e) (e, error) {
+func (s *EntityService[e]) Update(entity *e) (*e, error) {
 	entity, err := s.entityRepository.Update(entity)
 	if err != nil {
-		return entity, fmt.Errorf("%w: %s", ErrRepository, err.Error())
+		return nil, fmt.Errorf("%w: %s", ErrRepository, err.Error())
 	}
 	return entity, nil
 }
@@ -54,5 +54,5 @@ func (s *EntityService[e]) GetById(id uint) (*e, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrRepository, err.Error())
 	}
-	return &entity, nil
+	return entity, nil
 }
