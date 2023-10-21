@@ -34,6 +34,8 @@ func main() {
 	}
 
 	db.AutoMigrate(&models.Bot{})
+	db.AutoMigrate(&models.Chat{})
+	db.AutoMigrate(&models.Message{})
 
 	errorHandler := error_handler.NewErrorHandler()
 	responseHandler := response_handler.NewResponseHandler(errorHandler)

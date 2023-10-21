@@ -34,6 +34,12 @@ vulns:
 
 pipeline: build test lint ci-lint coverages
 
+api:
+	go run ./cmd/api/main.go
+
+frontend:
+	cd ./web && npm i && npm start && cd ../
+
 app:
 	go run ./cmd/api/main.go &
 	cd ./web && npm i && npm start && cd ../
