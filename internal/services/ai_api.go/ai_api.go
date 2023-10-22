@@ -10,7 +10,12 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 )
 
+type HttpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type AiApi struct {
+	client      HttpClient
 	maxTokens   int
 	randomness  float32
 	chatUrl     string
@@ -39,12 +44,14 @@ type chatResponse struct {
 }
 
 func NewAiApi(
+	client HttpClient,
 	maxTokens int,
 	randomness float32,
 	chatUrl string,
 	accessToken string,
 ) *AiApi {
 	return &AiApi{
+		client:      client,
 		maxTokens:   maxTokens,
 		randomness:  randomness,
 		chatUrl:     chatUrl,
@@ -86,23 +93,24 @@ func (api *AiApi) GetResponse(aiModel string, messages []*models.Message) (*mode
 	if err != nil {
 		return nil, err
 	}
-	requestReader := bytes.NewReader(jsonBody)
+	requestReader := bytes.NewBuffer(jsonBody)
 
 	request, err := http.NewRequest(http.MethodPost, api.chatUrl, requestReader)
 	if err != nil {
 		return nil, err
 	}
 	request.Header.Set("Authorization", "Bearer "+api.accessToken)
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
 
-	client := http.Client{}
-	response, err := client.Do(request)
+	response, err := api.client.Do(request)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
-	var responseBody *chatResponse
-	err = json.NewDecoder(response.Body).Decode(responseBody)
+	var responseBody chatResponse
+	err = json.NewDecoder(response.Body).Decode(&responseBody)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -9,6 +10,8 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/messages_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/error_handler"
+	"github.com/freddyouellette/ai-dashboard/internal/api/logged_client"
+	"github.com/freddyouellette/ai-dashboard/internal/api/request_logger"
 	"github.com/freddyouellette/ai-dashboard/internal/api/response_handler"
 	"github.com/freddyouellette/ai-dashboard/internal/api/router"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
@@ -54,7 +57,17 @@ func main() {
 		messagesRepository,
 	)
 	chatsRepository := entity_repository.NewRepository[models.Chat](db)
-	aiApi := ai_api.NewAiApi(5000, 1.0, "https://api.openai.com/v1/chat/completions", OPENAI_ACCESS_TOKEN)
+	logger := log.Default()
+	logger.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
+	httpClient := logged_client.NewLoggedClient(http.DefaultClient, logger, logged_client.Options{
+		LogRequestHeaders:  true,
+		LogRequestBody:     true,
+		LogResponseHeaders: true,
+		LogResponseBody:    true,
+		PrettyJson:         true,
+	})
+	// httpClient := http.DefaultClient
+	aiApi := ai_api.NewAiApi(httpClient, 5000, 1.0, "https://api.openai.com/v1/chat/completions", OPENAI_ACCESS_TOKEN)
 	chatsService := chats_service.NewChatsService(
 		entity_service.NewEntityService[models.Chat](chatsRepository),
 		botsService,
@@ -69,8 +82,21 @@ func main() {
 		responseHandler,
 		chatsService,
 	)
-	messagesController := messages_controller.NewMessagesController(responseHandler, messagesService)
-	router := router.NewRouter(botsController, chatsController, messagesController)
+	messagesController := messages_controller.NewMessagesController(
+		entity_request_controller.NewEntityRequestController[models.Message](
+			responseHandler,
+			messagesService,
+		),
+		responseHandler,
+		messagesService,
+	)
+	requestLogger := request_logger.NewRequestLogger(logger, request_logger.Options{
+		LogHeaders:      false,
+		LogRequestBody:  true,
+		LogResponseBody: true,
+		PrettyJson:      true,
+	})
+	router := router.NewRouter(botsController, chatsController, messagesController, requestLogger)
 
 	router = cors.AllowAll().Handler(router)
 	// router = cors.Default().Handler(router)

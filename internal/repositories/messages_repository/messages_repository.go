@@ -23,7 +23,7 @@ func NewMessagesRepository(
 
 func (r *MessagesRepository) GetByChatId(chatId uint) ([]*models.Message, error) {
 	var messages []*models.Message
-	result := r.db.Where("chat_id = ?", chatId).Find(messages)
+	result := r.db.Where("chat_id = ?", chatId).Find(&messages)
 	if result.Error != nil {
 		return nil, result.Error
 	}

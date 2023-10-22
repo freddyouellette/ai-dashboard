@@ -14,12 +14,10 @@ const chatsSlice = createSlice({
 		setChats: (state, action) => {
 			state.chats = action.payload;
 		},
-		setSelectedChat: (state, action) => {
-			state.selectedChat = action.payload
-		},
 	}
 });
 
+// thunk
 export const fetchChats = () => async dispatch => {
 	fetch('http://localhost:8080/chats')
 	.then(response => response.json())
@@ -46,5 +44,4 @@ export const addChat = (botId) => async dispatch => {
 
 export const { setSelectedChat, setChats } = chatsSlice.actions;
 export const selectChats = state => state.chats.chats;
-export const selectSelectedChat = state => state.chats.selectedChat;
 export default chatsSlice.reducer;

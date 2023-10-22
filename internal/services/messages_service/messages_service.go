@@ -26,6 +26,11 @@ func NewMessagesService(
 	}
 }
 
+func (s *MessagesService) Create(entity *models.Message) (*models.Message, error) {
+	entity.Role = models.MESSAGE_ROLE_USER
+	return s.EntityService.Create(entity)
+}
+
 func (s *MessagesService) GetChatMessages(chatId uint) ([]*models.Message, error) {
 	entities, err := s.messagesRepository.GetByChatId(chatId)
 	if err != nil {

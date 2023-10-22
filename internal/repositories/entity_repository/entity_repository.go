@@ -26,12 +26,12 @@ func (r *EntityRepository[e]) GetAll() ([]*e, error) {
 }
 
 func (r *EntityRepository[e]) GetByID(id uint) (*e, error) {
-	var entity *e
-	result := r.db.First(entity, id)
+	var entity e
+	result := r.db.First(&entity, id)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return entity, nil
+	return &entity, nil
 }
 
 func (r *EntityRepository[e]) Create(entity *e) (*e, error) {

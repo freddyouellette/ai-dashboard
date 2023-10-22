@@ -1,6 +1,9 @@
 package chats_service
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
 )
@@ -39,18 +42,29 @@ func NewChatsService(
 	}
 }
 
+var (
+	ErrGettingChatById     = errors.New("error getting chat by id")
+	ErrGettingBotById      = errors.New("error getting bot by id")
+	ErrGettingChatMessages = errors.New("error getting chat messages")
+)
+
 func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
-	chat, err := s.EntityService.GetById(chatId)
+	var chat *models.Chat
+	var bot *models.Bot
+	var messages []*models.Message
+	var err error
+
+	chat, err = s.EntityService.GetById(chatId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatById, chatId, err)
 	}
-	bot, err := s.botService.GetById(chat.BotID)
+	bot, err = s.botService.GetById(chat.BotID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingBotById, chat.BotID, err)
 	}
-	messages, err := s.messagesService.GetChatMessages(chatId)
+	messages, err = s.messagesService.GetChatMessages(chatId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatMessages, chatId, err)
 	}
 
 	// Add bot name, bot personality, and user history to list of messages to be sent
@@ -79,7 +93,8 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	// TODO: Limit this
 	requestMessages = append(requestMessages, messages...)
 
-	responseMessage, err := s.aiApi.GetResponse(bot.AiModel, requestMessages)
+	var responseMessage *models.Message
+	responseMessage, err = s.aiApi.GetResponse(bot.AiModel, requestMessages)
 	if err != nil {
 		return nil, err
 	}

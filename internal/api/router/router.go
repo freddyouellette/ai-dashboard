@@ -20,18 +20,23 @@ type ChatsController interface {
 }
 
 type MessagesController interface {
-	HandleGetAllMessagesRequest(w http.ResponseWriter, r *http.Request)
-	HandleCreateMessageRequest(w http.ResponseWriter, r *http.Request)
-	HandleGetMessageByIdRequest(w http.ResponseWriter, r *http.Request)
+	EntityRequestController[models.Message]
 	HandleGetMessageByChatIdRequest(w http.ResponseWriter, r *http.Request)
+}
+
+type RequestLogger interface {
+	CreateRequestLoggerHandler(next http.Handler) http.Handler
 }
 
 func NewRouter(
 	botsController EntityRequestController[models.Bot],
 	chatsController ChatsController,
 	messagesController MessagesController,
+	requestLogger RequestLogger,
 ) http.Handler {
 	router := mux.NewRouter()
+
+	router.Use(requestLogger.CreateRequestLoggerHandler)
 
 	router.HandleFunc("/bots", botsController.HandleGetAllEntitiesRequest).Methods("GET")
 	router.HandleFunc("/bots", botsController.HandleCreateEntityRequest).Methods("POST")
@@ -43,9 +48,9 @@ func NewRouter(
 	router.HandleFunc("/chats/{id}", chatsController.HandleCreateEntityRequest).Methods("POST")
 	router.HandleFunc("/chats/{id}/response", chatsController.HandleGetChatResponseRequest).Methods("GET")
 
-	router.HandleFunc("/messages", messagesController.HandleGetAllMessagesRequest).Methods("GET")
-	router.HandleFunc("/messages", messagesController.HandleCreateMessageRequest).Methods("POST")
-	router.HandleFunc("/messages/{id}", messagesController.HandleGetMessageByIdRequest).Methods("GET")
+	router.HandleFunc("/messages", messagesController.HandleGetAllEntitiesRequest).Methods("GET")
+	router.HandleFunc("/messages", messagesController.HandleCreateEntityRequest).Methods("POST")
+	router.HandleFunc("/messages/{id}", messagesController.HandleGetEntityByIdRequest).Methods("GET")
 	router.HandleFunc("/chats/{chat_id}/messages", messagesController.HandleGetMessageByChatIdRequest).Methods("GET")
 
 	return router

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 )
@@ -28,7 +29,7 @@ func (h *ErrorHandler) HandleError(w http.ResponseWriter, err error) {
 		status = http.StatusInternalServerError
 		message = "Internal server error"
 	}
-	fmt.Printf("%s: %v", message, err.Error())
+	fmt.Printf("[%s] %s: %v\n", time.Now().Format(time.RFC1123Z), message, err.Error())
 	w.WriteHeader(status)
 	w.Write([]byte(message))
 }

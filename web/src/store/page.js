@@ -16,7 +16,7 @@ const pageSlice = createSlice({
 		status: null,
 		sidebarStatus: SIDEBAR_STATUSES.BOT_LIST,
 		selectedBot: null,
-		chatSelected: null,
+		selectedChat: null,
 		botToUpdate: null,
 	},
 	reducers: {
@@ -30,7 +30,7 @@ const pageSlice = createSlice({
 		},
 		goToBotChat: (state, action) => {
 			state.status = PAGE_STATUSES.BOT_CHAT;
-			state.chatSelected = action.payload;
+			state.selectedChat = action.payload;
 		},
 		setPageStatus: (state, action) => {
 			state.status = action.payload;
@@ -47,4 +47,5 @@ export const selectPageStatus = state => state.page.status;
 export const selectSidebarStatus = state => state.page.sidebarStatus;
 export const selectBotToUpdate = state => state.page.botToUpdate;
 export const selectSelectedBot = state => state.page.selectedBot;
+export const selectSelectedChat = state => state.page.selectedChat;
 export default pageSlice.reducer;
