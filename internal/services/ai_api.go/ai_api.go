@@ -31,7 +31,7 @@ type chatRequest struct {
 	Model       string        `json:"model"`
 	Messages    []chatMessage `json:"messages"`
 	MaxTokens   int           `json:"max_tokens"`
-	Temperature float32       `json:"temperature"`
+	Temperature float64       `json:"temperature"`
 }
 
 type chatResponse struct {
@@ -46,14 +46,12 @@ type chatResponse struct {
 func NewAiApi(
 	client HttpClient,
 	maxTokens int,
-	randomness float32,
 	chatUrl string,
 	accessToken string,
 ) *AiApi {
 	return &AiApi{
 		client:      client,
 		maxTokens:   maxTokens,
-		randomness:  randomness,
 		chatUrl:     chatUrl,
 		accessToken: accessToken,
 	}
@@ -63,7 +61,7 @@ var (
 	ErrBadResponse = errors.New("received bad response")
 )
 
-func (api *AiApi) GetResponse(aiModel string, messages []*models.Message) (*models.Message, error) {
+func (api *AiApi) GetResponse(aiModel string, randomness float64, messages []*models.Message) (*models.Message, error) {
 	requestMessages := make([]chatMessage, 0)
 	for _, message := range messages {
 		var messageRole string
@@ -88,7 +86,7 @@ func (api *AiApi) GetResponse(aiModel string, messages []*models.Message) (*mode
 		Model:       aiModel,
 		Messages:    requestMessages,
 		MaxTokens:   api.maxTokens,
-		Temperature: api.randomness,
+		Temperature: randomness,
 	}
 
 	jsonBody, err := json.Marshal(requestBody)

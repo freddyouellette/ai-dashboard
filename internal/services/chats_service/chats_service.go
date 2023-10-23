@@ -18,7 +18,7 @@ type BotService interface {
 }
 
 type AiApi interface {
-	GetResponse(aiModel string, messages []*models.Message) (*models.Message, error)
+	GetResponse(aiModel string, randomness float64, messages []*models.Message) (*models.Message, error)
 }
 
 type ChatsService struct {
@@ -94,7 +94,7 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	requestMessages = append(requestMessages, messages...)
 
 	var responseMessage *models.Message
-	responseMessage, err = s.aiApi.GetResponse(bot.AiModel, requestMessages)
+	responseMessage, err = s.aiApi.GetResponse(bot.AiModel, bot.Randomness, requestMessages)
 	if err != nil {
 		return nil, err
 	}

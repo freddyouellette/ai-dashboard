@@ -67,7 +67,7 @@ func main() {
 		PrettyJson:         true,
 	})
 	// httpClient := http.DefaultClient
-	aiApi := ai_api.NewAiApi(httpClient, 5000, 1.0, "https://api.openai.com/v1/chat/completions", OPENAI_ACCESS_TOKEN)
+	aiApi := ai_api.NewAiApi(httpClient, 5000, "https://api.openai.com/v1/chat/completions", OPENAI_ACCESS_TOKEN)
 	chatsService := chats_service.NewChatsService(
 		entity_service.NewEntityService[models.Chat](chatsRepository),
 		botsService,

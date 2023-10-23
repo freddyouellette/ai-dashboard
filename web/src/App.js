@@ -22,7 +22,7 @@ function App() {
 	}
 	
 	return (
-		<div className="App h-100 container-fluid">
+		<div className="App h-100 container-fluid text-start">
 			<Row className="h-100">
 				<Col className="col-4 sidebar text-white bg-dark h-100 p-0">
 					<Container>
