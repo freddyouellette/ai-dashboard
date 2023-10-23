@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { selectChatBot, selectSelectedChat } from "../store/page";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react"; // import useRef
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
@@ -21,9 +21,26 @@ export default function Chat() {
 		setMessageToSend(event.target.value)
 	}
 	
+	let dispatchSendMessage = () => {
+		dispatch(sendMessage(selectedChat.ID, messageToSend))
+		setMessageToSend("")
+	}
+	
+	let handleMessageTextKeyDown = event => {
+		if ((event.ctrlKey || event.metaKey) && (event.keyCode === 13)) {
+			dispatchSendMessage()
+		}
+	}
+
+	// scroll to bottom of list when a new message appears
+	const messageListRef = useRef(null);
+	useEffect(() => {
+		messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+	}, [messages]);
+
 	return (
 		<div className="flex-grow-1 d-flex flex-column">
-			<div className="flex-grow-1 overflow-auto mb-2 border-bottom px-2" style={{height: '0px'}}>
+			<div className="message-list flex-grow-1 overflow-auto mb-2 border-bottom px-2" style={{height: '0px'}} ref={messageListRef}>
 				<div>
 					{messages.map(message => {
 						switch (message.role) {
@@ -53,8 +70,17 @@ export default function Chat() {
 			</div>
 			<div className="mb-2 px-2">
 				<div className="d-flex">
-					<textarea onChange={handleMessageToSendChange}  type="text" className="form-control" id="chat-message" name="message" placeholder="Enter message" required value={messageToSend}></textarea>
-					<Button className="ms-3" onClick={() => dispatch(sendMessage(selectedChat.ID, messageToSend))}><FontAwesomeIcon icon={faPaperPlane} /></Button>
+					<textarea 
+						onChange={handleMessageToSendChange} 
+						onKeyDown={handleMessageTextKeyDown}
+						type="text" 
+						className="form-control" 
+						id="chat-message" 
+						name="message" 
+						placeholder="Enter message" 
+						required 
+						value={messageToSend}></textarea>
+					<Button className="ms-3" onClick={dispatchSendMessage}><FontAwesomeIcon icon={faPaperPlane} /></Button>
 				</div>
 				<div className="text-start ms-2">
 					<small><em>Ctrl+Enter / ⌘+Enter to send message</em></small>

@@ -8,8 +8,8 @@ import { deleteBot } from "../store/bots";
 
 export default function SidebarChatList() {
 	const dispatch = useDispatch();
-	const chats = useSelector(selectChats);
 	const bot = useSelector(selectSidebarSelectedBot);
+	let chats = useSelector(selectChats).filter(chat => chat.bot_id === bot.ID);
 	
 	return (
 		<ListGroup className="list-group-flush bg-dark text-white">
