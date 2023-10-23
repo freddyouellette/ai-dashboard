@@ -22,19 +22,21 @@ function App() {
 	}
 	
 	return (
-		<Row className="App h-100">
-			<Col className="sidebar text-white bg-dark h-100 p-0">
-				<Container>
-					<h1>AI Dashboard</h1>
-				</Container>
-				<SidebarMenu />
-			</Col>
-			<Col className="col-8 h-100 d-flex flex-column">
-				<Container className="flex-grow-1 d-flex flex-column">
-					{content}
-				</Container>
-			</Col>
-		</Row>
+		<div className="App h-100 container-fluid">
+			<Row className="h-100">
+				<Col className="col-4 sidebar text-white bg-dark h-100 p-0">
+					<Container>
+						<h1>AI Dashboard</h1>
+					</Container>
+					<SidebarMenu />
+				</Col>
+				<Col className="col-8 h-100 d-flex flex-column p-0">
+					<div className="flex-grow-1 d-flex flex-column">
+						{content}
+					</div>
+				</Col>
+			</Row>
+		</div>
 	);
 }
 

@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { selectMessages, sendMessage } from "../store/messages";
 import Markdown from 'react-markdown'
+import './chat.css'
 
 export default function Chat() {
 	let dispatch = useDispatch()
@@ -21,14 +22,14 @@ export default function Chat() {
 	}
 	
 	return (
-		<div className="bg-red flex-grow-1 d-flex flex-column">
-			<div className="flex-grow-1">
-				<div className="overflow-auto">
+		<div className="flex-grow-1 d-flex flex-column">
+			<div className="flex-grow-1 overflow-auto mb-2 border-bottom px-2" style={{height: '0px'}}>
+				<div>
 					{messages.map(message => {
 						switch (message.role) {
 							case "USER":
 								return (
-									<div key={message.ID} className="text-start bg-light p-2 m-2 ms-5 rounded border">
+									<div key={message.ID} className="text-start user-message p-2 m-2 ms-5 rounded border">
 										<b className="">👤 You:</b>
 										<Markdown>
 											{message.text}
@@ -50,7 +51,7 @@ export default function Chat() {
 					})}
 				</div>
 			</div>
-			<div className="mb-3">
+			<div className="mb-2 px-2">
 				<div className="d-flex">
 					<textarea onChange={handleMessageToSendChange}  type="text" className="form-control" id="chat-message" name="message" placeholder="Enter message" required value={messageToSend}></textarea>
 					<Button className="ms-3" onClick={() => dispatch(sendMessage(selectedChat.ID, messageToSend))}><FontAwesomeIcon icon={faPaperPlane} /></Button>
