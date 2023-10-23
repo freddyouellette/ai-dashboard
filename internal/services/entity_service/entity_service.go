@@ -9,6 +9,7 @@ type EntityRepository[e any] interface {
 	GetByID(id uint) (*e, error)
 	Create(entity *e) (*e, error)
 	Update(entity *e) (*e, error)
+	Delete(entity *e) error
 }
 
 type EntityService[e any] struct {
@@ -55,4 +56,16 @@ func (s *EntityService[e]) GetById(id uint) (*e, error) {
 		return nil, fmt.Errorf("%w: %s", ErrRepository, err.Error())
 	}
 	return entity, nil
+}
+
+func (s *EntityService[e]) Delete(id uint) error {
+	entity, err := s.entityRepository.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("%w: %s", ErrRepository, err.Error())
+	}
+	err = s.entityRepository.Delete(entity)
+	if err != nil {
+		return fmt.Errorf("%w: %s", ErrRepository, err.Error())
+	}
+	return nil
 }

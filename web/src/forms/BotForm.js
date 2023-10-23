@@ -34,7 +34,7 @@ export default function CreateBotForm() {
 	}
 	
 	return (
-		<div>
+		<div className="mx-3">
 			<h1>{botFormData?.ID ? 'Update Bot' : 'Create New Bot'}</h1>
 			<form onSubmit={handleSubmit}>
 				<div className="mb-3">

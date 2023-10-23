@@ -12,6 +12,7 @@ type EntityRequestController[e any] interface {
 	HandleGetEntityByIdRequest(w http.ResponseWriter, r *http.Request)
 	HandleCreateEntityRequest(w http.ResponseWriter, r *http.Request)
 	HandleUpdateEntityByIdRequest(w http.ResponseWriter, r *http.Request)
+	HandleDeleteEntityByIdRequest(w http.ResponseWriter, r *http.Request)
 }
 
 type ChatsController interface {
@@ -42,6 +43,7 @@ func NewRouter(
 	router.HandleFunc("/bots", botsController.HandleCreateEntityRequest).Methods("POST")
 	router.HandleFunc("/bots", botsController.HandleUpdateEntityByIdRequest).Methods("PUT")
 	router.HandleFunc("/bots/{id}", botsController.HandleGetEntityByIdRequest).Methods("GET")
+	router.HandleFunc("/bots/{id}", botsController.HandleDeleteEntityByIdRequest).Methods("DELETE")
 
 	router.HandleFunc("/chats", chatsController.HandleGetAllEntitiesRequest).Methods("GET")
 	router.HandleFunc("/chats", chatsController.HandleCreateEntityRequest).Methods("POST")

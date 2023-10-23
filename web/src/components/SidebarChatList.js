@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { goToBotChat, goToBotEdit, goToSidebarBotList, selectSidebarSelectedBot } from "../store/page";
 import { addChat, selectChats } from "../store/chats";
+import { deleteBot } from "../store/bots";
 
 export default function SidebarChatList() {
 	const dispatch = useDispatch();
@@ -13,7 +14,7 @@ export default function SidebarChatList() {
 	return (
 		<ListGroup className="list-group-flush bg-dark text-white">
 			<ListGroupItem className="border-bottom bg-dark text-white">
-				<Container className="text-center">
+				<div className="text-center">
 					<div className="d-flex align-items-center justify-content-between mb-3">
 						<div>
 							{bot.name}
@@ -21,6 +22,9 @@ export default function SidebarChatList() {
 						<div>
 							<Button className="btn-sm ms-2" onClick={() => dispatch(goToBotEdit(bot))}>
 								Edit
+							</Button>
+							<Button className="btn-sm ms-2 btn-danger" onClick={() => dispatch(deleteBot(bot))}>
+								Delete
 							</Button>
 						</div>
 					</div>
@@ -34,7 +38,7 @@ export default function SidebarChatList() {
 							New Chat
 						</Button>
 					</div>
-				</Container>
+				</div>
 			</ListGroupItem>
 			{chats.map(chat => {
 				return (

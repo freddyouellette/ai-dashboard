@@ -20,6 +20,7 @@ type EntityService[e any] interface {
 	GetById(id uint) (*e, error)
 	Create(entity *e) (*e, error)
 	Update(entity *e) (*e, error)
+	Delete(id uint) error
 }
 
 type EntityRequestController[e any] struct {
@@ -73,4 +74,14 @@ func (h *EntityRequestController[e]) HandleUpdateEntityByIdRequest(w http.Respon
 	}
 	responseObject, err := h.entityService.Update(&entity)
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
+}
+
+func (h *EntityRequestController[e]) HandleDeleteEntityByIdRequest(w http.ResponseWriter, r *http.Request) {
+	entityId, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+	if err != nil {
+		h.responseHandler.HandleResponseObject(w, nil, fmt.Errorf("%w: %s", ErrInvalidId, err.Error()))
+		return
+	}
+	err = h.entityService.Delete(uint(entityId))
+	h.responseHandler.HandleResponseObject(w, nil, err)
 }
