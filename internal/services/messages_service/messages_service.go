@@ -27,7 +27,6 @@ func NewMessagesService(
 }
 
 func (s *MessagesService) Create(entity *models.Message) (*models.Message, error) {
-	entity.Role = models.MESSAGE_ROLE_USER
 	return s.EntityService.Create(entity)
 }
 

@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
+import { goToBotChat } from './page';
 
 const chatsSlice = createSlice({
 	name: 'chats',
@@ -37,11 +38,12 @@ export const addChat = (botId) => async dispatch => {
 	.then(response => {
 		console.log(response);
 		dispatch(chatsSlice.actions.addChat(response.data));
+		dispatch(goToBotChat(response.data))
 	}).catch(error => {
 		console.error(error);
 	})
 }
 
-export const { setSelectedChat, setChats } = chatsSlice.actions;
+export const { setChats } = chatsSlice.actions;
 export const selectChats = state => state.chats.chats;
 export default chatsSlice.reducer;

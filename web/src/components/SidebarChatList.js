@@ -2,13 +2,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button, Container, ListGroup, ListGroupItem } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { goToBotChat, goToBotEdit, goToSidebarBotList, selectSelectedBot } from "../store/page";
+import { goToBotChat, goToBotEdit, goToSidebarBotList, selectSidebarSelectedBot } from "../store/page";
 import { addChat, selectChats } from "../store/chats";
 
 export default function SidebarChatList() {
 	const dispatch = useDispatch();
 	const chats = useSelector(selectChats);
-	const bot = useSelector(selectSelectedBot);
+	const bot = useSelector(selectSidebarSelectedBot);
 	
 	return (
 		<ListGroup className="list-group-flush bg-dark text-white">

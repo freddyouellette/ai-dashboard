@@ -74,6 +74,8 @@ func (api *AiApi) GetResponse(aiModel string, messages []*models.Message) (*mode
 			messageRole = "assistant"
 		case models.MESSAGE_ROLE_SYSTEM:
 			messageRole = "system"
+		default:
+			continue
 		}
 
 		requestMessages = append(requestMessages, chatMessage{

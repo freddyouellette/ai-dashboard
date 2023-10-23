@@ -1,6 +1,7 @@
 package messages_controller
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -43,6 +44,18 @@ func NewMessagesController(
 var (
 	ErrInvalidId = errors.New("invalid id")
 )
+
+func (h *MessagesController) HandleCreateEntityRequest(w http.ResponseWriter, r *http.Request) {
+	var message models.Message
+	err := json.NewDecoder(r.Body).Decode(&message)
+	if err != nil {
+		h.responseHandler.HandleResponseObject(w, nil, models.ErrInvalidResourceSyntax)
+		return
+	}
+	message.Role = models.MESSAGE_ROLE_USER
+	responseObject, err := h.messagesService.Create(&message)
+	h.responseHandler.HandleResponseObject(w, responseObject, err)
+}
 
 func (h *MessagesController) HandleGetMessageByChatIdRequest(w http.ResponseWriter, r *http.Request) {
 	chatId, err := strconv.ParseUint(mux.Vars(r)["chat_id"], 10, 64)
