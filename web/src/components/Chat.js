@@ -3,8 +3,8 @@ import { selectChatBot, selectSelectedChat } from "../store/page";
 import { useState, useEffect, useRef } from "react"; // import useRef
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { selectMessages, sendMessage } from "../store/messages";
+import { faCommentDots, faEllipsis, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { selectMessages, selectWaitingForResponse, sendMessage } from "../store/messages";
 import Markdown from 'react-markdown'
 import './chat.css'
 
@@ -13,6 +13,7 @@ export default function Chat() {
 	let selectedChat = useSelector(selectSelectedChat)
 	let messages = useSelector(selectMessages)
 	let chatBot = useSelector(selectChatBot)
+	let waitingForResponse = useSelector(selectWaitingForResponse)
 	messages = messages.filter(message => message.chat_id === selectedChat.ID)
 	
 	let [messageToSend, setMessageToSend] = useState("")
@@ -66,6 +67,13 @@ export default function Chat() {
 								return ""
 						}
 					})}
+					{waitingForResponse ? (
+						<div className="d-flex justify-content-start">
+							<div className="m-2 p-3 border rounded bg-light">
+								🤖 <FontAwesomeIcon className="ms-1 mb-2" icon={faCommentDots} bounce />
+							</div>
+						</div>
+					) : ""}
 				</div>
 			</div>
 			<div className="mb-2 px-2">
