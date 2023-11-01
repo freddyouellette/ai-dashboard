@@ -75,7 +75,7 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 		Role: models.MESSAGE_ROLE_SYSTEM,
 	})
 
-	if bot.Description != "" {
+	if bot.Personality != "" {
 		requestMessages = append(requestMessages, &models.Message{
 			Text: "Your personality: " + bot.Personality,
 			Role: models.MESSAGE_ROLE_SYSTEM,
