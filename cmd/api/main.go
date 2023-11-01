@@ -96,12 +96,20 @@ func main() {
 		LogResponseBody: true,
 		PrettyJson:      true,
 	})
-	router := router.NewRouter(botsController, chatsController, messagesController, requestLogger)
+	apiRouter := router.NewRouter(botsController, chatsController, messagesController, requestLogger)
 
-	router = cors.AllowAll().Handler(router)
+	apiRouter = cors.AllowAll().Handler(apiRouter)
 	// router = cors.Default().Handler(router)
 
-	http.Handle("/", router)
-	fmt.Println("Listening on port " + API_PORT)
-	http.ListenAndServe(":"+API_PORT, nil)
+	// frontend
+	WEB_PORT := os.Getenv("WEB_PORT")
+	fs := http.FileServer(http.Dir("web/build"))
+	frontendServer := http.NewServeMux()
+	frontendServer.Handle("/", fs)
+	fmt.Println("Frontend listening on port " + WEB_PORT)
+
+	go http.ListenAndServe(":"+WEB_PORT, frontendServer)
+
+	fmt.Println("API listening on port " + API_PORT)
+	http.ListenAndServe(":"+API_PORT, apiRouter)
 }

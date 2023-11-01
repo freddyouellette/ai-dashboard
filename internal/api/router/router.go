@@ -39,21 +39,21 @@ func NewRouter(
 
 	router.Use(requestLogger.CreateRequestLoggerHandler)
 
-	router.HandleFunc("/bots", botsController.HandleGetAllEntitiesRequest).Methods("GET")
-	router.HandleFunc("/bots", botsController.HandleCreateEntityRequest).Methods("POST")
-	router.HandleFunc("/bots", botsController.HandleUpdateEntityByIdRequest).Methods("PUT")
-	router.HandleFunc("/bots/{id}", botsController.HandleGetEntityByIdRequest).Methods("GET")
-	router.HandleFunc("/bots/{id}", botsController.HandleDeleteEntityByIdRequest).Methods("DELETE")
+	router.HandleFunc("/api/bots", botsController.HandleGetAllEntitiesRequest).Methods("GET")
+	router.HandleFunc("/api/bots", botsController.HandleCreateEntityRequest).Methods("POST")
+	router.HandleFunc("/api/bots", botsController.HandleUpdateEntityByIdRequest).Methods("PUT")
+	router.HandleFunc("/api/bots/{id}", botsController.HandleGetEntityByIdRequest).Methods("GET")
+	router.HandleFunc("/api/bots/{id}", botsController.HandleDeleteEntityByIdRequest).Methods("DELETE")
 
-	router.HandleFunc("/chats", chatsController.HandleGetAllEntitiesRequest).Methods("GET")
-	router.HandleFunc("/chats", chatsController.HandleCreateEntityRequest).Methods("POST")
-	router.HandleFunc("/chats/{id}", chatsController.HandleCreateEntityRequest).Methods("POST")
-	router.HandleFunc("/chats/{id}/response", chatsController.HandleGetChatResponseRequest).Methods("GET")
+	router.HandleFunc("/api/chats", chatsController.HandleGetAllEntitiesRequest).Methods("GET")
+	router.HandleFunc("/api/chats", chatsController.HandleCreateEntityRequest).Methods("POST")
+	router.HandleFunc("/api/chats/{id}", chatsController.HandleCreateEntityRequest).Methods("POST")
+	router.HandleFunc("/api/chats/{id}/response", chatsController.HandleGetChatResponseRequest).Methods("GET")
 
-	router.HandleFunc("/messages", messagesController.HandleGetAllEntitiesRequest).Methods("GET")
-	router.HandleFunc("/messages", messagesController.HandleCreateEntityRequest).Methods("POST")
-	router.HandleFunc("/messages/{id}", messagesController.HandleGetEntityByIdRequest).Methods("GET")
-	router.HandleFunc("/chats/{chat_id}/messages", messagesController.HandleGetMessageByChatIdRequest).Methods("GET")
+	router.HandleFunc("/api/messages", messagesController.HandleGetAllEntitiesRequest).Methods("GET")
+	router.HandleFunc("/api/messages", messagesController.HandleCreateEntityRequest).Methods("POST")
+	router.HandleFunc("/api/messages/{id}", messagesController.HandleGetEntityByIdRequest).Methods("GET")
+	router.HandleFunc("/api/chats/{chat_id}/messages", messagesController.HandleGetMessageByChatIdRequest).Methods("GET")
 
 	return router
 }

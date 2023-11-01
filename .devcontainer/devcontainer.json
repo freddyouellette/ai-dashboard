@@ -2,5 +2,7 @@
 	"name": "ai-dashboard",
 	"dockerComposeFile": "./../docker-compose.yml",
 	"service": "devcontainer",
-	"workspaceFolder": "/workspace"
+	"workspaceFolder": "/workspace",
+	// instead of running the default command, sleep infinity to keep the container running
+	"overrideCommand": true
 }

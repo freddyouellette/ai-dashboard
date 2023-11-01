@@ -33,7 +33,7 @@ const botsSlice = createSlice({
 });
 
 export const fetchBots = () => async dispatch => {
-	axios.get('http://localhost:8080/bots')
+	axios.get('http://localhost:8080/api/bots')
 	.then(
 		res => dispatch(botsSlice.actions.setBots(res.data)), 
 		error => console.error(error)
@@ -41,7 +41,7 @@ export const fetchBots = () => async dispatch => {
 }
 
 export const deleteBot = bot => async (dispatch, getState) => {
-	axios.delete(`http://localhost:8080/bots/${bot.ID}`)
+	axios.delete(`http://localhost:8080/api/bots/${bot.ID}`)
 	.then(
 		() => {
 			dispatch(botsSlice.actions.removeBot(bot))

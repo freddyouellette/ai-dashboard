@@ -2,6 +2,7 @@
 /.env
 /data
 /bin
+/web/build
 
 .DS_Store
 

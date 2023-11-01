@@ -20,7 +20,7 @@ const chatsSlice = createSlice({
 
 // thunk
 export const fetchChats = () => async dispatch => {
-	fetch('http://localhost:8080/chats')
+	fetch('http://localhost:8080/api/chats')
 	.then(response => response.json())
 	.then(
 		chats => dispatch(chatsSlice.actions.setChats(chats)), 
@@ -34,7 +34,7 @@ export const addChat = (botId) => async dispatch => {
 		name: "New Chat",
 		bot_id: botId,
 	}
-	axios.post('http://localhost:8080/chats', newChatData)
+	axios.post('http://localhost:8080/api/chats', newChatData)
 	.then(response => {
 		console.log(response);
 		dispatch(chatsSlice.actions.addChat(response.data));

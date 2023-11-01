@@ -26,12 +26,12 @@ export const sendMessage = (chatId, message) => async dispatch => {
 		chat_id: chatId,
 		text: message,
 	}
-	axios.post('http://localhost:8080/messages', newMessageData)
+	axios.post('http://localhost:8080/api/messages', newMessageData)
 	.then(response => {
 		console.log(response)
 		dispatch(messagesSlice.actions.addMessage(response.data))
 		dispatch(messagesSlice.actions.setWaitingForResponse(true))
-		axios.get("http://localhost:8080/chats/"+chatId+"/response")
+		axios.get("http://localhost:8080/api/chats/"+chatId+"/response")
 		.then(response => {
 			console.log(response)
 			dispatch(messagesSlice.actions.setWaitingForResponse(false))
@@ -42,7 +42,7 @@ export const sendMessage = (chatId, message) => async dispatch => {
 
 // thunk
 export const fetchMessages = () => async dispatch => {
-	axios.get('http://localhost:8080/messages')
+	axios.get('http://localhost:8080/api/messages')
 	.then(response => {
 		console.log(response)
 		dispatch(messagesSlice.actions.setMessages(response.data))

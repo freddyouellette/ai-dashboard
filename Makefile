@@ -2,7 +2,10 @@
 
 COVERAGE_REQUIREMENT := 90
 
-build:
+build-frontend:
+	cd ./web && npm i && npm run build && cd ../
+
+build: build-frontend
 	mkdir -p ./bin && go build -v -o ./bin ./...
 
 test:
@@ -40,6 +43,9 @@ api:
 frontend:
 	cd ./web && npm i && npm start && cd ../
 
-app:
+app: build
+	./bin/api
+
+app-dev:
 	go run ./cmd/api/main.go &
 	cd ./web && npm i && npm start && cd ../
