@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/chats_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
@@ -29,7 +30,16 @@ import (
 
 func main() {
 	API_PORT := os.Getenv("API_PORT")
+	WEB_PORT := os.Getenv("WEB_PORT")
 	OPENAI_ACCESS_TOKEN := os.Getenv("OPENAI_ACCESS_TOKEN")
+	frontendStr, ok := os.LookupEnv("FRONTEND")
+	if !ok {
+		frontendStr = "true"
+	}
+	FRONTEND, err := strconv.ParseBool(frontendStr)
+	if err != nil {
+		panic(err)
+	}
 
 	db, err := gorm.Open(sqlite.Open("data/data.db"))
 	if err != nil {
@@ -102,13 +112,14 @@ func main() {
 	// router = cors.Default().Handler(router)
 
 	// frontend
-	WEB_PORT := os.Getenv("WEB_PORT")
-	fs := http.FileServer(http.Dir("web/build"))
-	frontendServer := http.NewServeMux()
-	frontendServer.Handle("/", fs)
-	fmt.Println("Frontend listening on port " + WEB_PORT)
+	if FRONTEND {
+		fs := http.FileServer(http.Dir("web/build"))
+		frontendServer := http.NewServeMux()
+		frontendServer.Handle("/", fs)
+		fmt.Println("Frontend listening on port " + WEB_PORT)
 
-	go http.ListenAndServe(":"+WEB_PORT, frontendServer)
+		go http.ListenAndServe(":"+WEB_PORT, frontendServer)
+	}
 
 	fmt.Println("API listening on port " + API_PORT)
 	http.ListenAndServe(":"+API_PORT, apiRouter)

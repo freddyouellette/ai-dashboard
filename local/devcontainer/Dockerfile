@@ -19,4 +19,6 @@ RUN go install github.com/cweill/gotests/gotests@v1.6.0 \
 	&& go install golang.org/x/vuln/cmd/govulncheck@latest \
 	&& go install github.com/google/pprof@latest
 
+RUN npm i -g nodemon
+
 ENV PATH="$PATH:/root/go/bin"

@@ -47,5 +47,5 @@ app: build
 	./bin/api
 
 app-dev:
-	go run ./cmd/api/main.go &
+	FRONTEND=false nodemon --watch './**/*.go' --signal SIGTERM --exec go run ./cmd/api/main.go &
 	cd ./web && npm i && npm start && cd ../
