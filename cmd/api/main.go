@@ -118,9 +118,17 @@ func main() {
 		frontendServer.Handle("/", fs)
 		fmt.Println("Frontend listening on port " + WEB_PORT)
 
-		go http.ListenAndServe(":"+WEB_PORT, frontendServer)
+		go func() {
+			err = http.ListenAndServe(":"+WEB_PORT, frontendServer)
+			if err != nil {
+				panic(err)
+			}
+		}()
 	}
 
 	fmt.Println("API listening on port " + API_PORT)
-	http.ListenAndServe(":"+API_PORT, apiRouter)
+	err = http.ListenAndServe(":"+API_PORT, apiRouter)
+	if err != nil {
+		panic(err)
+	}
 }
