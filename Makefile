@@ -5,8 +5,10 @@ COVERAGE_REQUIREMENT := 90
 build-frontend:
 	cd ./web && npm i && npm run build && cd ../
 
-build: build-frontend
+build-backend:
 	mkdir -p ./bin && go build -v -o ./bin ./...
+
+build: build-frontend build-backend
 
 test:
 	go test ./... -coverprofile=coverage.out
@@ -46,6 +48,11 @@ frontend:
 app: build
 	./bin/api
 
-app-dev:
-	FRONTEND=false nodemon --watch './**/*.go' --signal SIGTERM --exec go run ./cmd/api/main.go &
+app-dev-api:
+	FRONTEND=false nodemon --watch './**/*.go' --signal SIGTERM --exec go run ./cmd/api/main.go
+
+app-dev-frontend:
 	cd ./web && npm i && npm start && cd ../
+
+app-dev:
+	make -j 2 app-dev-api app-dev-frontend
