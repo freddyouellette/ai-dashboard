@@ -9,7 +9,7 @@ export default function CreateBotForm() {
 	const botFormData = useSelector(selectBotToUpdate) || {
 		name: '',
 		description: '',
-		model: 'gpt-4',
+		model: 'gpt-4-1106-preview',
 		randomness: 1,
 		personality: '',
 		user_history: '',
@@ -54,6 +54,7 @@ export default function CreateBotForm() {
 					<select onChange={handleChange} id="create-bot-form-model" name="model" className="form-control" value={botFormData?.model ?? 'gpt-4'}>
 						<option value="">Select AI Model</option>
 						<option value="gpt-4">GPT-4</option>
+						<option value="gpt-4-1106-preview">GPT-4 11.06 Preview</option>
 					</select>
 				</div>
 				<div className="mb-3">
