@@ -56,3 +56,6 @@ app-dev-frontend:
 
 app-dev:
 	make -j 2 app-dev-api app-dev-frontend
+
+app-local:
+	DEVCONTAINER_COMMAND="make app" docker-compose up

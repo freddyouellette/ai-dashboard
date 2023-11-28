@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./local/devcontainer/Dockerfile
     working_dir: /workspace
-    command: make app
+    command: ${DEVCONTAINER_COMMAND:-sleep infinity}
     ports:
       - "${API_PORT}:${API_PORT}"
       - "${WEB_PORT}:${WEB_PORT}"
