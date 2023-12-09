@@ -5,37 +5,46 @@ import Chat from './components/Chat';
 import { useSelector } from 'react-redux'
 import { selectPageStatus, PAGE_STATUSES } from './store/page'
 import SidebarMenu from './components/SidebarMenu';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars, faGear, faGripLines } from '@fortawesome/free-solid-svg-icons';
 
 function App() {
-	const pageStatus = useSelector(selectPageStatus)
+	// const chatSelected = useSelector(selectChatSelected);
+	const chatSelected = {};
+	// const botSelected = useSelector(selectBotSelected);
+	const botSelected = {
+		name: "Uncle Bob",
+		description: "",
+		model: "",
+		personality: "",
+		user_history: "",
+		randomness: "",
+	};
 	
-	let content;
-	switch(pageStatus) {
-		case PAGE_STATUSES.CREATE_BOT:
-			content = <BotForm />;
-		break;
-		case PAGE_STATUSES.BOT_CHAT:
-			content = <Chat />
-		break;
-		default:
-			content = <div className="text-center text-italics">Select a bot</div>;
-	}
 	
 	return (
-		<div className="App h-100 container-fluid text-start">
-			<Row className="h-100">
-				<Col className="col-4 sidebar text-white bg-dark h-100 p-0">
-					<Container>
-						<h1>AI Dashboard</h1>
-					</Container>
-					<SidebarMenu />
-				</Col>
-				<Col className="col-8 h-100 d-flex flex-column p-0">
-					<div className="flex-grow-1 d-flex flex-column">
-						{content}
-					</div>
-				</Col>
-			</Row>
+		<div className="App h-100">
+			<nav className="navbar px-2 bg-light border-bottom">
+				<div data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+					<span className="btn border"><FontAwesomeIcon icon={faBars}/></span>
+				</div>
+				
+				<div className="flex-grow-1">
+					{botSelected.name}
+				</div>
+				
+				<div>
+					<span className="btn border"><FontAwesomeIcon icon={faGear}/></span>
+				</div>
+				
+				<div className="collapse navbar-collapse" id="navbar-menu">
+					<ul className="navbar-nav me-auto">
+						<li className="nav-item active">
+							<a className="nav-link" href="#">Home</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
 		</div>
 	);
 }
