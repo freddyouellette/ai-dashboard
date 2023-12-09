@@ -1,5 +1,7 @@
 /.vscode
 /.env
+/.deploy
+/.ignore
 /data
 /bin
 /web/build
