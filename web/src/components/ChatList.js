@@ -11,8 +11,8 @@ import { getBots, selectBots } from "../store/bots";
 export default function ChatList() {
 	const dispatch = useDispatch();
 	useEffect(() => {
-		dispatch(getChats())
-		dispatch(getBots())
+		dispatch(getChats());
+		dispatch(getBots());
 	}, [dispatch]);
 	let { chats, chatsLoading, chatsError } = useSelector(selectChats);
 	let { bots, botsLoading, botsError } = useSelector(selectBots);
@@ -30,9 +30,9 @@ export default function ChatList() {
 			{Object.values(chats).map(chat => {
 				let bot = bots[chat.bot_id];
 				return (
-					<ListGroupItem 
+					<div 
 						key={chat.ID} 
-						className="border-bottom" 
+						className="border-bottom bg-light" 
 						style={{ "cursor": "pointer" }}
 						onClick={() => dispatch(goToBotChat(chat))}>
 						<Container className="text-start">
@@ -50,7 +50,7 @@ export default function ChatList() {
 								</div>
 							</div>
 						</Container>
-					</ListGroupItem>
+					</div>
 				);
 			})}
 		</ListGroup>

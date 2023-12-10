@@ -1,6 +1,6 @@
 import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faGear } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faGear, faPlus } from '@fortawesome/free-solid-svg-icons';
 import ChatList from './components/ChatList';
 import { TODO } from './util/todo';
 
@@ -20,21 +20,24 @@ function App() {
 	
 	return (
 		<div className="App h-100">
-			<nav className="navbar px-2 bg-light border-bottom">
-				<div data-bs-toggle="collapse" data-bs-target="#navbar-menu">
-					<span className="btn border"><FontAwesomeIcon icon={faBars}/></span>
+			<nav className="navbar bg-light border-bottom py-0">
+				<div class="mx-2 d-flex w-100 align-items-center py-2">
+					<div data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+						<span className="btn border"><FontAwesomeIcon icon={faBars}/></span>
+					</div>
+					
+					<div className="flex-grow-1">
+						AI Dashboard
+					</div>
+					
+					<div data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+						<span className="btn border"><FontAwesomeIcon icon={faPlus}/></span>
+					</div>
 				</div>
 				
-				<div className="flex-grow-1">
-					{botSelected.name}
-				</div>
-				
-				<div>
-					<span className="btn border" onClick={TODO}><FontAwesomeIcon icon={faGear}/></span>
-				</div>
-				
-				<div className="collapse navbar-collapse" id="navbar-menu">
-					<ChatList/>
+				<div className="collapse navbar-collapse border-top" id="navbar-menu">
+					<div className="border-bottom py-3">Bots</div>
+					<div className="py-3">Chats</div>
 				</div>
 			</nav>
 		</div>
