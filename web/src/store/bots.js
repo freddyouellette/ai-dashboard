@@ -1,59 +1,53 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSelector, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
-import { goToSidebarBotList } from './page';
 
 const botsSlice = createSlice({
 	name: 'bots',
 	initialState: {
-		bots: []
+		bots: {},
+		botsLoading: false,
+		botsError: null,
 	},
 	reducers: {
-		addOrUpdateBot: (state, action) => {
-			const bot = action.payload;
-			const botIndex = state.bots.findIndex(b => b.ID === bot.ID);
-			if(botIndex > -1) {
-				// Update bot
-				state.bots[botIndex] = bot;
-			} else {
-				// Create bot
-				state.bots.push(bot);
-			}
-		},
 		setBots: (state, action) => {
 			state.bots = action.payload;
 		},
-		removeBot: (state, action) => {
-			const bot = action.payload;
-			const botIndex = state.bots.findIndex(b => b.ID === bot.ID);
-			if(botIndex > -1) {
-				state.bots.splice(botIndex, 1);
-			}
-		}
+		setBotsLoading: (state, action) => {
+			state.botsLoading = action.payload;
+		},
+		setBotsError: (state, action) => {
+			state.botsError = action.payload;
+		},
 	}
 });
 
-export const fetchBots = () => async dispatch => {
+export const getBots = () => async dispatch => {
+	dispatch(botsSlice.actions.setBotsLoading(true));
+	dispatch(botsSlice.actions.setBotsError(null));
 	axios.get('http://localhost:8080/api/bots')
 	.then(
-		res => dispatch(botsSlice.actions.setBots(res.data)), 
-		error => console.error(error)
-	);
-}
-
-export const deleteBot = bot => async (dispatch, getState) => {
-	axios.delete(`http://localhost:8080/api/bots/${bot.ID}`)
-	.then(
-		() => {
-			dispatch(botsSlice.actions.removeBot(bot))
-			const state = getState();
-			if (state.page.sidebarBotSelected?.ID === bot.ID) {
-				dispatch(goToSidebarBotList());
-			}
+		res => {
+			let botsById = {};
+			res.data.forEach(bot => {
+				botsById[bot.ID] = bot;
+			});
+			dispatch(botsSlice.actions.setBotsLoading(false));
+			dispatch(botsSlice.actions.setBotsError(null));
+			dispatch(botsSlice.actions.setBots(botsById));
+		}, 
+		error => {
+			dispatch(botsSlice.actions.setBotsLoading(false));
+			dispatch(botsSlice.actions.setBotsError(error));
+			console.error(error);
 		},
-		error => console.error(error)
 	);
 }
 
-export const { addOrUpdateBot } = botsSlice.actions;
-export const selectBots = state => state.bots.bots;
+export const selectBots = createSelector(
+	state => state.bots.bots,
+	state => state.bots.botsLoading,
+	state => state.bots.botsError, 
+	(bots, botsLoading, botsError) => ({ bots, botsLoading, botsError })
+);
+
 export default botsSlice.reducer;

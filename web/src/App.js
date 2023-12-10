@@ -1,16 +1,12 @@
-import { Col, Container, Row } from 'react-bootstrap';
 import './App.css';
-import BotForm from './forms/BotForm';
-import Chat from './components/Chat';
-import { useSelector } from 'react-redux'
-import { selectPageStatus, PAGE_STATUSES } from './store/page'
-import SidebarMenu from './components/SidebarMenu';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faGear, faGripLines } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faGear } from '@fortawesome/free-solid-svg-icons';
+import ChatList from './components/ChatList';
+import { TODO } from './util/todo';
 
 function App() {
 	// const chatSelected = useSelector(selectChatSelected);
-	const chatSelected = {};
+	// const chatSelected = {};
 	// const botSelected = useSelector(selectBotSelected);
 	const botSelected = {
 		name: "Uncle Bob",
@@ -34,15 +30,11 @@ function App() {
 				</div>
 				
 				<div>
-					<span className="btn border"><FontAwesomeIcon icon={faGear}/></span>
+					<span className="btn border" onClick={TODO}><FontAwesomeIcon icon={faGear}/></span>
 				</div>
 				
 				<div className="collapse navbar-collapse" id="navbar-menu">
-					<ul className="navbar-nav me-auto">
-						<li className="nav-item active">
-							<a className="nav-link" href="#">Home</a>
-						</li>
-					</ul>
+					<ChatList/>
 				</div>
 			</nav>
 		</div>
