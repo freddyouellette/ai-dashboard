@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { PAGE_STATUSES, goToBotListPage, goToChatListPage, goToCreateChatPage, selectPageStatus } from './store/page';
 import ChatList from './components/ChatList';
 import Chat from './components/Chat';
+import ChatForm from './forms/ChatForm';
 
 function App() {
 	const dispatch = useDispatch();
@@ -22,7 +23,7 @@ function App() {
 			content = <Chat/>;
 		break;
 		case PAGE_STATUSES.CREATE_CHAT:
-			content = "Create Chat";
+			content = <ChatForm/>;
 		break;
 		case PAGE_STATUSES.CHAT_LIST:
 			content = <ChatList/>;

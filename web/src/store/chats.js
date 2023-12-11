@@ -14,6 +14,9 @@ const chatsSlice = createSlice({
 		setChats: (state, action) => {
 			state.chats = action.payload;
 		},
+		addChat: (state, action) => {
+			state.chats[action.payload.ID] = action.payload;
+		},
 		setChatsLoading: (state, action) => {
 			state.chatsLoading = action.payload;
 		},
@@ -48,7 +51,7 @@ export const getChats = () => async dispatch => {
 }
 
 // thunk
-export const createChat = (botId) => async dispatch => {
+export const createChat = ({ botId }) => async dispatch => {
 	let newChatData = {
 		name: "New Chat",
 		bot_id: botId,

@@ -34,7 +34,7 @@ export default function ChatList() {
 						<Container className="text-start">
 							<div className="d-flex justify-content-between">
 								<div className="flex-grow-1">
-									<div><strong>{bot.name}</strong></div>
+									<div><strong>{bot?.name ?? <i>unknown</i>}</strong></div>
 									<div>{chat.ID}</div>
 								</div>
 								<div className="d-flex align-items-center">

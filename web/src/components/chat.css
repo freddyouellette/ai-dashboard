@@ -1,3 +1,10 @@
 .user-message {
 	background-color: #c5e9ff;
 }
+
+.system-message {
+	background-color: #ddd;
+	line-height: 1.2em;
+	font-size: 0.8em;
+	font-style: italic;
+}

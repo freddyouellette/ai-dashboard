@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { selectSelectedChat, selectSelectedChatBot } from "../store/page";
+import { selectSelectedChat } from "../store/page";
 import { useState, useEffect, useRef } from "react"; // import useRef
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,14 +7,20 @@ import { faCommentDots, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { getChatMessages, selectMessages, selectWaitingForResponse, sendMessage } from "../store/messages";
 import Markdown from 'react-markdown'
 import './chat.css'
+import { getBots, selectBots } from "../store/bots";
 
 export default function Chat() {
-	let dispatch = useDispatch();
-	let selectedChat = useSelector(selectSelectedChat);
-	let { messages, messagesLoading, messagesError } = useSelector(selectMessages);
-	let chatBot = useSelector(selectSelectedChatBot);
-	let waitingForResponse = useSelector(selectWaitingForResponse);
-	let [messageToSend, setMessageToSend] = useState("");
+	const dispatch = useDispatch();
+	const selectedChat = useSelector(selectSelectedChat);
+	const { messages, messagesLoading, messagesError } = useSelector(selectMessages);
+	const waitingForResponse = useSelector(selectWaitingForResponse);
+	const [messageToSend, setMessageToSend] = useState("");
+	const { bots, botsLoading, botsError } = useSelector(selectBots);
+	const chatBot = bots[selectedChat?.bot_id];
+	
+	useEffect(() => {
+		dispatch(getBots());
+	}, [dispatch]);
 	
 	useEffect(() => {
 		dispatch(getChatMessages(selectedChat))
@@ -28,8 +34,9 @@ export default function Chat() {
 		}
 	}, [messages]);
 	
-	if (messagesLoading) return <div>Loading...</div>;
+	if (messagesLoading || botsLoading) return <div>Loading...</div>;
 	if (messagesError) return <div>Error loading messages...</div>;
+	if (botsError) return <div>Error loading bots...</div>;
 	
 	let handleMessageToSendChange = event => {
 		setMessageToSend(event.target.value)
@@ -50,6 +57,12 @@ export default function Chat() {
 		<div className="d-flex flex-column flex-grow-1">
 			<div className="message-list flex-grow-1 overflow-auto mb-2 border-bottom px-2" style={{height: '0px'}} ref={messageListRef}>
 				<div>
+					<div className="text-start system-message p-2 m-2 rounded border text-muted">
+						<b className="">Bot Personality:</b>
+						<Markdown>
+							{chatBot.personality}
+						</Markdown>
+					</div>
 					{Object.values(messages).map(message => {
 						switch (message.role) {
 							case "USER":
