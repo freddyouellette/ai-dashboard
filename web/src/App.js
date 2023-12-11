@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from "react-redux";
 import { PAGE_STATUSES, goToBotListPage, goToChatListPage, goToCreateChatPage, selectPageStatus } from './store/page';
+import ChatList from './components/ChatList';
+import Chat from './components/Chat';
 
 function App() {
 	const dispatch = useDispatch();
@@ -17,13 +19,13 @@ function App() {
 			content = "Bot List";
 		break;
 		case PAGE_STATUSES.BOT_CHAT:
-			content = "Chat";
+			content = <Chat/>;
 		break;
 		case PAGE_STATUSES.CREATE_CHAT:
 			content = "Create Chat";
 		break;
 		case PAGE_STATUSES.CHAT_LIST:
-			content = "Chat List";
+			content = <ChatList/>;
 		break;
 		default:
 			content = "";
@@ -31,7 +33,7 @@ function App() {
 	}
 	
 	return (
-		<div className="App h-100">
+		<div className="App h-100 d-flex flex-column">
 			<nav className="navbar bg-light border-bottom py-0">
 				<div className="mx-2 d-flex w-100 align-items-center py-2">
 					<div data-bs-toggle="collapse" data-bs-target="#navbar-menu">
@@ -56,9 +58,7 @@ function App() {
 					<NavItem name="Chats" onClick={() => dispatch(goToChatListPage())}/>
 				</div>
 			</nav>
-			<div>
-				{content}
-			</div>
+			{content}
 		</div>
 	);
 }

@@ -1,22 +1,35 @@
 import { useDispatch, useSelector } from "react-redux";
-import { selectChatBot, selectSelectedChat } from "../store/page";
+import { selectSelectedChat, selectSelectedChatBot } from "../store/page";
 import { useState, useEffect, useRef } from "react"; // import useRef
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faEllipsis, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { selectMessages, selectWaitingForResponse, sendMessage } from "../store/messages";
+import { faCommentDots, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { getChatMessages, selectMessages, selectWaitingForResponse, sendMessage } from "../store/messages";
 import Markdown from 'react-markdown'
 import './chat.css'
 
 export default function Chat() {
-	let dispatch = useDispatch()
-	let selectedChat = useSelector(selectSelectedChat)
-	let messages = useSelector(selectMessages)
-	let chatBot = useSelector(selectChatBot)
-	let waitingForResponse = useSelector(selectWaitingForResponse)
-	messages = messages.filter(message => message.chat_id === selectedChat.ID)
+	let dispatch = useDispatch();
+	let selectedChat = useSelector(selectSelectedChat);
+	let { messages, messagesLoading, messagesError } = useSelector(selectMessages);
+	let chatBot = useSelector(selectSelectedChatBot);
+	let waitingForResponse = useSelector(selectWaitingForResponse);
+	let [messageToSend, setMessageToSend] = useState("");
 	
-	let [messageToSend, setMessageToSend] = useState("")
+	useEffect(() => {
+		dispatch(getChatMessages(selectedChat))
+	}, [selectedChat, dispatch]);
+	
+	// scroll to bottom of list when a new message appears
+	const messageListRef = useRef(null);
+	useEffect(() => {
+		if (messageListRef.current !== null) {
+			messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+		}
+	}, [messages]);
+	
+	if (messagesLoading) return <div>Loading...</div>;
+	if (messagesError) return <div>Error loading messages...</div>;
 	
 	let handleMessageToSendChange = event => {
 		setMessageToSend(event.target.value)
@@ -33,17 +46,11 @@ export default function Chat() {
 		}
 	}
 
-	// scroll to bottom of list when a new message appears
-	const messageListRef = useRef(null);
-	useEffect(() => {
-		messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
-	}, [messages]);
-
 	return (
-		<div className="flex-grow-1 d-flex flex-column">
+		<div className="d-flex flex-column flex-grow-1">
 			<div className="message-list flex-grow-1 overflow-auto mb-2 border-bottom px-2" style={{height: '0px'}} ref={messageListRef}>
 				<div>
-					{messages.map(message => {
+					{Object.values(messages).map(message => {
 						switch (message.role) {
 							case "USER":
 								return (
@@ -90,7 +97,7 @@ export default function Chat() {
 						value={messageToSend}></textarea>
 					<Button className="ms-3" onClick={dispatchSendMessage}><FontAwesomeIcon icon={faPaperPlane} /></Button>
 				</div>
-				<div className="text-start ms-2">
+				<div className="text-start ms-2 d-none d-md-flex">
 					<small><em>Ctrl+Enter / ⌘+Enter to send message</em></small>
 				</div>
 			</div>

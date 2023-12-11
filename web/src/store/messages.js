@@ -1,10 +1,12 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSelector, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
 
 const messagesSlice = createSlice({
 	name: 'messages',
 	initialState: {
-		messages: [],
+		messages: {},
+		messagesLoading: false,
+		messagesError: null,
 		waitingForResponse: false,
 	},
 	reducers: {
@@ -13,6 +15,12 @@ const messagesSlice = createSlice({
 		},
 		setMessages: (state, action) => {
 			state.messages = action.payload
+		},
+		setMessagesLoading: (state, action) => {
+			state.messagesLoading = action.payload
+		},
+		setMessagesError: (state, action) => {
+			state.messagesError = action.payload
 		},
 		setWaitingForResponse: (state, action) => {
 			state.waitingForResponse = action.payload
@@ -41,15 +49,29 @@ export const sendMessage = (chatId, message) => async dispatch => {
 }
 
 // thunk
-export const fetchMessages = () => async dispatch => {
-	axios.get('http://localhost:8080/api/messages')
+export const getChatMessages = chat => async dispatch => {
+	dispatch(messagesSlice.actions.setMessages({}));
+	dispatch(messagesSlice.actions.setMessagesLoading(true));
+	dispatch(messagesSlice.actions.setMessagesError(null));
+	axios.get(`http://localhost:8080/api/chats/${chat.ID}/messages`)
 	.then(response => {
 		console.log(response)
+		dispatch(messagesSlice.actions.setMessagesLoading(false));
+		dispatch(messagesSlice.actions.setMessagesError(null));
 		dispatch(messagesSlice.actions.setMessages(response.data))
-	}, error => console.error(error))
+	}, error => {
+		dispatch(messagesSlice.actions.setMessagesLoading(false));
+		dispatch(messagesSlice.actions.setMessagesError(error));
+		console.error(error)
+	});
 }
 
-export const selectMessages = state => state.messages.messages
+export const selectMessages = createSelector(
+	state => state.messages.messages,
+	state => state.messages.messagesLoading,
+	state => state.messages.messagesError,
+	(messages, messagesLoading, messagesError) => ({ messages, messagesLoading, messagesError })
+);
 export const selectWaitingForResponse = state => state.messages.waitingForResponse
 
 export default messagesSlice.reducer;

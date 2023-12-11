@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Container, ListGroup, ListGroupItem } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { goToBotChat } from "../store/page";
+import { goToChatPage } from "../store/page";
 import { getChats, selectChats } from "../store/chats";
 import { TODO } from "../util/todo";
 import { useEffect } from "react";
@@ -23,10 +23,6 @@ export default function ChatList() {
 	
 	return (
 		<ListGroup className="list-group-flush">
-			<ListGroupItem className="border-bottom d-flex justify-content-between align-items-center bg-light cursor-pointer" onClick={TODO}>
-				<div>New Chat</div>
-				<FontAwesomeIcon icon={faPlus} className="me-2" />
-			</ListGroupItem>
 			{Object.values(chats).map(chat => {
 				let bot = bots[chat.bot_id];
 				return (
@@ -34,7 +30,7 @@ export default function ChatList() {
 						key={chat.ID} 
 						className="border-bottom bg-light" 
 						style={{ "cursor": "pointer" }}
-						onClick={() => dispatch(goToBotChat(chat))}>
+						onClick={() => dispatch(goToChatPage(chat))}>
 						<Container className="text-start">
 							<div className="d-flex justify-content-between">
 								<div className="flex-grow-1">
