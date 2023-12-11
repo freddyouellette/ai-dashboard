@@ -1,6 +1,6 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
-import { goToBotChat } from './page';
+import { goToChatPage } from './page';
 
 const chatsSlice = createSlice({
 	name: 'chats',
@@ -57,7 +57,7 @@ export const createChat = (botId) => async dispatch => {
 	.then(response => {
 		console.log(response);
 		dispatch(chatsSlice.actions.addChat(response.data));
-		dispatch(goToBotChat(response.data))
+		dispatch(goToChatPage(response.data))
 	}).catch(error => {
 		console.error(error);
 	})

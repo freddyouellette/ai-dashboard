@@ -1,12 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-export const SIDEBAR_STATUSES = {
-	BOT_LIST: "bot-list",
-	BOT_CHAT_LIST: "bot-chat-list",
-}
-
 export const PAGE_STATUSES = {
 	CREATE_BOT: "create-bot",
+	BOT_LIST: "bot-list",
+	CREATE_CHAT: "create-chat",
+	CHAT_LIST: "chat-list",
 	BOT_CHAT: "bot-chat",
 };
 
@@ -14,52 +12,51 @@ const pageSlice = createSlice({
 	name: 'page',
 	initialState: {
 		status: null,
-		sidebarStatus: SIDEBAR_STATUSES.BOT_LIST,
-		sidebarBotSelected: null,
 		selectedChat: null,
-		chatBot: null,
-		botToUpdate: null,
+		selectedBot: null,
 	},
 	reducers: {
-		goToSidebarBotChatList: (state, action) => {
-			state.sidebarBotSelected = action.payload;
-			state.sidebarStatus = SIDEBAR_STATUSES.BOT_CHAT_LIST;
-		},
-		goToSidebarBotList: (state, action) => {
-			state.sidebarStatus = SIDEBAR_STATUSES.BOT_LIST;
-			state.sidebarBotSelected = null;
-		},
-		setSelectedChat: (state, action) => {
-			state.status = PAGE_STATUSES.BOT_CHAT;
-			state.selectedChat = action.payload;
-		},
-		setChatBot: (state, action) => {
-			state.chatBot = action.payload;
-		},
-		setPageStatus: (state, action) => {
+		setStatus: (state, action) => {
 			state.status = action.payload;
 		},
-		goToBotEdit: (state, action) => {
-			state.botToUpdate = action.payload;
-			state.status = PAGE_STATUSES.CREATE_BOT;
+		setSelectedChat: (state, action) => {
+			state.selectedChat = action.payload;
+		},
+		setSelectedBot: (state, action) => {
+			state.selectedBot = action.payload;
 		},
 	}
 });
 
+export const goToCreateChatPage = () => dispatch => {
+	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CREATE_CHAT))
+}
+
+export const goToBotListPage = () => dispatch => {
+	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.BOT_LIST))
+}
+
+export const goToChatListPage = () => dispatch => {
+	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CHAT_LIST))
+}
+
 // thunk
-export const goToBotChat = (chat) => (dispatch, getState) => {
+export const goToChatPage = (chat) => (dispatch, getState) => {
 	dispatch(pageSlice.actions.setSelectedChat(chat))
-	dispatch(pageSlice.actions.setPageStatus(PAGE_STATUSES.BOT_CHAT))
+	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.BOT_CHAT))
 	
 	let chatBot = getState().bots.bots.find(bot => bot.ID === chat.bot_id)
 	dispatch(pageSlice.actions.setChatBot(chatBot))
 }
 
-export const { goToSidebarBotChatList, goToSidebarBotList, setPageStatus, goToBotEdit } = pageSlice.actions;
+// thunk
+export const goToBotEditPage = (bot) => (dispatch, getState) => {
+	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CREATE_BOT))
+	dispatch(pageSlice.actions.setSelectedBot(bot))
+}
+
 export const selectPageStatus = state => state.page.status;
-export const selectSidebarStatus = state => state.page.sidebarStatus;
-export const selectBotToUpdate = state => state.page.botToUpdate;
-export const selectSidebarSelectedBot = state => state.page.sidebarBotSelected;
 export const selectSelectedChat = state => state.page.selectedChat;
-export const selectChatBot = state => state.page.chatBot;
+export const selectSelectedBot = state => state.page.selectedBot;
+
 export default pageSlice.reducer;
