@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/freddyouellette/ai-dashboard/internal/models"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
 type ResponseHandler interface {
@@ -56,7 +56,7 @@ func (h *EntityRequestController[e]) HandleCreateEntityRequest(w http.ResponseWr
 }
 
 func (h *EntityRequestController[e]) HandleGetEntityByIdRequest(w http.ResponseWriter, r *http.Request) {
-	entityId, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+	entityId, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		h.responseHandler.HandleResponseObject(w, nil, fmt.Errorf("%w: %s", ErrInvalidId, err.Error()))
 		return
@@ -77,7 +77,7 @@ func (h *EntityRequestController[e]) HandleUpdateEntityByIdRequest(w http.Respon
 }
 
 func (h *EntityRequestController[e]) HandleDeleteEntityByIdRequest(w http.ResponseWriter, r *http.Request) {
-	entityId, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+	entityId, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		h.responseHandler.HandleResponseObject(w, nil, fmt.Errorf("%w: %s", ErrInvalidId, err.Error()))
 		return
