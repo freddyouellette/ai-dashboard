@@ -33,7 +33,7 @@ export const getBots = () => async (dispatch, getState) => {
 	}
 	dispatch(botsSlice.actions.setBotsLoading(true));
 	dispatch(botsSlice.actions.setBotsError(null));
-	axios.get('http://localhost:8080/api/bots')
+	axios.get(process.env.REACT_APP_API_HOST+'/api/bots')
 	.then(
 		res => {
 			let botsById = {};
@@ -57,7 +57,7 @@ export const getBots = () => async (dispatch, getState) => {
 export const addOrUpdateBot = (bot) => async (dispatch, getState) => {
 	dispatch(botsSlice.actions.setBotsLoading(true));
 	dispatch(botsSlice.actions.setBotsError(null));
-	axios[bot.ID ? "put" : "post"]("http://localhost:8080/api/bots", bot)
+	axios[bot.ID ? "put" : "post"](process.env.REACT_APP_API_HOST+"/api/bots", bot)
 	.then(
 		res => {
 			dispatch(botsSlice.actions.setBotsLoading(false));

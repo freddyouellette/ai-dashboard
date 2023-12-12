@@ -1,11 +1,11 @@
+.DS_Store
 /.vscode
 /.env
 /.deploy
 /.ignore
 /data
 /bin
-/web/build
-
-.DS_Store
 
 /web/node_modules
+/web/build
+/web/.env

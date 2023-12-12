@@ -30,7 +30,7 @@ const chatsSlice = createSlice({
 export const getChats = () => async dispatch => {
 	dispatch(chatsSlice.actions.setChatsLoading(true))
 	dispatch(chatsSlice.actions.setChatsError(null))
-	fetch('http://localhost:8080/api/chats')
+	fetch(process.env.REACT_APP_API_HOST+'/api/chats')
 	.then(response => response.json())
 	.then(
 		chats => {
@@ -56,7 +56,7 @@ export const createChat = ({ botId }) => async dispatch => {
 		name: "New Chat",
 		bot_id: botId,
 	}
-	axios.post('http://localhost:8080/api/chats', newChatData)
+	axios.post(process.env.REACT_APP_API_HOST+'/api/chats', newChatData)
 	.then(response => {
 		console.log(response);
 		dispatch(chatsSlice.actions.addChat(response.data));

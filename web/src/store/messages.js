@@ -34,12 +34,12 @@ export const sendMessage = (chatId, message) => async dispatch => {
 		chat_id: chatId,
 		text: message,
 	}
-	axios.post('http://localhost:8080/api/messages', newMessageData)
+	axios.post(process.env.REACT_APP_API_HOST+'/api/messages', newMessageData)
 	.then(response => {
 		console.log(response)
 		dispatch(messagesSlice.actions.addMessage(response.data))
 		dispatch(messagesSlice.actions.setWaitingForResponse(true))
-		axios.get("http://localhost:8080/api/chats/"+chatId+"/response")
+		axios.get(process.env.REACT_APP_API_HOST+"/api/chats/"+chatId+"/response")
 		.then(response => {
 			console.log(response)
 			dispatch(messagesSlice.actions.setWaitingForResponse(false))
@@ -53,7 +53,7 @@ export const getChatMessages = chat => async dispatch => {
 	dispatch(messagesSlice.actions.setMessages({}));
 	dispatch(messagesSlice.actions.setMessagesLoading(true));
 	dispatch(messagesSlice.actions.setMessagesError(null));
-	axios.get(`http://localhost:8080/api/chats/${chat.ID}/messages`)
+	axios.get(process.env.REACT_APP_API_HOST+`/api/chats/${chat.ID}/messages`)
 	.then(response => {
 		console.log(response)
 		dispatch(messagesSlice.actions.setMessagesLoading(false));

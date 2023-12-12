@@ -28,7 +28,7 @@ export default function CreateBotForm() {
 		
 		let createBotData = Object.assign({}, botFormData);
 		createBotData.randomness = parseFloat(createBotData.randomness);
-		axios[botFormData.ID ? "put" : "post"]("http://localhost:8080/api/bots", createBotData)
+		axios[botFormData.ID ? "put" : "post"](process.env.REACT_APP_API_HOST+"/api/bots", createBotData)
 		.then(response => {
 			console.log(response);
 			dispatch(addOrUpdateBot(response.data));
