@@ -13,3 +13,4 @@ services:
       - "${WEB_PORT}:${WEB_PORT}"
     volumes:
       - .:/workspace
+      - ~/.ssh:/root/.ssh
