@@ -30,7 +30,6 @@ import (
 
 func main() {
 	API_PORT := os.Getenv("API_PORT")
-	WEB_PORT := os.Getenv("WEB_PORT")
 	OPENAI_ACCESS_TOKEN := os.Getenv("OPENAI_ACCESS_TOKEN")
 	frontendStr, ok := os.LookupEnv("FRONTEND")
 	if !ok {
@@ -106,25 +105,10 @@ func main() {
 		LogResponseBody: true,
 		PrettyJson:      true,
 	})
-	apiRouter := router.NewRouter(botsController, chatsController, messagesController, requestLogger)
+	apiRouter := router.NewRouter(FRONTEND, botsController, chatsController, messagesController, requestLogger)
 
 	apiRouter = cors.AllowAll().Handler(apiRouter)
 	// router = cors.Default().Handler(router)
-
-	// frontend
-	if FRONTEND {
-		fs := http.FileServer(http.Dir("web/build"))
-		frontendServer := http.NewServeMux()
-		frontendServer.Handle("/", fs)
-		fmt.Println("Frontend listening on port " + WEB_PORT)
-
-		go func() {
-			err = http.ListenAndServe(":"+WEB_PORT, frontendServer)
-			if err != nil {
-				panic(err)
-			}
-		}()
-	}
 
 	fmt.Println("API listening on port " + API_PORT)
 	err = http.ListenAndServe(":"+API_PORT, apiRouter)

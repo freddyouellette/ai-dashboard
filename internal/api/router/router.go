@@ -2,9 +2,13 @@ package router
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/freddyouellette/ai-dashboard/internal/api/web_handler"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 )
 
 type EntityRequestController[e any] interface {
@@ -30,30 +34,57 @@ type RequestLogger interface {
 }
 
 func NewRouter(
+	frontend bool,
 	botsController EntityRequestController[models.Bot],
 	chatsController ChatsController,
 	messagesController MessagesController,
 	requestLogger RequestLogger,
 ) http.Handler {
-	router := mux.NewRouter()
+	router := chi.NewRouter()
 
-	router.Use(requestLogger.CreateRequestLoggerHandler)
+	// A good base middleware stack
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
 
-	router.HandleFunc("/api/bots", botsController.HandleGetAllEntitiesRequest).Methods("GET")
-	router.HandleFunc("/api/bots", botsController.HandleCreateEntityRequest).Methods("POST")
-	router.HandleFunc("/api/bots", botsController.HandleUpdateEntityByIdRequest).Methods("PUT")
-	router.HandleFunc("/api/bots/{id}", botsController.HandleGetEntityByIdRequest).Methods("GET")
-	router.HandleFunc("/api/bots/{id}", botsController.HandleDeleteEntityByIdRequest).Methods("DELETE")
+	// Basic CORS
+	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
+	router.Use(cors.Handler(cors.Options{
+		// AllowedOrigins: []string{fmt.Sprintf("%s:%s", WEB_HOST, WEB_PORT)},
+		AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 
-	router.HandleFunc("/api/chats", chatsController.HandleGetAllEntitiesRequest).Methods("GET")
-	router.HandleFunc("/api/chats", chatsController.HandleCreateEntityRequest).Methods("POST")
-	router.HandleFunc("/api/chats/{id}", chatsController.HandleCreateEntityRequest).Methods("POST")
-	router.HandleFunc("/api/chats/{id}/response", chatsController.HandleGetChatResponseRequest).Methods("GET")
+	// Set a timeout value on the request context (ctx), that will signal
+	// through ctx.Done() that the request has timed out and further
+	// processing should be stopped.
+	router.Use(middleware.Timeout(30 * time.Second))
 
-	router.HandleFunc("/api/messages", messagesController.HandleGetAllEntitiesRequest).Methods("GET")
-	router.HandleFunc("/api/messages", messagesController.HandleCreateEntityRequest).Methods("POST")
-	router.HandleFunc("/api/messages/{id}", messagesController.HandleGetEntityByIdRequest).Methods("GET")
-	router.HandleFunc("/api/chats/{chat_id}/messages", messagesController.HandleGetMessageByChatIdRequest).Methods("GET")
+	router.Get("/api/bots", botsController.HandleGetAllEntitiesRequest)
+	router.Post("/api/bots", botsController.HandleCreateEntityRequest)
+	router.Put("/api/bots", botsController.HandleUpdateEntityByIdRequest)
+	router.Get("/api/bots/{id}", botsController.HandleGetEntityByIdRequest)
+	router.Delete("/api/bots/{id}", botsController.HandleDeleteEntityByIdRequest)
+
+	router.Get("/api/chats", chatsController.HandleGetAllEntitiesRequest)
+	router.Post("/api/chats", chatsController.HandleCreateEntityRequest)
+	router.Post("/api/chats/{id}", chatsController.HandleCreateEntityRequest)
+	router.Get("/api/chats/{id}/response", chatsController.HandleGetChatResponseRequest)
+
+	router.Get("/api/messages", messagesController.HandleGetAllEntitiesRequest)
+	router.Post("/api/messages", messagesController.HandleCreateEntityRequest)
+	router.Get("/api/messages/{id}", messagesController.HandleGetEntityByIdRequest)
+	router.Get("/api/chats/{chat_id}/messages", messagesController.HandleGetMessageByChatIdRequest)
+
+	if frontend {
+		webHandler := web_handler.NewWebHandler("web/build", "index.html")
+		router.HandleFunc("/*", webHandler.Handler)
+	}
 
 	return router
 }
