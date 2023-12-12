@@ -49,7 +49,13 @@ func main() {
 	db.AutoMigrate(&models.Chat{})
 	db.AutoMigrate(&models.Message{})
 
-	errorHandler := error_handler.NewErrorHandler()
+	errorFile, err := os.OpenFile("error.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+
+	errorLogger := log.New(errorFile, "", log.Ldate|log.Ltime|log.Lmicroseconds)
+	errorHandler := error_handler.NewErrorHandler(errorLogger)
 	responseHandler := response_handler.NewResponseHandler(errorHandler)
 	botsRepository := entity_repository.NewRepository[models.Bot](db)
 	botsService := entity_service.NewEntityService[models.Bot](botsRepository)
@@ -76,7 +82,7 @@ func main() {
 		PrettyJson:         true,
 	})
 	// httpClient := http.DefaultClient
-	aiApi := ai_api.NewAiApi(httpClient, 5000, "https://api.openai.com/v1/chat/completions", OPENAI_ACCESS_TOKEN)
+	aiApi := ai_api.NewAiApi(httpClient, 4096, "https://api.openai.com/v1/chat/completions", OPENAI_ACCESS_TOKEN)
 	chatsService := chats_service.NewChatsService(
 		entity_service.NewEntityService[models.Chat](chatsRepository),
 		botsService,

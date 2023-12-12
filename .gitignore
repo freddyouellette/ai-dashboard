@@ -3,6 +3,7 @@
 /.env
 /.deploy
 /.ignore
+/error.log
 /data
 /bin
 

@@ -3,16 +3,21 @@ package error_handler
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 )
 
-type ErrorHandler struct{}
+type ErrorHandler struct {
+	logger *log.Logger
+}
 
-func NewErrorHandler() *ErrorHandler {
-	return &ErrorHandler{}
+func NewErrorHandler(logger *log.Logger) *ErrorHandler {
+	return &ErrorHandler{
+		logger: logger,
+	}
 }
 
 func (h *ErrorHandler) HandleError(w http.ResponseWriter, err error) {
@@ -29,6 +34,7 @@ func (h *ErrorHandler) HandleError(w http.ResponseWriter, err error) {
 		status = http.StatusInternalServerError
 		message = "Internal server error"
 	}
+	h.logger.Printf("%s: %v\n", message, err.Error())
 	fmt.Printf("[%s] %s: %v\n", time.Now().Format(time.RFC1123Z), message, err.Error())
 	w.WriteHeader(status)
 	w.Write([]byte(message))
