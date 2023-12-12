@@ -1,5 +1,7 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
+import { goToCreateChatPage } from './page';
+import { createChat } from './chats';
 
 const botsSlice = createSlice({
 	name: 'bots',
@@ -46,6 +48,26 @@ export const getBots = () => async (dispatch, getState) => {
 		error => {
 			dispatch(botsSlice.actions.setBotsLoading(false));
 			dispatch(botsSlice.actions.setBotsLoaded(false));
+			dispatch(botsSlice.actions.setBotsError(error));
+			console.error(error);
+		},
+	);
+}
+
+export const addOrUpdateBot = (bot) => async (dispatch, getState) => {
+	dispatch(botsSlice.actions.setBotsLoading(true));
+	dispatch(botsSlice.actions.setBotsError(null));
+	axios[bot.ID ? "put" : "post"]("http://localhost:8080/api/bots", bot)
+	.then(
+		res => {
+			dispatch(botsSlice.actions.setBotsLoading(false));
+			dispatch(botsSlice.actions.setBotsError(null));
+			let oldBots = getState().bots.bots;
+			dispatch(botsSlice.actions.setBots({ ...oldBots, [res.data.ID]: res.data }));
+			dispatch(createChat({ botId: res.data.ID }));
+		}, 
+		error => {
+			dispatch(botsSlice.actions.setBotsLoading(false));
 			dispatch(botsSlice.actions.setBotsError(error));
 			console.error(error);
 		},

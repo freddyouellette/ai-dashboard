@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectBotToUpdate, goToBotEdit } from '../store/page';
+import { goToBotEditPage, selectSelectedBot } from '../store/page';
 import { addOrUpdateBot } from '../store/bots';
 import RequiredStar from './RequiredStar';
 
 export default function CreateBotForm() {
-	const botFormData = useSelector(selectBotToUpdate) || {
+	const botFormData = useSelector(selectSelectedBot) || {
 		name: '',
 		description: '',
 		model: 'gpt-4-1106-preview',
@@ -17,7 +17,7 @@ export default function CreateBotForm() {
 	const dispatch = useDispatch();
 	
 	let handleChange = (event) => {
-		dispatch(goToBotEdit({
+		dispatch(goToBotEditPage({
 			...botFormData,
 			[event.target.name]: event.target.value
 		}));
@@ -38,7 +38,7 @@ export default function CreateBotForm() {
 	}
 	
 	return (
-		<div className="mx-3">
+		<div className="mx-3 mt-3">
 			<h1 className="text-center">{botFormData?.ID ? 'Update Bot' : 'Create New Bot'}</h1>
 			<form onSubmit={handleSubmit}>
 				<div className="mb-3">
