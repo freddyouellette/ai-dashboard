@@ -1,6 +1,6 @@
 import { Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { goToBotEditPage, goToChatPage, selectSelectedBot } from '../store/page';
+import { goToBotEditPage, goToBotListPage, goToChatPage, selectSelectedBot } from '../store/page';
 import { addOrUpdateBot } from '../store/bots';
 import RequiredStar from './RequiredStar';
 import { persistChat } from '../store/chats';
@@ -29,11 +29,16 @@ export default function CreateBotForm() {
 		let createBotData = Object.assign({}, botFormData);
 		createBotData.randomness = parseFloat(createBotData.randomness);
 		let newBot = await dispatch(addOrUpdateBot(createBotData));
-		let newChat = await dispatch(persistChat({
-			name: 'New Chat',
-			bot_id: newBot.ID,
-		}));
-		dispatch(goToChatPage(newChat));
+		if (createBotData.ID) {
+			// updating existing bot
+			dispatch(goToBotListPage())
+		} else {
+			let newChat = await dispatch(persistChat({
+				name: 'New Chat',
+				bot_id: newBot.ID,
+			}));
+			dispatch(goToChatPage(newChat));
+		}
 	}
 	
 	return (

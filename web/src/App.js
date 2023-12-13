@@ -10,6 +10,7 @@ import CreateBotForm from './forms/BotForm';
 import { useState } from 'react';
 import { debounce } from 'lodash';
 import { persistChat } from './store/chats';
+import BotList from './components/BotList';
 
 function App() {
 	const dispatch = useDispatch();
@@ -27,7 +28,7 @@ function App() {
 			content = <CreateBotForm/>;
 		break;
 		case PAGE_STATUSES.BOT_LIST:
-			content = "Bot List";
+			content = <BotList/>;
 		break;
 		case PAGE_STATUSES.BOT_CHAT:
 			content = <Chat/>;
