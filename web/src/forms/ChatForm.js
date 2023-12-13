@@ -8,7 +8,8 @@ export default function ChatForm() {
 	const dispatch = useDispatch();
 	const { bots, botsLoading, botsError } = useSelector(selectBots);
 	const [formData, setFormData] = useState({
-		botId: null,
+		bot_id: null,
+		name: 'New Chat',
 	});
 	console.log(formData);
 	useEffect(() => {
@@ -22,7 +23,7 @@ export default function ChatForm() {
 		event.preventDefault();
 		
 		let createChatData = Object.assign({}, formData);
-		createChatData.botId = parseInt(createChatData.botId);
+		createChatData.bot_id = parseInt(createChatData.bot_id);
 		dispatch(createChat(createChatData));
 	}
 	
@@ -37,9 +38,13 @@ export default function ChatForm() {
 		<div className="container">
 			<h1 className="text-center">New Chat</h1>
 			<form onSubmit={handleSubmit}>
+				<div class="mb-3">
+					<label htmlFor="name" className="form-label">Name of Chat</label>
+					<input onChange={handleChange} type="text" name="name" className="form-control" id="create-chat-form-name" value={formData?.name ?? ''}/>
+				</div>
 				<div className="mb-3">
-					<label htmlFor="botId" className="form-label">Bot <RequiredStar/></label>
-					<select onChange={handleChange} id="create-chat-form-model" required name="botId" className="form-control">
+					<label htmlFor="bot_id" className="form-label">Bot <RequiredStar/></label>
+					<select onChange={handleChange} id="create-chat-form-model" required name="bot_id" className="form-control">
 						<option value="">Select Bot</option>
 						{Object.values(bots).map(bot => (
 							<option key={bot.ID} value={bot.ID}>{bot.name}</option>

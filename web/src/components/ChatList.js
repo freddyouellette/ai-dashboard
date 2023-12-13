@@ -1,12 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
-import { Container, ListGroup, ListGroupItem } from "react-bootstrap";
+import { Container, ListGroup } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronRight, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { goToChatPage } from "../store/page";
 import { getChats, selectChats } from "../store/chats";
-import { TODO } from "../util/todo";
 import { useEffect } from "react";
 import { getBots, selectBots } from "../store/bots";
+import moment from "moment";
 
 export default function ChatList() {
 	const dispatch = useDispatch();
@@ -21,9 +21,13 @@ export default function ChatList() {
 	if (chatsError) return <div>Error loading chats...</div>;
 	if (botsError) return <div>Error loading bots...</div>;
 	
+	// put chats in order of creation descending
+	let chatList = Object.values(chats);
+	chatList.sort((a, b) => moment(b.CreatedAt) - moment(a.CreatedAt));
+	
 	return (
 		<ListGroup className="list-group-flush">
-			{Object.values(chats).map(chat => {
+			{chatList.map(chat => {
 				let bot = bots[chat.bot_id];
 				return (
 					<div 
@@ -35,7 +39,7 @@ export default function ChatList() {
 							<div className="d-flex justify-content-between">
 								<div className="flex-grow-1">
 									<div><strong>{bot?.name ?? <i>unknown</i>}</strong></div>
-									<div>{chat.ID}</div>
+									<div>{chat.name || chat.ID}</div>
 								</div>
 								<div className="d-flex align-items-center">
 									<FontAwesomeIcon 

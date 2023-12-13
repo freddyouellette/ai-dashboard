@@ -51,12 +51,8 @@ export const getChats = () => async dispatch => {
 }
 
 // thunk
-export const createChat = ({ botId }) => async dispatch => {
-	let newChatData = {
-		name: "New Chat",
-		bot_id: botId,
-	}
-	axios.post(process.env.REACT_APP_API_HOST+'/api/chats', newChatData)
+export const createChat = (chat) => async dispatch => {
+	axios.post(process.env.REACT_APP_API_HOST+'/api/chats', chat)
 	.then(response => {
 		console.log(response);
 		dispatch(chatsSlice.actions.addChat(response.data));

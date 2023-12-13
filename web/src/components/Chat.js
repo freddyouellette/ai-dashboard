@@ -18,6 +18,7 @@ export default function Chat() {
 	const { bots, botsLoading, botsError } = useSelector(selectBots);
 	const chatBot = bots[selectedChat?.bot_id];
 	
+	
 	useEffect(() => {
 		dispatch(getBots());
 	}, [dispatch]);
@@ -37,6 +38,7 @@ export default function Chat() {
 	if (messagesLoading || botsLoading) return <div>Loading...</div>;
 	if (messagesError) return <div>Error loading messages...</div>;
 	if (botsError) return <div>Error loading bots...</div>;
+	if (!chatBot) return <div className="pt-3 text-danger">Unknown Bot...</div>;
 	
 	let handleMessageToSendChange = event => {
 		setMessageToSend(event.target.value)
