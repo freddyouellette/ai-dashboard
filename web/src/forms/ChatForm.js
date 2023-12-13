@@ -1,8 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
 import { getBots, selectBots } from "../store/bots";
 import RequiredStar from './RequiredStar';
-import { createChat } from "../store/chats";
+import { persistChat } from "../store/chats";
 import { useEffect, useState } from "react";
+import { goToChatPage } from "../store/page";
 
 export default function ChatForm() {
 	const dispatch = useDispatch();
@@ -11,7 +12,6 @@ export default function ChatForm() {
 		bot_id: null,
 		name: 'New Chat',
 	});
-	console.log(formData);
 	useEffect(() => {
 		dispatch(getBots());
 	}, [dispatch]);
@@ -24,7 +24,8 @@ export default function ChatForm() {
 		
 		let createChatData = Object.assign({}, formData);
 		createChatData.bot_id = parseInt(createChatData.bot_id);
-		dispatch(createChat(createChatData));
+		let newChat = await dispatch(persistChat(createChatData));
+		dispatch(goToChatPage(newChat));
 	}
 	
 	const handleChange = (event) => {

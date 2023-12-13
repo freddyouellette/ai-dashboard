@@ -1,9 +1,9 @@
-import axios from 'axios';
 import { Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
-import { goToBotEditPage, selectSelectedBot } from '../store/page';
+import { goToBotEditPage, goToChatPage, selectSelectedBot } from '../store/page';
 import { addOrUpdateBot } from '../store/bots';
 import RequiredStar from './RequiredStar';
+import { persistChat } from '../store/chats';
 
 export default function CreateBotForm() {
 	const botFormData = useSelector(selectSelectedBot) || {
@@ -28,13 +28,12 @@ export default function CreateBotForm() {
 		
 		let createBotData = Object.assign({}, botFormData);
 		createBotData.randomness = parseFloat(createBotData.randomness);
-		axios[botFormData.ID ? "put" : "post"](process.env.REACT_APP_API_HOST+"/api/bots", createBotData)
-		.then(response => {
-			console.log(response);
-			dispatch(addOrUpdateBot(response.data));
-		}).catch(error => {
-			console.error(error);
-		})
+		let newBot = await dispatch(addOrUpdateBot(createBotData));
+		let newChat = await dispatch(persistChat({
+			name: 'New Chat',
+			bot_id: newBot.ID,
+		}));
+		dispatch(goToChatPage(newChat));
 	}
 	
 	return (

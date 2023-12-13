@@ -28,27 +28,38 @@ const pageSlice = createSlice({
 	}
 });
 
+// thunk
 export const goToCreateChatPage = () => dispatch => {
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CREATE_CHAT))
+	dispatch(pageSlice.actions.setSelectedBot(null))
+	dispatch(pageSlice.actions.setSelectedChat(null))
 }
 
+// thunk
 export const goToBotListPage = () => dispatch => {
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.BOT_LIST))
+	dispatch(pageSlice.actions.setSelectedBot(null))
+	dispatch(pageSlice.actions.setSelectedChat(null))
 }
 
+// thunk
 export const goToChatListPage = () => dispatch => {
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CHAT_LIST))
+	dispatch(pageSlice.actions.setSelectedBot(null))
+	dispatch(pageSlice.actions.setSelectedChat(null))
 }
 
 // thunk
 export const goToChatPage = (chat) => (dispatch, getState) => {
 	dispatch(pageSlice.actions.setSelectedChat(chat))
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.BOT_CHAT))
+	dispatch(pageSlice.actions.setSelectedBot(null))
 }
 
 // thunk
 export const goToBotEditPage = (bot) => (dispatch, getState) => {
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CREATE_BOT))
+	dispatch(pageSlice.actions.setSelectedChat(null))
 	dispatch(pageSlice.actions.setSelectedBot(bot))
 }
 

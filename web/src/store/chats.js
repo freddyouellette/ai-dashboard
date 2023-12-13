@@ -1,6 +1,5 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
-import { goToChatPage } from './page';
 
 const chatsSlice = createSlice({
 	name: 'chats',
@@ -51,12 +50,12 @@ export const getChats = () => async dispatch => {
 }
 
 // thunk
-export const createChat = (chat) => async dispatch => {
-	axios.post(process.env.REACT_APP_API_HOST+'/api/chats', chat)
+export const persistChat = (chat) => async dispatch => {
+	return axios[chat.ID ? "put" : "post"](process.env.REACT_APP_API_HOST+'/api/chats', chat)
 	.then(response => {
 		console.log(response);
 		dispatch(chatsSlice.actions.addChat(response.data));
-		dispatch(goToChatPage(response.data))
+		return response.data;
 	}).catch(error => {
 		console.error(error);
 	})

@@ -1,6 +1,5 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
-import { createChat } from './chats';
 
 const botsSlice = createSlice({
 	name: 'bots',
@@ -56,14 +55,14 @@ export const getBots = () => async (dispatch, getState) => {
 export const addOrUpdateBot = (bot) => async (dispatch, getState) => {
 	dispatch(botsSlice.actions.setBotsLoading(true));
 	dispatch(botsSlice.actions.setBotsError(null));
-	axios[bot.ID ? "put" : "post"](process.env.REACT_APP_API_HOST+"/api/bots", bot)
+	return axios[bot.ID ? "put" : "post"](process.env.REACT_APP_API_HOST+"/api/bots", bot)
 	.then(
 		res => {
 			dispatch(botsSlice.actions.setBotsLoading(false));
 			dispatch(botsSlice.actions.setBotsError(null));
 			let oldBots = getState().bots.bots;
 			dispatch(botsSlice.actions.setBots({ ...oldBots, [res.data.ID]: res.data }));
-			dispatch(createChat({ bot_id: res.data.ID }));
+			return res.data;
 		}, 
 		error => {
 			dispatch(botsSlice.actions.setBotsLoading(false));

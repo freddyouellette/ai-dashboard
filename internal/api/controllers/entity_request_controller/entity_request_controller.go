@@ -65,7 +65,7 @@ func (h *EntityRequestController[e]) HandleGetEntityByIdRequest(w http.ResponseW
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
 }
 
-func (h *EntityRequestController[e]) HandleUpdateEntityByIdRequest(w http.ResponseWriter, r *http.Request) {
+func (h *EntityRequestController[e]) HandleUpdateEntityRequest(w http.ResponseWriter, r *http.Request) {
 	var entity e
 	err := json.NewDecoder(r.Body).Decode(&entity)
 	if err != nil {

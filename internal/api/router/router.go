@@ -15,7 +15,7 @@ type EntityRequestController[e any] interface {
 	HandleGetAllEntitiesRequest(w http.ResponseWriter, r *http.Request)
 	HandleGetEntityByIdRequest(w http.ResponseWriter, r *http.Request)
 	HandleCreateEntityRequest(w http.ResponseWriter, r *http.Request)
-	HandleUpdateEntityByIdRequest(w http.ResponseWriter, r *http.Request)
+	HandleUpdateEntityRequest(w http.ResponseWriter, r *http.Request)
 	HandleDeleteEntityByIdRequest(w http.ResponseWriter, r *http.Request)
 }
 
@@ -67,12 +67,13 @@ func NewRouter(
 
 	router.Get("/api/bots", botsController.HandleGetAllEntitiesRequest)
 	router.Post("/api/bots", botsController.HandleCreateEntityRequest)
-	router.Put("/api/bots", botsController.HandleUpdateEntityByIdRequest)
+	router.Put("/api/bots", botsController.HandleUpdateEntityRequest)
 	router.Get("/api/bots/{id}", botsController.HandleGetEntityByIdRequest)
 	router.Delete("/api/bots/{id}", botsController.HandleDeleteEntityByIdRequest)
 
 	router.Get("/api/chats", chatsController.HandleGetAllEntitiesRequest)
 	router.Post("/api/chats", chatsController.HandleCreateEntityRequest)
+	router.Put("/api/chats", chatsController.HandleUpdateEntityRequest)
 	router.Post("/api/chats/{id}", chatsController.HandleCreateEntityRequest)
 	router.Get("/api/chats/{id}/response", chatsController.HandleGetChatResponseRequest)
 

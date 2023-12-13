@@ -2,15 +2,24 @@ import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from "react-redux";
-import { PAGE_STATUSES, goToBotEditPage, goToBotListPage, goToChatListPage, goToCreateChatPage, selectPageStatus } from './store/page';
+import { PAGE_STATUSES, goToBotEditPage, goToBotListPage, goToChatListPage, goToCreateChatPage, selectPageStatus, selectSelectedChat } from './store/page';
 import ChatList from './components/ChatList';
 import Chat from './components/Chat';
 import ChatForm from './forms/ChatForm';
 import CreateBotForm from './forms/BotForm';
+import { useState } from 'react';
+import { debounce } from 'lodash';
+import { persistChat } from './store/chats';
 
 function App() {
 	const dispatch = useDispatch();
 	const pageStatus = useSelector(selectPageStatus);
+	const selectedChat = useSelector(selectSelectedChat);
+	
+	let title = "AI Dashboard";
+	if (selectedChat) {
+		title = <ChatTitle/>;
+	}
 	
 	let content;
 	switch(pageStatus) {
@@ -45,7 +54,7 @@ function App() {
 					</div>
 					
 					<div className="flex-grow-1">
-						AI Dashboard
+						{title}
 					</div>
 					
 					<div>
@@ -82,6 +91,38 @@ function App() {
 				{content}
 			</div>
 		</div>
+	);
+}
+
+const debounceSave = debounce((dispatch, newChat) => {
+	dispatch(persistChat(newChat));
+}, 1000);
+
+function ChatTitle() {
+	const dispatch = useDispatch();
+	const selectedChat = useSelector(selectSelectedChat);
+	
+	const [formData, setFormData] = useState({
+		name: selectedChat.name,
+	});
+	
+	const handleChange = (event) => {
+		let newFormData = {
+			...formData,
+			[event.target.name]: event.target.value
+		};
+		setFormData(newFormData);
+		let newChat = Object.assign({}, selectedChat, newFormData);
+		debounceSave(dispatch, newChat);
+	}
+	
+	return (
+		<input 
+			className="bg-light flex-grow-1 form-control border-0 text-center" 
+			name="name" 
+			value={formData.name || ''} 
+			onChange={handleChange}
+		/>
 	);
 }
 
