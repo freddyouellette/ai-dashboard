@@ -71,4 +71,3 @@ self.addEventListener('message', (event) => {
 
 // Any other custom service worker logic can go here.
 addEventListener("fetch", (event) => {});
-onfetch = (event) => {};
