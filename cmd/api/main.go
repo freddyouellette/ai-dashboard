@@ -40,6 +40,8 @@ func main() {
 		panic(err)
 	}
 
+	makeDir("data")
+
 	db, err := gorm.Open(sqlite.Open("data/data.db"))
 	if err != nil {
 		panic("failed to connect database")
@@ -118,6 +120,13 @@ func main() {
 
 	fmt.Println("API listening on port " + API_PORT)
 	err = http.ListenAndServe(":"+API_PORT, apiRouter)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func makeDir(dir string) {
+	err := os.MkdirAll(dir, 0755)
 	if err != nil {
 		panic(err)
 	}
