@@ -3,7 +3,7 @@ import { selectSelectedChat } from "../store/page";
 import { useState, useEffect, useRef } from "react"; // import useRef
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentDots, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faCommentDots, faCopy, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { getChatMessages, selectMessages, selectWaitingForResponse, sendMessage } from "../store/messages";
 import Markdown from 'react-markdown'
 import './chat.css'
@@ -40,27 +40,30 @@ export default function Chat() {
 	if (botsError) return <div>Error loading bots...</div>;
 	if (!chatBot) return <div className="pt-3 text-danger">Unknown Bot...</div>;
 	
-	let handleMessageToSendChange = event => {
+	const handleMessageToSendChange = event => {
 		setMessageToSend(event.target.value)
 	}
 	
-	let dispatchSendMessage = () => {
+	const dispatchSendMessage = () => {
 		dispatch(sendMessage(selectedChat.ID, messageToSend))
 		setMessageToSend("")
 	}
 	
-	let handleMessageTextKeyDown = event => {
+	const handleMessageTextKeyDown = event => {
 		if ((event.ctrlKey || event.metaKey) && (event.keyCode === 13)) {
 			dispatchSendMessage()
 		}
 	}
-
+	
 	return (
 		<div className="d-flex flex-column flex-grow-1">
 			<div className="message-list flex-grow-1 overflow-auto mb-2 border-bottom px-2" style={{height: '0px'}} ref={messageListRef}>
 				<div>
 					<div className="text-start system-message p-2 m-2 rounded border text-muted">
-						<b className="">Bot Personality:</b>
+						<div className="d-flex justify-content-between">
+							<b className="">Bot Personality:</b>
+							<CopyButton text={chatBot.personality} />
+						</div>
 						<Markdown>
 							{chatBot.personality}
 						</Markdown>
@@ -70,7 +73,10 @@ export default function Chat() {
 							case "USER":
 								return (
 									<div key={message.ID} className="text-start user-message p-2 m-2 ms-5 rounded border">
-										<b className="">👤 You:</b>
+										<div className="d-flex justify-content-between">
+											<b className="">👤 You:</b>
+											<CopyButton text={message.text} />
+										</div>
 										<Markdown>
 											{message.text}
 										</Markdown>
@@ -79,7 +85,10 @@ export default function Chat() {
 							case "BOT":
 								return (
 									<div key={message.ID} className="text-start bg-light p-2 m-2 me-5 rounded border">
-										<b>🤖 {chatBot.name}:</b>
+										<div className="d-flex justify-content-between">
+											<b>🤖 {chatBot.name}:</b>
+											<CopyButton text={message.text} />
+										</div>
 										<Markdown>
 											{message.text}
 										</Markdown>
@@ -118,4 +127,23 @@ export default function Chat() {
 			</div>
 		</div>
 	);
+}
+
+function CopyButton({ text }) {
+	const [copied, setCopied] = useState(false);
+	
+	const copyToClipboard = (text) => {
+		navigator.clipboard.writeText(text).then(() => {
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		}).catch(err => {
+			console.error('Failed to copy text: ', err);
+		});
+	}
+	
+	if (window.isSecureContext === false) return "";
+	
+	return (
+		<FontAwesomeIcon className={copied ? "copy-button text-success" : "copy-button"} icon={faCopy} onClick={() => copyToClipboard(text)} />
+	)
 }
