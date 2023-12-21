@@ -49,7 +49,7 @@ export default function ChatForm() {
 						<option value="">Select Bot</option>
 						{Object.values(bots).map(bot => (
 							<option key={bot.ID} value={bot.ID}>
-								{bot.name} - {bot.description}</option>
+								{bot.name}{bot.description ? " - "+bot.description : ""}</option>
 						))}
 					</select>
 				</div>
