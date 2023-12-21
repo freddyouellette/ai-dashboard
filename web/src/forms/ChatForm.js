@@ -48,7 +48,8 @@ export default function ChatForm() {
 					<select onChange={handleChange} id="create-chat-form-model" required name="bot_id" className="form-control">
 						<option value="">Select Bot</option>
 						{Object.values(bots).map(bot => (
-							<option key={bot.ID} value={bot.ID}>{bot.name}</option>
+							<option key={bot.ID} value={bot.ID}>
+								{bot.name} - {bot.description}</option>
 						))}
 					</select>
 				</div>
