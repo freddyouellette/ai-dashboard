@@ -45,7 +45,8 @@ func NewRouter(
 	// A good base middleware stack
 	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
-	router.Use(middleware.Logger)
+	// router.Use(middleware.Logger)
+	router.Use(requestLogger.CreateRequestLoggerHandler)
 	router.Use(middleware.Recoverer)
 
 	// Basic CORS

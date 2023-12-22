@@ -5,13 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
 
+type Logger interface {
+	Error(msg string, fields map[string]interface{})
+	Warning(msg string, fields map[string]interface{})
+	Info(msg string, fields map[string]interface{})
+}
+
 type RequestLogger struct {
-	logger  *log.Logger
+	logger  Logger
 	options Options
 }
 
@@ -23,7 +28,7 @@ type Options struct {
 }
 
 func NewRequestLogger(
-	logger *log.Logger,
+	logger Logger,
 	options Options,
 ) *RequestLogger {
 	return &RequestLogger{
@@ -50,37 +55,35 @@ func (wo *responseWriterObserver) WriteHeader(statusCode int) {
 
 func (l *RequestLogger) CreateRequestLoggerHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
+		info := map[string]interface{}{}
+		info["start"] = time.Now()
+		info["method"] = r.Method
+		info["url"] = r.URL.Path
+
 		observer := &responseWriterObserver{ResponseWriter: w}
 		next.ServeHTTP(observer, r)
 
-		message := ""
-
-		message += fmt.Sprintf("API REQ %s %s\n", r.Method, r.URL.Path)
-
 		if l.options.LogHeaders {
-			for name, values := range r.Header {
-				for _, value := range values {
-					message += fmt.Sprintf("%s: %s\n", name, value)
-				}
-			}
+			info["headers"] = r.Header
 		}
 
 		if l.options.LogRequestBody {
 			body, err := io.ReadAll(r.Body)
 			if err != nil {
-				message += "<<<Error reading body>>>\n"
+				info["request_body"] = "<<<Error reading body>>>\n"
 			} else if len(body) != 0 {
-				message += sprintJson(body, l.options.PrettyJson)
+				info["request_body"] = sprintJson(body, l.options.PrettyJson)
 			}
 		}
 
-		message += fmt.Sprintf("API RES %d %s\n", observer.statusCode, time.Since(start).String())
+		end := time.Now()
+		info["end"] = end
+		info["duration"] = time.Since(end).String()
 		if l.options.LogResponseBody {
-			message += sprintJson(observer.body, l.options.PrettyJson)
+			info["response_body"] = sprintJson(observer.body, l.options.PrettyJson)
 		}
 
-		l.logger.Print(message)
+		l.logger.Info("API HTTP Request", info)
 	})
 }
 

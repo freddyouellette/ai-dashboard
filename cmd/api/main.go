@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -22,8 +21,10 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/services/chats_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/messages_service"
+	"github.com/freddyouellette/ai-dashboard/internal/util/logger"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/cors"
+	"github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -56,8 +57,8 @@ func main() {
 		panic(err)
 	}
 
-	errorLogger := log.New(errorFile, "", log.Ldate|log.Ltime|log.Lmicroseconds)
-	errorHandler := error_handler.NewErrorHandler(errorLogger)
+	logger := logger.NewLogger(errorFile, logrus.ErrorLevel)
+	errorHandler := error_handler.NewErrorHandler(logger)
 	responseHandler := response_handler.NewResponseHandler(errorHandler)
 	botsRepository := entity_repository.NewRepository[models.Bot](db)
 	botsService := entity_service.NewEntityService[models.Bot](botsRepository)
@@ -74,8 +75,6 @@ func main() {
 		messagesRepository,
 	)
 	chatsRepository := entity_repository.NewRepository[models.Chat](db)
-	logger := log.Default()
-	logger.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
 	httpClient := logged_client.NewLoggedClient(http.DefaultClient, logger, logged_client.Options{
 		LogRequestHeaders:  true,
 		LogRequestBody:     true,
@@ -111,7 +110,7 @@ func main() {
 		LogHeaders:      false,
 		LogRequestBody:  true,
 		LogResponseBody: true,
-		PrettyJson:      true,
+		PrettyJson:      false,
 	})
 	apiRouter := router.NewRouter(FRONTEND, botsController, chatsController, messagesController, requestLogger)
 

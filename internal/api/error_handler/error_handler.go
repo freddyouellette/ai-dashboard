@@ -2,19 +2,22 @@ package error_handler
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"net/http"
-	"time"
 
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 )
 
-type ErrorHandler struct {
-	logger *log.Logger
+type Logger interface {
+	Error(msg string, fields map[string]interface{})
+	Warning(msg string, fields map[string]interface{})
+	Info(msg string, fields map[string]interface{})
 }
 
-func NewErrorHandler(logger *log.Logger) *ErrorHandler {
+type ErrorHandler struct {
+	logger Logger
+}
+
+func NewErrorHandler(logger Logger) *ErrorHandler {
 	return &ErrorHandler{
 		logger: logger,
 	}
@@ -27,15 +30,16 @@ func (h *ErrorHandler) HandleError(w http.ResponseWriter, err error) {
 	case errors.Is(err, models.ErrResourceNotFound):
 		status = http.StatusNotFound
 		message = "Error: " + err.Error()
+		h.logger.Warning("Resource not found", map[string]interface{}{"error": err.Error()})
 	case errors.Is(err, models.ErrInvalidResourceSyntax):
 		status = http.StatusBadRequest
 		message = "Error: " + err.Error()
+		h.logger.Warning("Invalid Resource Syntax", map[string]interface{}{"error": err.Error()})
 	default:
 		status = http.StatusInternalServerError
 		message = "Internal server error"
+		h.logger.Error("Internal Server Error", map[string]interface{}{"error": err.Error()})
 	}
-	h.logger.Printf("%s: %v\n", message, err.Error())
-	fmt.Printf("[%s] %s: %v\n", time.Now().Format(time.RFC1123Z), message, err.Error())
 	w.WriteHeader(status)
 	w.Write([]byte(message))
 }

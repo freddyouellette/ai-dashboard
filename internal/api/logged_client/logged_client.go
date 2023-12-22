@@ -1,8 +1,6 @@
 package logged_client
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"net/http/httputil"
 )
@@ -15,13 +13,19 @@ type Options struct {
 	PrettyJson         bool
 }
 
+type Logger interface {
+	Error(msg string, fields map[string]interface{})
+	Warning(msg string, fields map[string]interface{})
+	Info(msg string, fields map[string]interface{})
+}
+
 type LoggedClient struct {
 	*http.Client
-	logger  *log.Logger
+	logger  Logger
 	options Options
 }
 
-func NewLoggedClient(client *http.Client, logger *log.Logger, options Options) *LoggedClient {
+func NewLoggedClient(client *http.Client, logger Logger, options Options) *LoggedClient {
 	return &LoggedClient{
 		Client:  client,
 		logger:  logger,
@@ -34,20 +38,24 @@ func (c *LoggedClient) Do(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	message := fmt.Sprintf("EXT REQ: %s\n", string(reqBytes))
-
 	resp, err := c.Client.Do(req)
 
 	if err != nil {
-		message += fmt.Sprintf("CLIENT ERR: %s\n", err.Error())
+		c.logger.Error("Error making HTTP client request", map[string]interface{}{
+			"request": string(reqBytes),
+			"error":   err.Error(),
+		})
 	} else {
 		resBytes, err := httputil.DumpResponse(resp, true)
 		if err != nil {
 			return nil, err
 		}
-		message += fmt.Sprintf("EXT RESP: %s\n", string(resBytes))
+		c.logger.Info("HTTP client Request", map[string]interface{}{
+			"request":  string(reqBytes),
+			"response": string(resBytes),
+			"error":    err.Error(),
+		})
 	}
 
-	c.logger.Print(message)
 	return resp, err
 }
