@@ -53,7 +53,6 @@ func (c *LoggedClient) Do(req *http.Request) (*http.Response, error) {
 		c.logger.Info("HTTP client Request", map[string]interface{}{
 			"request":  string(reqBytes),
 			"response": string(resBytes),
-			"error":    err.Error(),
 		})
 	}
 

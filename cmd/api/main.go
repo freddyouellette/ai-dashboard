@@ -14,6 +14,8 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/api/request_logger"
 	"github.com/freddyouellette/ai-dashboard/internal/api/response_handler"
 	"github.com/freddyouellette/ai-dashboard/internal/api/router"
+	"github.com/freddyouellette/ai-dashboard/internal/events/event_dispatcher"
+	"github.com/freddyouellette/ai-dashboard/internal/events/event_handler"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/entity_repository"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/messages_repository"
@@ -60,6 +62,9 @@ func main() {
 	logger := logger.NewLogger(errorFile, logrus.ErrorLevel)
 	errorHandler := error_handler.NewErrorHandler(logger)
 	responseHandler := response_handler.NewResponseHandler(errorHandler)
+
+	eventDispatcher := event_dispatcher.NewEventDispatcher(logger)
+
 	botsRepository := entity_repository.NewRepository[models.Bot](db)
 	botsService := entity_service.NewEntityService[models.Bot](botsRepository)
 	botsController := entity_request_controller.NewEntityRequestController[models.Bot](
@@ -73,6 +78,7 @@ func main() {
 	messagesService := messages_service.NewMessagesService(
 		entity_service.NewEntityService[models.Message](messagesRepository),
 		messagesRepository,
+		eventDispatcher,
 	)
 	chatsRepository := entity_repository.NewRepository[models.Chat](db)
 	httpClient := logged_client.NewLoggedClient(http.DefaultClient, logger, logged_client.Options{
@@ -106,6 +112,10 @@ func main() {
 		responseHandler,
 		messagesService,
 	)
+
+	eventHandler := event_handler.NewEventHandler(chatsService)
+	eventDispatcher.Register(models.EVENT_TYPE_MESSAGE_CREATED, eventHandler.HandleMessageCreatedEvent)
+
 	requestLogger := request_logger.NewRequestLogger(logger, request_logger.Options{
 		LogHeaders:      false,
 		LogRequestBody:  true,

@@ -23,7 +23,7 @@ export default function ChatList() {
 	
 	// put chats in order of creation descending
 	let chatList = Object.values(chats);
-	chatList.sort((a, b) => moment(b.CreatedAt) - moment(a.CreatedAt));
+	chatList.sort((a, b) => moment(b.last_message_at || b.CreatedAt) - moment(a.last_message_at || a.CreatedAt));
 	
 	return (
 		<ListGroup className="list-group-flush">
