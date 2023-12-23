@@ -56,19 +56,42 @@ export default function Chat() {
 		}
 	}
 	
+	let personalityMessage = "";
+	if (chatBot.personality) {
+		personalityMessage = (
+			<div className="text-start system-message p-2 m-2 rounded border text-muted">
+				<div className="d-flex justify-content-between">
+					<b className="">Bot Personality:</b>
+					<CopyButton text={chatBot.personality} />
+				</div>
+				<Markdown className="text-break">
+					{chatBot.personality}
+				</Markdown>
+			</div>
+		)
+	}
+	
+	let userHistoryMessage = "";
+	if (chatBot.user_history) {
+		userHistoryMessage = (
+			<div className="text-start system-message p-2 m-2 rounded border text-muted">
+				<div className="d-flex justify-content-between">
+					<b className="">User History:</b>
+					<CopyButton text={chatBot.user_history} />
+				</div>
+				<Markdown className="text-break">
+					{chatBot.user_history}
+				</Markdown>
+			</div>
+		)
+	}
+	
 	return (
 		<div className="d-flex flex-column flex-grow-1">
 			<div className="message-list flex-grow-1 overflow-auto mb-2 border-bottom px-2" style={{height: '0px'}} ref={messageListRef}>
 				<div>
-					<div className="text-start system-message p-2 m-2 rounded border text-muted">
-						<div className="d-flex justify-content-between">
-							<b className="">Bot Personality:</b>
-							<CopyButton text={chatBot.personality} />
-						</div>
-						<Markdown>
-							{chatBot.personality}
-						</Markdown>
-					</div>
+					{personalityMessage}
+					{userHistoryMessage}
 					{Object.values(messages).map(message => {
 						switch (message.role) {
 							case "USER":
@@ -81,7 +104,7 @@ export default function Chat() {
 												<CopyButton text={message.text} />
 											</div>
 										</div>
-										<Markdown>
+										<Markdown className="text-break">
 											{message.text}
 										</Markdown>
 									</div>
@@ -96,7 +119,7 @@ export default function Chat() {
 												<CopyButton text={message.text} />
 											</div>
 										</div>
-										<Markdown>
+										<Markdown className="text-break">
 											{message.text}
 										</Markdown>
 									</div>
