@@ -23,6 +23,11 @@ export default function BotList() {
 	
 	return (
 		<ListGroup className="list-group-flush">
+			<ListGroupItem className="border-bottom">
+				<div className="d-flex justify-content-center">
+					<div className="btn btn-light border" onClick={() => dispatch(goToBotEditPage())}>Create New Bot</div>
+				</div>
+			</ListGroupItem>
 			{botsList.map(bot => {
 				return (
 					<ListGroupItem 

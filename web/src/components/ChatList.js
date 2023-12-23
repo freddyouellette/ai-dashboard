@@ -32,7 +32,7 @@ export default function ChatList() {
 				return (
 					<div 
 						key={chat.ID} 
-						className="border-bottom bg-light" 
+						className="border-bottom" 
 						style={{ "cursor": "pointer" }}
 						onClick={() => dispatch(goToChatPage(chat))}>
 						<Container className="text-start">
