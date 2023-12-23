@@ -8,6 +8,7 @@ import { getChatMessages, selectMessages, selectWaitingForResponse, sendMessage 
 import Markdown from 'react-markdown'
 import './chat.css'
 import { getBots, selectBots } from "../store/bots";
+import moment from "moment";
 
 export default function Chat() {
 	const dispatch = useDispatch();
@@ -74,7 +75,10 @@ export default function Chat() {
 								return (
 									<div key={message.ID} className="text-start user-message p-2 m-2 ms-5 rounded border">
 										<div className="d-flex justify-content-between">
-											<b className="">👤 You:</b>
+											<div className="d-flex justify-content-between flex-grow-1">
+												<div><b className="">👤 You:</b></div>
+												<div className="help-text">{moment(message.CreatedAt).fromNow()}</div>
+											</div>
 											<CopyButton text={message.text} />
 										</div>
 										<Markdown>
@@ -86,7 +90,10 @@ export default function Chat() {
 								return (
 									<div key={message.ID} className="text-start bg-light p-2 m-2 me-5 rounded border">
 										<div className="d-flex justify-content-between">
-											<b>🤖 {chatBot.name}:</b>
+											<div className="d-flex justify-content-between flex-grow-1">
+												<div><b>🤖 {chatBot.name}:</b></div>
+												<div className="help-text">{moment(message.CreatedAt).fromNow()}</div>
+											</div>
 											<CopyButton text={message.text} />
 										</div>
 										<Markdown>

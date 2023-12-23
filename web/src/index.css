@@ -23,3 +23,8 @@ code {
 .copy-button {
 	transition: color 0.1s ease;
 }
+
+.help-text {
+	font-size: 0.7em;
+	font-style: italic;
+}

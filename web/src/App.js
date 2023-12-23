@@ -1,8 +1,8 @@
 import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faComments, faPlus, faRobot } from '@fortawesome/free-solid-svg-icons';
+import { faComments, faPlus, faRobot } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from "react-redux";
-import { PAGE_STATUSES, goToBotEditPage, goToBotListPage, goToChatListPage, goToCreateChatPage, selectPageStatus, selectSelectedChat } from './store/page';
+import { PAGE_STATUSES, goToBotListPage, goToChatListPage, goToCreateChatPage, selectPageStatus, selectSelectedChat } from './store/page';
 import ChatList from './components/ChatList';
 import Chat from './components/Chat';
 import ChatForm from './forms/ChatForm';
