@@ -21,8 +21,12 @@ export default function ChatForm() {
 	if (botsLoading) return <div>Loading...</div>
 	if (botsError) return <div>Error loading bots...</div>
 	
-	const history_durations = {
+	const memory_durations = {
 		"No memory": 0,
+		"1 minute": 60,
+		"5 minutes": 60 * 5,
+		"15 minutes": 60 * 15,
+		"30 minutes": 60 * 30,
 		"1 hour": 60 * 60,
 		"3 hours": 60 * 60 * 3,
 		"12 hours": 60 * 60 * 12,
@@ -63,7 +67,7 @@ export default function ChatForm() {
 				<div className="mb-3">
 					<label htmlFor="memory_duration" className="form-label">Memory <RequiredStar/></label>
 					<select onChange={handleChange} id="create-chat-form-model" required name="memory_duration" className="form-select" value={formData?.memory_duration}>
-						{Object.entries(history_durations).map(([key, value]) => (
+						{Object.entries(memory_durations).map(([key, value]) => (
 							<option key={key} value={value}>{key}</option>
 						))}
 					</select>
