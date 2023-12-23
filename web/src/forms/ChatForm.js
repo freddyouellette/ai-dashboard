@@ -3,12 +3,13 @@ import { getBots, selectBots } from "../store/bots";
 import RequiredStar from './RequiredStar';
 import { persistChat } from "../store/chats";
 import { useEffect, useState } from "react";
-import { goToChatPage } from "../store/page";
+import { goToChatPage, selectSelectedChat } from "../store/page";
 
 export default function ChatForm() {
 	const dispatch = useDispatch();
 	const { bots, botsLoading, botsError } = useSelector(selectBots);
-	const [formData, setFormData] = useState({
+	const selectedChat = useSelector(selectSelectedChat);
+	const [formData, setFormData] = useState(selectedChat ?? {
 		bot_id: null,
 		name: 'New Chat',
 	});
@@ -37,15 +38,15 @@ export default function ChatForm() {
 	
 	return (
 		<div className="container">
-			<h1 className="text-center">New Chat</h1>
+			<h1 className="text-center">{selectedChat ? "Edit" : "Create"} Chat</h1>
 			<form onSubmit={handleSubmit}>
-				<div class="mb-3">
+				<div className="mb-3">
 					<label htmlFor="name" className="form-label">Name of Chat</label>
 					<input onChange={handleChange} type="text" name="name" className="form-control" id="create-chat-form-name" value={formData?.name ?? ''}/>
 				</div>
 				<div className="mb-3">
 					<label htmlFor="bot_id" className="form-label">Bot <RequiredStar/></label>
-					<select onChange={handleChange} id="create-chat-form-model" required name="bot_id" className="form-control">
+					<select onChange={handleChange} id="create-chat-form-model" required name="bot_id" className="form-control" value={formData?.bot_id}>
 						<option value="">Select Bot</option>
 						{Object.values(bots).map(bot => (
 							<option key={bot.ID} value={bot.ID}>
@@ -53,7 +54,7 @@ export default function ChatForm() {
 						))}
 					</select>
 				</div>
-				<button type="submit" className="btn btn-primary">Create Chat</button>
+				<button type="submit" className="btn btn-primary">{selectedChat ? "Save" : "Create"} Chat</button>
 			</form>
 		</div>
 	);

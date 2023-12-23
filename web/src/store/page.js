@@ -29,10 +29,10 @@ const pageSlice = createSlice({
 });
 
 // thunk
-export const goToCreateChatPage = () => dispatch => {
+export const goToChatEditPage = (chat) => dispatch => {
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CREATE_CHAT))
 	dispatch(pageSlice.actions.setSelectedBot(null))
-	dispatch(pageSlice.actions.setSelectedChat(null))
+	dispatch(pageSlice.actions.setSelectedChat(chat || null))
 }
 
 // thunk

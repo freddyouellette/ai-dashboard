@@ -1,8 +1,8 @@
 import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faComments, faPlus, faRobot } from '@fortawesome/free-solid-svg-icons';
+import { faComments, faGear, faPlus, faRobot } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from "react-redux";
-import { PAGE_STATUSES, goToBotListPage, goToChatListPage, goToCreateChatPage, selectPageStatus, selectSelectedChat } from './store/page';
+import { PAGE_STATUSES, goToBotListPage, goToChatListPage, goToChatEditPage, selectPageStatus, selectSelectedChat } from './store/page';
 import ChatList from './components/ChatList';
 import Chat from './components/Chat';
 import ChatForm from './forms/ChatForm';
@@ -18,9 +18,6 @@ function App() {
 	const selectedChat = useSelector(selectSelectedChat);
 	
 	let title = "AI Dashboard";
-	if (selectedChat) {
-		title = <ChatTitle/>;
-	}
 	
 	let content;
 	switch(pageStatus) {
@@ -31,6 +28,7 @@ function App() {
 			content = <BotList/>;
 		break;
 		case PAGE_STATUSES.BOT_CHAT:
+			title = <ChatTitle/>;
 			content = <Chat/>;
 		break;
 		case PAGE_STATUSES.CREATE_CHAT:
@@ -44,14 +42,23 @@ function App() {
 		break;
 	}
 	
+	let chatEditButton = "";
+	if (selectedChat) {
+		chatEditButton = (
+			<span className="btn bg-white border mx-1" onClick={() => dispatch(goToChatEditPage(selectedChat))}>
+				<FontAwesomeIcon icon={faGear}/>
+			</span>
+		);
+	}
+	
 	return (
 		<div className="App h-100 d-flex flex-column">
 			<nav className="navbar bg-light border-bottom py-0">
 				<div className="mx-2 d-flex w-100 align-items-center py-2">
-					<span className="btn bg-white border me-1" onClick={() => dispatch(goToBotListPage())}>
+					<span className="btn bg-white border" onClick={() => dispatch(goToBotListPage())}>
 						<FontAwesomeIcon icon={faRobot}/>
 					</span>
-					<span className="btn bg-white border" onClick={() => dispatch(goToChatListPage())}>
+					<span className="btn bg-white border mx-1" onClick={() => dispatch(goToChatListPage(selectedChat))}>
 						<FontAwesomeIcon icon={faComments}/>
 					</span>
 					
@@ -60,7 +67,8 @@ function App() {
 					</div>
 					
 					<div>
-						<span className="btn bg-white border" onClick={() => dispatch(goToCreateChatPage())}>
+						{chatEditButton}
+						<span className="btn bg-white border" onClick={() => dispatch(goToChatEditPage())}>
 							<FontAwesomeIcon icon={faPlus}/>
 						</span>
 					</div>
