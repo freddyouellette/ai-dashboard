@@ -74,12 +74,12 @@ export default function Chat() {
 							case "USER":
 								return (
 									<div key={message.ID} className="text-start user-message p-2 m-2 ms-5 rounded border">
-										<div className="d-flex justify-content-between">
-											<div className="d-flex justify-content-between flex-grow-1">
-												<div><b className="">👤 You:</b></div>
-												<div className="help-text">{moment(message.CreatedAt).fromNow()}</div>
+										<div className="d-flex justify-content-between align-items-center">
+											<div><b className="">👤 You:</b></div>
+											<div className="d-flex">
+												<div className="help-text mx-1">{moment(message.CreatedAt).fromNow()}</div>
+												<CopyButton text={message.text} />
 											</div>
-											<CopyButton text={message.text} />
 										</div>
 										<Markdown>
 											{message.text}
@@ -89,12 +89,12 @@ export default function Chat() {
 							case "BOT":
 								return (
 									<div key={message.ID} className="text-start bg-light p-2 m-2 me-5 rounded border">
-										<div className="d-flex justify-content-between">
-											<div className="d-flex justify-content-between flex-grow-1">
-												<div><b>🤖 {chatBot.name}:</b></div>
-												<div className="help-text">{moment(message.CreatedAt).fromNow()}</div>
+										<div className="d-flex justify-content-between align-items-center">
+											<div><b>🤖 {chatBot.name}:</b></div>
+											<div className="d-flex">
+												<div className="help-text mx-1">{moment(message.CreatedAt).fromNow()}</div>
+												<CopyButton text={message.text} />
 											</div>
-											<CopyButton text={message.text} />
 										</div>
 										<Markdown>
 											{message.text}
@@ -148,7 +148,7 @@ function CopyButton({ text }) {
 		});
 	}
 	
-	if (window.isSecureContext === false) return "";
+	// if (window.isSecureContext === false) return "";
 	
 	return (
 		<FontAwesomeIcon className={copied ? "copy-button text-success" : "copy-button"} icon={faCopy} onClick={() => copyToClipboard(text)} />

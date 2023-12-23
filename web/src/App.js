@@ -66,7 +66,7 @@ function App() {
 						{title}
 					</div>
 					
-					<div>
+					<div className="d-flex">
 						{chatEditButton}
 						<span className="btn bg-white border" onClick={() => dispatch(goToChatEditPage())}>
 							<FontAwesomeIcon icon={faPlus}/>
