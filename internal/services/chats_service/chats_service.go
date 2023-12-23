@@ -3,6 +3,7 @@ package chats_service
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
@@ -89,9 +90,18 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 		})
 	}
 
-	// Add previous messages to list
-	// TODO: Limit this
-	requestMessages = append(requestMessages, messages...)
+	// Add previous messages to list only if they are within the memory duration
+	for i, pastMessage := range messages {
+		if i == len(messages)-1 {
+			continue
+		}
+		if pastMessage.CreatedAt.After(time.Now().Add(-(chat.MemoryDuration * time.Second))) {
+			requestMessages = append(requestMessages, pastMessage)
+		}
+	}
+
+	// ALWAYS add the last message to the list
+	requestMessages = append(requestMessages, messages[len(messages)-1])
 
 	var responseMessage *models.Message
 	responseMessage, err = s.aiApi.GetResponse(bot.AiModel, bot.Randomness, requestMessages)

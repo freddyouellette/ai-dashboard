@@ -51,6 +51,7 @@ export const getChats = () => async dispatch => {
 
 // thunk
 export const persistChat = (chat) => async dispatch => {
+	chat.memory_duration = parseInt(chat.memory_duration);
 	return axios[chat.ID ? "put" : "post"](process.env.REACT_APP_API_HOST+'/api/chats', chat)
 	.then(response => {
 		console.log(response);
