@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/bots_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/chats_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/messages_controller"
@@ -65,11 +66,24 @@ func main() {
 
 	eventDispatcher := event_dispatcher.NewEventDispatcher(logger)
 
+	httpClient := logged_client.NewLoggedClient(http.DefaultClient, logger, logged_client.Options{
+		LogRequestHeaders:  true,
+		LogRequestBody:     true,
+		LogResponseHeaders: true,
+		LogResponseBody:    true,
+		PrettyJson:         true,
+	})
+	aiApi := ai_api.NewAiApi(httpClient, 4096, OPENAI_ACCESS_TOKEN)
+
 	botsRepository := entity_repository.NewRepository[models.Bot](db)
 	botsService := entity_service.NewEntityService[models.Bot](botsRepository)
-	botsController := entity_request_controller.NewEntityRequestController[models.Bot](
+	botsController := bots_controller.NewBotsController(
+		entity_request_controller.NewEntityRequestController[models.Bot](
+			responseHandler,
+			botsService,
+		),
 		responseHandler,
-		botsService,
+		aiApi,
 	)
 	messagesRepository := messages_repository.NewMessagesRepository(
 		entity_repository.NewRepository[models.Message](db),
@@ -81,15 +95,6 @@ func main() {
 		eventDispatcher,
 	)
 	chatsRepository := entity_repository.NewRepository[models.Chat](db)
-	httpClient := logged_client.NewLoggedClient(http.DefaultClient, logger, logged_client.Options{
-		LogRequestHeaders:  true,
-		LogRequestBody:     true,
-		LogResponseHeaders: true,
-		LogResponseBody:    true,
-		PrettyJson:         true,
-	})
-	// httpClient := http.DefaultClient
-	aiApi := ai_api.NewAiApi(httpClient, 4096, "https://api.openai.com/v1/chat/completions", OPENAI_ACCESS_TOKEN)
 	chatsService := chats_service.NewChatsService(
 		entity_service.NewEntityService[models.Chat](chatsRepository),
 		botsService,

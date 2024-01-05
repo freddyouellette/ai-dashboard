@@ -8,6 +8,9 @@ const botsSlice = createSlice({
 		botsLoading: false,
 		botsError: null,
 		botsLoaded: false,
+		botModels: {},
+		botModelsLoading: false,
+		botModelsError: null,
 	},
 	reducers: {
 		setBots: (state, action) => {
@@ -21,6 +24,18 @@ const botsSlice = createSlice({
 		},
 		setBotsError: (state, action) => {
 			state.botsError = action.payload;
+		},
+		setBotModels: (state, action) => {
+			state.botModels = action.payload;
+		},
+		setBotModelsLoading: (state, action) => {
+			state.botModelsLoading = action.payload;
+		},
+		setBotModelsLoaded: (state, action) => {
+			state.botModelsLoaded = action.payload;
+		},
+		setBotModelsError: (state, action) => {
+			state.botModelsError = action.payload;
 		},
 	}
 });
@@ -72,11 +87,45 @@ export const addOrUpdateBot = (bot) => async (dispatch, getState) => {
 	);
 }
 
+export const getBotModels = () => async (dispatch, getState) => {
+	if (getState().bots.botModelsLoaded) {
+		return;
+	}
+	dispatch(botsSlice.actions.setBotModelsLoading(true));
+	dispatch(botsSlice.actions.setBotModelsError(null));
+	axios.get(process.env.REACT_APP_API_HOST+'/api/bots/models')
+	.then(
+		res => {
+			let botModelsById = {};
+			res.data.forEach(model => {
+				botModelsById[model.id] = model;
+			});
+			dispatch(botsSlice.actions.setBotModelsLoading(false));
+			dispatch(botsSlice.actions.setBotModelsLoaded(true));
+			dispatch(botsSlice.actions.setBotModelsError(null));
+			dispatch(botsSlice.actions.setBotModels(botModelsById));
+		}, 
+		error => {
+			dispatch(botsSlice.actions.setBotModelsLoading(false));
+			dispatch(botsSlice.actions.setBotModelsError(error));
+			console.error(error);
+		},
+	);
+
+}
+
 export const selectBots = createSelector(
 	state => state.bots.bots,
 	state => state.bots.botsLoading,
 	state => state.bots.botsError, 
 	(bots, botsLoading, botsError) => ({ bots, botsLoading, botsError })
+);
+
+export const selectBotModels = createSelector(
+	state => state.bots.botModels,
+	state => state.bots.botModelsLoading,
+	state => state.bots.botModelsError, 
+	(botModels, botModelsLoading, botModelsError) => ({ botModels, botModelsLoading, botModelsError })
 );
 
 export default botsSlice.reducer;

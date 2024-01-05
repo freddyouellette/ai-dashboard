@@ -24,6 +24,11 @@ type ChatsController interface {
 	HandleGetChatResponseRequest(w http.ResponseWriter, r *http.Request)
 }
 
+type BotsController interface {
+	EntityRequestController[models.Bot]
+	HandleGetBotModelsRequest(w http.ResponseWriter, r *http.Request)
+}
+
 type MessagesController interface {
 	EntityRequestController[models.Message]
 	HandleGetMessageByChatIdRequest(w http.ResponseWriter, r *http.Request)
@@ -35,7 +40,7 @@ type RequestLogger interface {
 
 func NewRouter(
 	frontend bool,
-	botsController EntityRequestController[models.Bot],
+	botsController BotsController,
 	chatsController ChatsController,
 	messagesController MessagesController,
 	requestLogger RequestLogger,
@@ -71,6 +76,7 @@ func NewRouter(
 	router.Put("/api/bots", botsController.HandleUpdateEntityRequest)
 	router.Get("/api/bots/{id}", botsController.HandleGetEntityByIdRequest)
 	router.Delete("/api/bots/{id}", botsController.HandleDeleteEntityByIdRequest)
+	router.Get("/api/bots/models", botsController.HandleGetBotModelsRequest)
 
 	router.Get("/api/chats", chatsController.HandleGetAllEntitiesRequest)
 	router.Post("/api/chats", chatsController.HandleCreateEntityRequest)

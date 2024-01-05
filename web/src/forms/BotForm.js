@@ -1,9 +1,11 @@
 import { Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { goToBotEditPage, goToBotListPage, goToChatPage, selectSelectedBot } from '../store/page';
-import { addOrUpdateBot } from '../store/bots';
+import { addOrUpdateBot, getBotModels, selectBotModels } from '../store/bots';
 import RequiredStar from './RequiredStar';
 import { persistChat } from '../store/chats';
+import { useEffect } from 'react';
+import moment from 'moment';
 
 export default function CreateBotForm() {
 	const botFormData = useSelector(selectSelectedBot) || {
@@ -15,6 +17,15 @@ export default function CreateBotForm() {
 		user_history: '',
 	};
 	const dispatch = useDispatch();
+	
+	const { botModels, botModelsLoading, botModelsError } = useSelector(selectBotModels);
+	
+	useEffect(() => {
+		dispatch(getBotModels());
+	}, [dispatch]);
+	
+	if (botModelsLoading) return <div>Loading...</div>;
+	if (botModelsError) return <div>Error loading bot models...</div>;
 	
 	let handleChange = (event) => {
 		dispatch(goToBotEditPage({
@@ -41,6 +52,9 @@ export default function CreateBotForm() {
 		}
 	}
 	
+	let botModelsList = Object.values(botModels);
+	botModelsList.sort((a, b) => moment(b.created_at) - moment(a.created_at))
+	
 	return (
 		<div className="mx-3 mt-3">
 			<h1 className="text-center">{botFormData?.ID ? 'Update Bot' : 'Create New Bot'}</h1>
@@ -57,8 +71,9 @@ export default function CreateBotForm() {
 					<label htmlFor="model" className="form-label">Model <RequiredStar/></label>
 					<select onChange={handleChange} id="create-bot-form-model" name="model" className="form-control" value={botFormData?.model ?? 'gpt-4'}>
 						<option value="">Select AI Model</option>
-						<option value="gpt-4">GPT-4</option>
-						<option value="gpt-4-1106-preview">GPT-4 11.06 Preview</option>
+						{botModelsList.map(botModel => {
+							return <option key={botModel.id} value={botModel.id}>{botModel.id}</option>
+						})}
 					</select>
 				</div>
 				<div className="mb-3">

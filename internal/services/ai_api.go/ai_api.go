@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 )
@@ -17,8 +18,6 @@ type HttpClient interface {
 type AiApi struct {
 	client      HttpClient
 	maxTokens   int
-	randomness  float32
-	chatUrl     string
 	accessToken string
 }
 
@@ -43,16 +42,23 @@ type chatResponse struct {
 	} `json:"choices"`
 }
 
+type model struct {
+	Id      string `json:"id"`
+	Created int64  `json:"created"`
+}
+
+type modelsResponse struct {
+	Data []model `json:"data"`
+}
+
 func NewAiApi(
 	client HttpClient,
 	maxTokens int,
-	chatUrl string,
 	accessToken string,
 ) *AiApi {
 	return &AiApi{
 		client:      client,
 		maxTokens:   maxTokens,
-		chatUrl:     chatUrl,
 		accessToken: accessToken,
 	}
 }
@@ -95,7 +101,7 @@ func (api *AiApi) GetResponse(aiModel string, randomness float64, messages []*mo
 	}
 	requestReader := bytes.NewBuffer(jsonBody)
 
-	request, err := http.NewRequest(http.MethodPost, api.chatUrl, requestReader)
+	request, err := http.NewRequest(http.MethodPost, "https://api.openai.com/v1/chat/completions", requestReader)
 	if err != nil {
 		return nil, err
 	}
@@ -123,4 +129,40 @@ func (api *AiApi) GetResponse(aiModel string, randomness float64, messages []*mo
 		Text: responseBody.Choices[0].Message.Content,
 		Role: models.MESSAGE_ROLE_BOT,
 	}, nil
+}
+
+func (api *AiApi) GetBotModels() ([]*models.BotModel, error) {
+	request, err := http.NewRequest(http.MethodGet, "https://api.openai.com/v1/models", nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Authorization", "Bearer "+api.accessToken)
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+
+	response, err := api.client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var responseBody modelsResponse
+	err = json.NewDecoder(response.Body).Decode(&responseBody)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("%w: [%d] %v", ErrBadResponse, response.StatusCode, responseBody)
+	}
+
+	botModels := make([]*models.BotModel, 0)
+	for _, model := range responseBody.Data {
+		botModels = append(botModels, &models.BotModel{
+			ID:        model.Id,
+			CreatedAt: time.Unix(model.Created, 0),
+		})
+	}
+
+	return botModels, nil
 }
