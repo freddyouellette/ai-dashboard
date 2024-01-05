@@ -2,7 +2,7 @@ import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComments, faGear, faPlus, faRobot } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from "react-redux";
-import { PAGE_STATUSES, goToBotListPage, goToChatListPage, goToChatEditPage, selectPageStatus, selectSelectedChat } from './store/page';
+import { PAGE_STATUSES, goToBotListPage, goToChatListPage, goToChatEditPage, selectPageStatus, selectSelectedChat, goToChatPage } from './store/page';
 import ChatList from './components/ChatList';
 import Chat from './components/Chat';
 import ChatForm from './forms/ChatForm';
@@ -42,10 +42,18 @@ function App() {
 		break;
 	}
 	
+	let clickChatEditButton = () => {
+		if (pageStatus === PAGE_STATUSES.CREATE_CHAT) {
+			dispatch(goToChatPage(selectedChat));
+		} else {
+			dispatch(goToChatEditPage(selectedChat));
+		}
+	}
+	
 	let chatEditButton = "";
 	if (selectedChat) {
 		chatEditButton = (
-			<span className="btn bg-white border mx-1" onClick={() => dispatch(goToChatEditPage(selectedChat))}>
+			<span className="btn bg-white border mx-1" onClick={clickChatEditButton}>
 				<FontAwesomeIcon icon={faGear}/>
 			</span>
 		);
