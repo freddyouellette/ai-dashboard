@@ -71,10 +71,12 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	// Add bot name, bot personality, and user history to list of messages to be sent
 	requestMessages := make([]*models.Message, 0)
 
-	requestMessages = append(requestMessages, &models.Message{
-		Text: "Your name is " + bot.Name + ".",
-		Role: models.MESSAGE_ROLE_SYSTEM,
-	})
+	if bot.SendName {
+		requestMessages = append(requestMessages, &models.Message{
+			Text: "Your name is " + bot.Name + ".",
+			Role: models.MESSAGE_ROLE_SYSTEM,
+		})
+	}
 
 	if bot.Personality != "" {
 		requestMessages = append(requestMessages, &models.Message{

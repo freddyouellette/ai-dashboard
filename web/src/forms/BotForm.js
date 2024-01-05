@@ -11,6 +11,7 @@ export default function CreateBotForm() {
 	const botFormData = useSelector(selectSelectedBot) || {
 		name: '',
 		description: '',
+		send_name: true,
 		model: 'gpt-4-1106-preview',
 		randomness: 1,
 		personality: '',
@@ -62,6 +63,17 @@ export default function CreateBotForm() {
 				<div className="mb-3">
 					<label htmlFor="name" className="form-label">Bot Name <RequiredStar/></label>
 					<input onChange={handleChange} type="text" className="form-control" id="create-bot-form-name" name="name" placeholder="Enter bot name" required value={botFormData?.name ?? ''} />
+				</div>
+				<div className="mb-3 form-check">
+					<input 
+						onChange={e => handleChange({target: {name: 'send_name', value: e.target.checked}})} 
+						className="form-check-input" 
+						id="send_name" 
+						name="send_name" 
+						type="checkbox"
+						checked={botFormData?.send_name}
+					/>
+					<label htmlFor="send_name" className="form-check-label text-left d-flex justify-content-start">Tell the bot its name</label>
 				</div>
 				<div className="mb-3">
 					<label htmlFor="description" className="form-label">Description</label>
