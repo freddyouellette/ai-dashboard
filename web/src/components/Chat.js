@@ -19,7 +19,6 @@ export default function Chat() {
 	const { bots, botsLoading, botsError } = useSelector(selectBots);
 	const chatBot = bots[selectedChat?.bot_id];
 	
-	
 	useEffect(() => {
 		dispatch(getBots());
 	}, [dispatch]);
@@ -46,6 +45,7 @@ export default function Chat() {
 	}
 	
 	const dispatchSendMessage = () => {
+		if (messageToSend === "") return;
 		dispatch(sendMessage(selectedChat.ID, messageToSend))
 		setMessageToSend("")
 	}
@@ -149,7 +149,7 @@ export default function Chat() {
 						placeholder="Enter message" 
 						required 
 						value={messageToSend}></textarea>
-					<Button className="ms-3" onClick={dispatchSendMessage}><FontAwesomeIcon icon={faPaperPlane} /></Button>
+					<Button className="ms-3" disabled={!messageToSend} onClick={dispatchSendMessage}><FontAwesomeIcon icon={faPaperPlane} /></Button>
 				</div>
 				<div className="text-start ms-2 d-none d-md-flex">
 					<small><em>Ctrl+Enter / ⌘+Enter to send message</em></small>
