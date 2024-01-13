@@ -102,8 +102,10 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 		}
 	}
 
-	// ALWAYS add the last message to the list
-	requestMessages = append(requestMessages, messages[len(messages)-1])
+	if len(requestMessages) == 0 {
+		// ALWAYS add the last message to the list
+		requestMessages = append(requestMessages, messages[len(messages)-1])
+	}
 
 	var responseMessage *models.Message
 	responseMessage, err = s.aiApi.GetResponse(bot.AiModel, bot.Randomness, requestMessages)
