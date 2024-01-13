@@ -9,6 +9,7 @@ import Markdown from 'react-markdown'
 import './chat.css'
 import { getBots, selectBots } from "../store/bots";
 import moment from "moment";
+import popup from "../util/popup"
 
 export default function Chat() {
 	const dispatch = useDispatch();
@@ -45,9 +46,14 @@ export default function Chat() {
 	}
 	
 	const dispatchSendMessage = () => {
-		if (messageToSend === "") return;
-		dispatch(sendMessage(selectedChat.ID, messageToSend))
-		setMessageToSend("")
+		if (messageToSend === "") {
+			return popup.confirm("The message field is empty. Are you sure you would like to send only previous messages?").then(ok => {
+				if (ok) dispatch(sendMessage(selectedChat.ID, messageToSend));
+			});
+		} else {
+			dispatch(sendMessage(selectedChat.ID, messageToSend))
+			setMessageToSend("")
+		}
 	}
 	
 	const handleMessageTextKeyDown = event => {
@@ -149,7 +155,7 @@ export default function Chat() {
 						placeholder="Enter message" 
 						required 
 						value={messageToSend}></textarea>
-					<Button className="ms-3" disabled={!messageToSend} onClick={dispatchSendMessage}><FontAwesomeIcon icon={faPaperPlane} /></Button>
+					<Button className="ms-3" onClick={dispatchSendMessage}><FontAwesomeIcon icon={faPaperPlane} /></Button>
 				</div>
 				<div className="text-start ms-2 d-none d-md-flex">
 					<small><em>Ctrl+Enter / ⌘+Enter to send message</em></small>

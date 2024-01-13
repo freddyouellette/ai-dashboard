@@ -30,21 +30,25 @@ const messagesSlice = createSlice({
 
 // thunk
 export const sendMessage = (chatId, message) => async dispatch => {
-	let newMessageData = {
-		chat_id: chatId,
-		text: message,
-	}
-	axios.post(process.env.REACT_APP_API_HOST+'/api/messages', newMessageData)
-	.then(response => {
-		console.log(response)
-		dispatch(messagesSlice.actions.addMessage(response.data))
-		dispatch(messagesSlice.actions.setWaitingForResponse(true))
-		axios.get(process.env.REACT_APP_API_HOST+"/api/chats/"+chatId+"/response")
+	if (message) {
+		let newMessageData = {
+			chat_id: chatId,
+			text: message,
+		}
+		await axios.post(process.env.REACT_APP_API_HOST+'/api/messages', newMessageData)
 		.then(response => {
 			console.log(response)
-			dispatch(messagesSlice.actions.setWaitingForResponse(false))
 			dispatch(messagesSlice.actions.addMessage(response.data))
+			dispatch(messagesSlice.actions.setWaitingForResponse(true))
 		}, error => console.error(error))
+	} else {
+		dispatch(messagesSlice.actions.setWaitingForResponse(true))
+	}
+	axios.get(process.env.REACT_APP_API_HOST+"/api/chats/"+chatId+"/response")
+	.then(response => {
+		console.log(response)
+		dispatch(messagesSlice.actions.setWaitingForResponse(false))
+		dispatch(messagesSlice.actions.addMessage(response.data))
 	}, error => console.error(error))
 }
 
