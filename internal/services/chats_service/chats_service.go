@@ -52,7 +52,7 @@ var (
 func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	var chat *models.Chat
 	var bot *models.Bot
-	var messages []*models.Message
+	var pastMessages []*models.Message
 	var err error
 
 	chat, err = s.EntityService.GetById(chatId)
@@ -63,7 +63,7 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingBotById, chat.BotID, err)
 	}
-	messages, err = s.messagesService.GetChatMessages(chatId)
+	pastMessages, err = s.messagesService.GetChatMessages(chatId)
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatMessages, chatId, err)
 	}
@@ -92,19 +92,19 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 		})
 	}
 
-	// Add previous messages to list only if they are within the memory duration
-	for i, pastMessage := range messages {
-		if i == len(messages)-1 {
-			continue
+	if len(pastMessages) != 0 {
+		// Add previous messages to list only if they are within the memory duration
+		for i, pastMessage := range pastMessages {
+			if i == len(pastMessages)-1 {
+				continue
+			}
+			if pastMessage.CreatedAt.After(time.Now().Add(-(chat.MemoryDuration * time.Second))) {
+				requestMessages = append(requestMessages, pastMessage)
+			}
 		}
-		if pastMessage.CreatedAt.After(time.Now().Add(-(chat.MemoryDuration * time.Second))) {
-			requestMessages = append(requestMessages, pastMessage)
-		}
-	}
 
-	if len(requestMessages) == 0 {
 		// ALWAYS add the last message to the list
-		requestMessages = append(requestMessages, messages[len(messages)-1])
+		requestMessages = append(requestMessages, pastMessages[len(pastMessages)-1])
 	}
 
 	var responseMessage *models.Message
