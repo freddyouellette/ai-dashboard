@@ -97,6 +97,11 @@ export default function CreateBotForm() {
 					<textarea onChange={handleChange} className="form-control" id="create-bot-form-user_history" name="user_history" rows="3" placeholder="Enter user history" value={botFormData?.user_history ??  ''} ></textarea>
 				</div>
 				<div className="mb-3">
+					<label htmlFor="correction_prompt" className="form-label">Message Correction Prompt</label>
+					<textarea onChange={handleChange} className="form-control" id="create-bot-form-correction_prompt" name="correction_prompt" rows="3" placeholder="Enter Correction Prompt" value={botFormData?.correction_prompt ?? ''} ></textarea>
+					<div className="help-text text-start">This prompt will be used to correct each message you send. Leave blank to turn off corrections.</div>
+				</div>
+				<div className="mb-3">
 					<label htmlFor="randomness" className="form-label">Randomness <RequiredStar/></label>
 					<input 
 						onChange={handleChange} 

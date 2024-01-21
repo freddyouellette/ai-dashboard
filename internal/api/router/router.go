@@ -22,6 +22,7 @@ type EntityRequestController[e any] interface {
 type ChatsController interface {
 	EntityRequestController[models.Chat]
 	HandleGetChatResponseRequest(w http.ResponseWriter, r *http.Request)
+	HandleGetMessageCorrectionRequest(w http.ResponseWriter, r *http.Request)
 }
 
 type BotsController interface {
@@ -83,6 +84,7 @@ func NewRouter(
 	router.Put("/api/chats", chatsController.HandleUpdateEntityRequest)
 	router.Post("/api/chats/{id}", chatsController.HandleCreateEntityRequest)
 	router.Get("/api/chats/{id}/response", chatsController.HandleGetChatResponseRequest)
+	router.Get("/api/messages/{id}/correction", chatsController.HandleGetMessageCorrectionRequest)
 
 	router.Get("/api/messages", messagesController.HandleGetAllEntitiesRequest)
 	router.Post("/api/messages", messagesController.HandleCreateEntityRequest)

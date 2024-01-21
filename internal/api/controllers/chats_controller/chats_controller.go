@@ -15,6 +15,7 @@ type ResponseHandler interface {
 
 type ChatsService interface {
 	GetChatResponse(chatId uint) (*models.Message, error)
+	GetMessageCorrection(messageId uint) (*models.Message, error)
 }
 
 type ChatsController struct {
@@ -45,4 +46,16 @@ func (h *ChatsController) HandleGetChatResponseRequest(w http.ResponseWriter, r 
 	responseObject, err := h.chatsService.GetChatResponse(uint(chatId))
 
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
+}
+
+func (h *ChatsController) HandleGetMessageCorrectionRequest(w http.ResponseWriter, r *http.Request) {
+	messageId, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		h.responseHandler.HandleResponseObject(w, nil, err)
+		return
+	}
+
+	message, err := h.chatsService.GetMessageCorrection(uint(messageId))
+
+	h.responseHandler.HandleResponseObject(w, message, err)
 }

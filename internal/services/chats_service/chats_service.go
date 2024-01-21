@@ -12,6 +12,8 @@ import (
 type MessagesService interface {
 	GetChatMessages(chatId uint) ([]*models.Message, error)
 	Create(message *models.Message) (*models.Message, error)
+	GetById(messageId uint) (*models.Message, error)
+	Update(message *models.Message) (*models.Message, error)
 }
 
 type BotService interface {
@@ -45,6 +47,7 @@ func NewChatsService(
 
 var (
 	ErrGettingChatById     = errors.New("error getting chat by id")
+	ErrGettingMessageById  = errors.New("error getting message by id")
 	ErrGettingBotById      = errors.New("error getting bot by id")
 	ErrGettingChatMessages = errors.New("error getting chat messages")
 )
@@ -122,4 +125,50 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	}
 
 	return responseMessage, nil
+}
+
+func (s *ChatsService) GetMessageCorrection(messageId uint) (*models.Message, error) {
+	var chat *models.Chat
+	var bot *models.Bot
+	var err error
+
+	message, err := s.messagesService.GetById(messageId)
+	if err != nil {
+		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingMessageById, messageId, err)
+	}
+	chat, err = s.EntityService.GetById(message.ChatID)
+	if err != nil {
+		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatById, message.ChatID, err)
+	}
+	bot, err = s.botService.GetById(chat.BotID)
+	if err != nil {
+		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingBotById, chat.BotID, err)
+	}
+
+	if bot.CorrectionPrompt == "" {
+		return nil, errors.New("bot does not have a correction prompt")
+	}
+
+	requestMessages := make([]*models.Message, 0)
+
+	requestMessages = append(requestMessages, &models.Message{
+		Text: bot.CorrectionPrompt,
+		Role: models.MESSAGE_ROLE_SYSTEM,
+	})
+
+	requestMessages = append(requestMessages, message)
+
+	var responseMessage *models.Message
+	responseMessage, err = s.aiApi.GetResponse(bot.AiModel, bot.Randomness, requestMessages)
+	if err != nil {
+		return nil, err
+	}
+
+	message.Correction = responseMessage.Text
+	message, err = s.messagesService.Update(message)
+	if err != nil {
+		return nil, err
+	}
+
+	return message, nil
 }

@@ -7,11 +7,12 @@ const messagesSlice = createSlice({
 		messages: {},
 		messagesLoading: false,
 		messagesError: null,
+		waitingForCorrectionId: null,
 		waitingForResponse: false,
 	},
 	reducers: {
 		addMessage: (state, action) => {
-			state.messages.push(action.payload)
+			state.messages[action.payload.ID] = action.payload
 		},
 		setMessages: (state, action) => {
 			state.messages = action.payload
@@ -21,6 +22,9 @@ const messagesSlice = createSlice({
 		},
 		setMessagesError: (state, action) => {
 			state.messagesError = action.payload
+		},
+		setWaitingForCorrectionId: (state, action) => {
+			state.waitingForCorrectionId = action.payload
 		},
 		setWaitingForResponse: (state, action) => {
 			state.waitingForResponse = action.payload
@@ -40,6 +44,7 @@ export const sendMessage = (chatId, message) => async dispatch => {
 			console.log(response)
 			dispatch(messagesSlice.actions.addMessage(response.data))
 			dispatch(messagesSlice.actions.setWaitingForResponse(true))
+			dispatch(getMessageCorrection(chatId, response.data.ID))
 		}, error => console.error(error))
 	} else {
 		dispatch(messagesSlice.actions.setWaitingForResponse(true))
@@ -53,8 +58,22 @@ export const sendMessage = (chatId, message) => async dispatch => {
 }
 
 // thunk
+export const getMessageCorrection = (chatId, messageId) => async (dispatch, getState) => {
+	let chat = getState().chats.chats[chatId]
+	let bot = getState().bots.bots[chat.bot_id]
+	if (bot.correction_prompt) {
+		dispatch(messagesSlice.actions.setWaitingForCorrectionId(messageId))
+		axios.get(process.env.REACT_APP_API_HOST+"/api/messages/"+messageId+"/correction")
+		.then(response => {
+			console.log(response)
+			dispatch(messagesSlice.actions.addMessage(response.data))
+			dispatch(messagesSlice.actions.setWaitingForCorrectionId(null))
+		}, error => console.error(error))
+	}
+}
+
+// thunk
 export const getChatMessages = chat => async dispatch => {
-	dispatch(messagesSlice.actions.setMessages({}));
 	dispatch(messagesSlice.actions.setMessagesLoading(true));
 	dispatch(messagesSlice.actions.setMessagesError(null));
 	axios.get(process.env.REACT_APP_API_HOST+`/api/chats/${chat.ID}/messages`)
@@ -62,7 +81,11 @@ export const getChatMessages = chat => async dispatch => {
 		console.log(response)
 		dispatch(messagesSlice.actions.setMessagesLoading(false));
 		dispatch(messagesSlice.actions.setMessagesError(null));
-		dispatch(messagesSlice.actions.setMessages(response.data))
+		let messages = {};
+		for (let message of response.data) {
+			messages[message.ID] = message
+		}
+		dispatch(messagesSlice.actions.setMessages(messages));
 	}, error => {
 		dispatch(messagesSlice.actions.setMessagesLoading(false));
 		dispatch(messagesSlice.actions.setMessagesError(error));
@@ -77,5 +100,6 @@ export const selectMessages = createSelector(
 	(messages, messagesLoading, messagesError) => ({ messages, messagesLoading, messagesError })
 );
 export const selectWaitingForResponse = state => state.messages.waitingForResponse
+export const selectWaitingForCorrectionId = state => state.messages.waitingForCorrectionId
 
 export default messagesSlice.reducer;
