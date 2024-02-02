@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	DEFAULT_PAGE_SIZE = 2
+	DEFAULT_PAGE_SIZE = 20
 )
 
 type ResponseHandler interface {
