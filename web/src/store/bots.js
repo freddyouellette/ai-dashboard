@@ -16,6 +16,9 @@ const botsSlice = createSlice({
 		setBots: (state, action) => {
 			state.bots = action.payload;
 		},
+		setBot: (state, action) => {
+			state.bots[action.payload.ID] =  action.payload;
+		},
 		setBotsLoading: (state, action) => {
 			state.botsLoading = action.payload;
 		},
@@ -40,8 +43,8 @@ const botsSlice = createSlice({
 	}
 });
 
-export const getBots = () => async (dispatch, getState) => {
-	if (getState().bots.botsLoaded) {
+export const getBots = (useCache = true) => async (dispatch, getState) => {
+	if (useCache && getState().bots.botsLoaded) {
 		return;
 	}
 	dispatch(botsSlice.actions.setBotsLoading(true));
@@ -56,6 +59,24 @@ export const getBots = () => async (dispatch, getState) => {
 			dispatch(botsSlice.actions.setBotsLoading(false));
 			dispatch(botsSlice.actions.setBotsError(null));
 			dispatch(botsSlice.actions.setBots(botsById));
+			dispatch(botsSlice.actions.setBotsLoaded(true));
+		}, 
+		error => {
+			dispatch(botsSlice.actions.setBotsLoading(false));
+			dispatch(botsSlice.actions.setBotsLoaded(false));
+			dispatch(botsSlice.actions.setBotsError(error));
+			console.error(error);
+		},
+	);
+}
+
+export const getBot = (botId) => async (dispatch, getState) => {
+	axios.get(process.env.REACT_APP_API_HOST+'/api/bots/'+botId)
+	.then(
+		res => {
+			dispatch(botsSlice.actions.setBot(res.data));
+			dispatch(botsSlice.actions.setBotsLoading(false));
+			dispatch(botsSlice.actions.setBotsError(null));
 			dispatch(botsSlice.actions.setBotsLoaded(true));
 		}, 
 		error => {

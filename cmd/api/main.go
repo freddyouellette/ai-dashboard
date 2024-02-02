@@ -118,7 +118,7 @@ func main() {
 		messagesService,
 	)
 
-	eventHandler := event_handler.NewEventHandler(chatsService)
+	eventHandler := event_handler.NewEventHandler(chatsService, botsService)
 	eventDispatcher.Register(models.EVENT_TYPE_MESSAGE_CREATED, eventHandler.HandleMessageCreatedEvent)
 
 	requestLogger := request_logger.NewRequestLogger(logger, request_logger.Options{

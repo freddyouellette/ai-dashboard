@@ -37,7 +37,7 @@ export default function Chat() {
 		if (messageListRef.current !== null) {
 			messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
 		}
-	}, [messages]);
+	}, [messages, bots]);
 	
 	if (messagesLoading || botsLoading) return <div>Loading...</div>;
 	if (messagesError) return <div>Error loading messages...</div>;
@@ -51,10 +51,10 @@ export default function Chat() {
 	const dispatchSendMessage = () => {
 		if (messageToSend === "") {
 			return popup.confirm("The message field is empty. Are you sure you would like to send only previous messages?").then(ok => {
-				if (ok) dispatch(sendMessage(selectedChat.ID, messageToSend));
+				if (ok) dispatch(sendMessage(selectedChat.ID, selectedChat?.bot_id, messageToSend));
 			});
 		} else {
-			dispatch(sendMessage(selectedChat.ID, messageToSend))
+			dispatch(sendMessage(selectedChat.ID, selectedChat?.bot_id, messageToSend))
 			setMessageToSend("")
 		}
 	}
@@ -108,7 +108,6 @@ export default function Chat() {
 								if (message.correction) {
 									let messageParts = [];
 									diffWords(message.text, message.correction).forEach(part => {
-										console.log(part)
 										if (part.added) {
 											messageParts.push(<span class="text-success fw-bold">{part.value}</span>);
 										} else if (part.removed) {

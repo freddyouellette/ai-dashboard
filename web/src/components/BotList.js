@@ -19,7 +19,7 @@ export default function BotList() {
 	if (botsError) return <div className="text-danger">Error loading bots...</div>;
 	
 	let botsList = Object.values(bots);
-	botsList.sort((a, b) => moment(b.CreatedAt) - moment(a.CreatedAt))
+	botsList.sort((a, b) => moment(b.last_message_at || b.CreatedAt) - moment(a.last_message_at || a.CreatedAt));
 	
 	return (
 		<ListGroup className="list-group-flush">

@@ -1,5 +1,6 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
+import { getBot, getBots } from './bots';
 
 const messagesSlice = createSlice({
 	name: 'messages',
@@ -33,7 +34,7 @@ const messagesSlice = createSlice({
 });
 
 // thunk
-export const sendMessage = (chatId, message) => async dispatch => {
+export const sendMessage = (chatId, botId, message) => async dispatch => {
 	if (message) {
 		let newMessageData = {
 			chat_id: chatId,
@@ -41,17 +42,17 @@ export const sendMessage = (chatId, message) => async dispatch => {
 		}
 		await axios.post(process.env.REACT_APP_API_HOST+'/api/messages', newMessageData)
 		.then(response => {
-			console.log(response)
 			dispatch(messagesSlice.actions.addMessage(response.data))
 			dispatch(messagesSlice.actions.setWaitingForResponse(true))
 			dispatch(getMessageCorrection(chatId, response.data.ID))
+			// refresh bots so the order corrects itself
+			dispatch(getBot(botId))
 		}, error => console.error(error))
 	} else {
 		dispatch(messagesSlice.actions.setWaitingForResponse(true))
 	}
 	axios.get(process.env.REACT_APP_API_HOST+"/api/chats/"+chatId+"/response")
 	.then(response => {
-		console.log(response)
 		dispatch(messagesSlice.actions.setWaitingForResponse(false))
 		dispatch(messagesSlice.actions.addMessage(response.data))
 	}, error => console.error(error))
@@ -65,7 +66,6 @@ export const getMessageCorrection = (chatId, messageId) => async (dispatch, getS
 		dispatch(messagesSlice.actions.setWaitingForCorrectionId(messageId))
 		axios.get(process.env.REACT_APP_API_HOST+"/api/messages/"+messageId+"/correction")
 		.then(response => {
-			console.log(response)
 			dispatch(messagesSlice.actions.addMessage(response.data))
 			dispatch(messagesSlice.actions.setWaitingForCorrectionId(null))
 		}, error => console.error(error))
@@ -78,7 +78,6 @@ export const getChatMessages = chat => async dispatch => {
 	dispatch(messagesSlice.actions.setMessagesError(null));
 	axios.get(process.env.REACT_APP_API_HOST+`/api/chats/${chat.ID}/messages`)
 	.then(response => {
-		console.log(response)
 		dispatch(messagesSlice.actions.setMessagesLoading(false));
 		dispatch(messagesSlice.actions.setMessagesError(null));
 		let messages = {};
