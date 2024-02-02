@@ -1,6 +1,6 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
-import { getBot, getBots } from './bots';
+import { getBot } from './bots';
 
 const messagesSlice = createSlice({
 	name: 'messages',
@@ -8,6 +8,8 @@ const messagesSlice = createSlice({
 		messages: {},
 		messagesLoading: false,
 		messagesError: null,
+		messagesPage: 1,
+		messagesTotal: 0,
 		waitingForCorrectionId: null,
 		waitingForResponse: false,
 	},
@@ -23,6 +25,12 @@ const messagesSlice = createSlice({
 		},
 		setMessagesError: (state, action) => {
 			state.messagesError = action.payload
+		},
+		setMessagesPage: (state, action) => {
+			state.messagesPage = action.payload
+		},
+		setMessagesTotal: (state, action) => {
+			state.messagesTotal = action.payload
 		},
 		setWaitingForCorrectionId: (state, action) => {
 			state.waitingForCorrectionId = action.payload
@@ -76,15 +84,20 @@ export const getMessageCorrection = (chatId, messageId) => async (dispatch, getS
 export const getChatMessages = chat => async dispatch => {
 	dispatch(messagesSlice.actions.setMessagesLoading(true));
 	dispatch(messagesSlice.actions.setMessagesError(null));
-	axios.get(process.env.REACT_APP_API_HOST+`/api/chats/${chat.ID}/messages`)
+	let params = {
+		chat_id: chat.ID,
+	};
+	axios.get(process.env.REACT_APP_API_HOST+`/api/messages`, { params })
 	.then(response => {
 		dispatch(messagesSlice.actions.setMessagesLoading(false));
 		dispatch(messagesSlice.actions.setMessagesError(null));
 		let messages = {};
-		for (let message of response.data) {
+		for (let message of response.data.messages) {
 			messages[message.ID] = message
 		}
 		dispatch(messagesSlice.actions.setMessages(messages));
+		dispatch(messagesSlice.actions.setMessagesPage(response.data.page));
+		dispatch(messagesSlice.actions.setMessagesTotal(response.data.total));
 	}, error => {
 		dispatch(messagesSlice.actions.setMessagesLoading(false));
 		dispatch(messagesSlice.actions.setMessagesError(error));
@@ -96,7 +109,9 @@ export const selectMessages = createSelector(
 	state => state.messages.messages,
 	state => state.messages.messagesLoading,
 	state => state.messages.messagesError,
-	(messages, messagesLoading, messagesError) => ({ messages, messagesLoading, messagesError })
+	state => state.messages.messagesPage,
+	state => state.messages.messagesTotal,
+	(messages, messagesLoading, messagesError, messagesPage, messagesTotal) => ({ messages, messagesLoading, messagesError, messagesPage, messagesTotal })
 );
 export const selectWaitingForResponse = state => state.messages.waitingForResponse
 export const selectWaitingForCorrectionId = state => state.messages.waitingForCorrectionId

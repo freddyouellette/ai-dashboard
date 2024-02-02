@@ -10,7 +10,7 @@ import (
 )
 
 type MessagesService interface {
-	GetChatMessages(chatId uint) ([]*models.Message, error)
+	GetAllPaginated(options *models.GetMessagesOptions) (*models.MessagesDTO, error)
 	Create(message *models.Message) (*models.Message, error)
 	GetById(messageId uint) (*models.Message, error)
 	Update(message *models.Message) (*models.Message, error)
@@ -55,7 +55,6 @@ var (
 func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	var chat *models.Chat
 	var bot *models.Bot
-	var pastMessages []*models.Message
 	var err error
 
 	chat, err = s.EntityService.GetById(chatId)
@@ -66,7 +65,11 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingBotById, chat.BotID, err)
 	}
-	pastMessages, err = s.messagesService.GetChatMessages(chatId)
+	messagesDTO, err := s.messagesService.GetAllPaginated(&models.GetMessagesOptions{
+		ChatID:  chatId,
+		PerPage: 50,
+		Page:    1,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatMessages, chatId, err)
 	}
@@ -95,10 +98,10 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 		})
 	}
 
-	if len(pastMessages) != 0 {
+	if len(messagesDTO.Messages) != 0 {
 		// Add previous messages to list only if they are within the memory duration
-		for i, pastMessage := range pastMessages {
-			if i == len(pastMessages)-1 {
+		for i, pastMessage := range messagesDTO.Messages {
+			if i == len(messagesDTO.Messages)-1 {
 				continue
 			}
 			if pastMessage.CreatedAt.After(time.Now().Add(-(chat.MemoryDuration * time.Second))) {
@@ -107,7 +110,7 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 		}
 
 		// ALWAYS add the last message to the list
-		requestMessages = append(requestMessages, pastMessages[len(pastMessages)-1])
+		requestMessages = append(requestMessages, messagesDTO.Messages[len(messagesDTO.Messages)-1])
 	}
 
 	var responseMessage *models.Message

@@ -12,7 +12,7 @@ type EventDispatcher interface {
 }
 
 type MessagesRepository interface {
-	GetByChatId(chatId uint) ([]*models.Message, error)
+	GetAllPaginated(options *models.GetMessagesOptions) (*models.MessagesDTO, error)
 }
 
 type MessagesService struct {
@@ -46,10 +46,10 @@ func (s *MessagesService) Create(entity *models.Message) (*models.Message, error
 	return message, nil
 }
 
-func (s *MessagesService) GetChatMessages(chatId uint) ([]*models.Message, error) {
-	entities, err := s.messagesRepository.GetByChatId(chatId)
+func (s *MessagesService) GetAllPaginated(options *models.GetMessagesOptions) (*models.MessagesDTO, error) {
+	messagesDTO, err := s.messagesRepository.GetAllPaginated(options)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", entity_service.ErrRepository, err.Error())
 	}
-	return entities, nil
+	return messagesDTO, nil
 }

@@ -32,7 +32,7 @@ type BotsController interface {
 
 type MessagesController interface {
 	EntityRequestController[models.Message]
-	HandleGetMessageByChatIdRequest(w http.ResponseWriter, r *http.Request)
+	HandleGetAllPaginatedRequest(w http.ResponseWriter, r *http.Request)
 }
 
 type RequestLogger interface {
@@ -86,10 +86,9 @@ func NewRouter(
 	router.Get("/api/chats/{id}/response", chatsController.HandleGetChatResponseRequest)
 	router.Get("/api/messages/{id}/correction", chatsController.HandleGetMessageCorrectionRequest)
 
-	router.Get("/api/messages", messagesController.HandleGetAllEntitiesRequest)
+	router.Get("/api/messages", messagesController.HandleGetAllPaginatedRequest)
 	router.Post("/api/messages", messagesController.HandleCreateEntityRequest)
 	router.Get("/api/messages/{id}", messagesController.HandleGetEntityByIdRequest)
-	router.Get("/api/chats/{chat_id}/messages", messagesController.HandleGetMessageByChatIdRequest)
 
 	if frontend {
 		webHandler := web_handler.NewWebHandler("web/build", "index.html")

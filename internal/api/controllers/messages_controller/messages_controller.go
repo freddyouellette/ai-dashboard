@@ -3,13 +3,15 @@ package messages_controller
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
-	"github.com/go-chi/chi/v5"
+)
+
+const (
+	DEFAULT_PAGE_SIZE = 20
 )
 
 type ResponseHandler interface {
@@ -17,10 +19,9 @@ type ResponseHandler interface {
 }
 
 type MessagesService interface {
-	GetAll() ([]*models.Message, error)
+	GetAllPaginated(options *models.GetMessagesOptions) (*models.MessagesDTO, error)
 	GetById(id uint) (*models.Message, error)
 	Create(entity *models.Message) (*models.Message, error)
-	GetChatMessages(chatId uint) ([]*models.Message, error)
 }
 
 type MessagesController struct {
@@ -57,12 +58,38 @@ func (h *MessagesController) HandleCreateEntityRequest(w http.ResponseWriter, r 
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
 }
 
-func (h *MessagesController) HandleGetMessageByChatIdRequest(w http.ResponseWriter, r *http.Request) {
-	chatId, err := strconv.ParseUint(chi.URLParam(r, "chat_id"), 10, 64)
+func (h *MessagesController) HandleGetAllPaginatedRequest(w http.ResponseWriter, r *http.Request) {
+	options := &models.GetMessagesOptions{}
+	chatID, err := h.parseQueryParamToInt(r, "chat_id", 0)
 	if err != nil {
-		h.responseHandler.HandleResponseObject(w, nil, fmt.Errorf("%w: %s", ErrInvalidId, err.Error()))
+		h.responseHandler.HandleResponseObject(w, nil, models.ErrInvalidResourceSyntax)
 		return
 	}
-	responseObject, err := h.messagesService.GetChatMessages(uint(chatId))
+	options.ChatID = uint(chatID)
+	page, err := h.parseQueryParamToInt(r, "page", 1)
+	if err != nil {
+		h.responseHandler.HandleResponseObject(w, nil, models.ErrInvalidResourceSyntax)
+		return
+	}
+	options.Page = page
+	perPage, err := h.parseQueryParamToInt(r, "per_page", DEFAULT_PAGE_SIZE)
+	if err != nil {
+		h.responseHandler.HandleResponseObject(w, nil, models.ErrInvalidResourceSyntax)
+		return
+	}
+	options.PerPage = perPage
+	responseObject, err := h.messagesService.GetAllPaginated(options)
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
+}
+
+func (h *MessagesController) parseQueryParamToInt(r *http.Request, param string, def int) (int, error) {
+	paramStr := r.URL.Query().Get(param)
+	if paramStr == "" {
+		return def, nil
+	}
+	paramInt, err := strconv.Atoi(paramStr)
+	if err != nil {
+		return 0, err
+	}
+	return paramInt, nil
 }
