@@ -81,11 +81,12 @@ export const getMessageCorrection = (chatId, messageId) => async (dispatch, getS
 }
 
 // thunk
-export const getChatMessages = chat => async dispatch => {
+export const getChatMessages = (chat, page) => async dispatch => {
 	dispatch(messagesSlice.actions.setMessagesLoading(true));
 	dispatch(messagesSlice.actions.setMessagesError(null));
 	let params = {
 		chat_id: chat.ID,
+		page,
 	};
 	axios.get(process.env.REACT_APP_API_HOST+`/api/messages`, { params })
 	.then(response => {

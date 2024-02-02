@@ -98,19 +98,17 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 		})
 	}
 
+	// NEWEST, NEWER, NEW, OLD, OLDER, OLDEST
 	if len(messagesDTO.Messages) != 0 {
 		// Add previous messages to list only if they are within the memory duration
-		for i, pastMessage := range messagesDTO.Messages {
-			if i == len(messagesDTO.Messages)-1 {
-				continue
-			}
-			if pastMessage.CreatedAt.After(time.Now().Add(-(chat.MemoryDuration * time.Second))) {
-				requestMessages = append(requestMessages, pastMessage)
+		for i := len(messagesDTO.Messages) - 1; i >= 1; i-- {
+			if messagesDTO.Messages[i].CreatedAt.After(time.Now().Add(-(chat.MemoryDuration * time.Second))) {
+				requestMessages = append(requestMessages, messagesDTO.Messages[i])
 			}
 		}
 
 		// ALWAYS add the last message to the list
-		requestMessages = append(requestMessages, messagesDTO.Messages[len(messagesDTO.Messages)-1])
+		requestMessages = append(requestMessages, messagesDTO.Messages[0])
 	}
 
 	var responseMessage *models.Message

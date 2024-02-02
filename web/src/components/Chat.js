@@ -15,7 +15,7 @@ import { diffWords } from "diff";
 export default function Chat() {
 	const dispatch = useDispatch();
 	const selectedChat = useSelector(selectSelectedChat);
-	const { messages, messagesLoading, messagesError } = useSelector(selectMessages);
+	const { messages, messagesLoading, messagesError, messagesPage } = useSelector(selectMessages);
 	const waitingForResponse = useSelector(selectWaitingForResponse);
 	const [messageToSend, setMessageToSend] = useState("");
 	const { bots, botsLoading, botsError } = useSelector(selectBots);
@@ -30,6 +30,17 @@ export default function Chat() {
 	useEffect(() => {
 		dispatch(getChatMessages(selectedChat));
 	}, [selectedChat, dispatch]);
+	
+	// if the top is reached, load more messages
+	useEffect(() => {
+		const handleScroll = () => {
+			if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || messagesLoading) return;
+			dispatch(getChatMessages(selectedChat, messagesPage + 1));
+		};
+	
+		window.addEventListener('scroll', handleScroll);
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, [dispatch, messagesLoading, messagesPage, selectedChat]);
 	
 	// scroll to bottom of list when a new message appears
 	const messageListRef = useRef(null);
