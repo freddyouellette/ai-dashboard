@@ -5,12 +5,12 @@ import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faCommentDots, faCopy, faPaperPlane} from "@fortawesome/free-solid-svg-icons";
 import { getChatMessages, selectMessages, selectWaitingForCorrectionId, selectWaitingForResponse, sendMessage } from "../store/messages";
-import Markdown from 'react-markdown'
 import './chat.css'
 import { getBots, selectBots } from "../store/bots";
 import moment from "moment";
 import popup from "../util/popup"
 import { diffWords } from "diff";
+import MessageText from "./MessageText";
 
 export default function Chat() {
 	const dispatch = useDispatch();
@@ -73,9 +73,7 @@ export default function Chat() {
 					<b className="">Bot Personality:</b>
 					<CopyButton text={chatBot.personality} />
 				</div>
-				<Markdown className="text-break">
-					{chatBot.personality}
-				</Markdown>
+				<MessageText>{chatBot.personality}</MessageText>
 			</div>
 		)
 	}
@@ -88,9 +86,7 @@ export default function Chat() {
 					<b className="">User History:</b>
 					<CopyButton text={chatBot.user_history} />
 				</div>
-				<Markdown className="text-break">
-					{chatBot.user_history}
-				</Markdown>
+				<MessageText>{chatBot.user_history}</MessageText>
 			</div>
 		)
 	}
@@ -104,7 +100,7 @@ export default function Chat() {
 					{Object.values(messages).map(message => {
 						switch (message.role) {
 							case "USER":
-								let messageDiv = <Markdown className="text-break">{message.text}</Markdown>
+								let messageDiv = <MessageText>{message.text}</MessageText>;
 								if (message.correction) {
 									let messageParts = [];
 									diffWords(message.text, message.correction).forEach(part => {
@@ -142,9 +138,7 @@ export default function Chat() {
 												<CopyButton text={message.text} />
 											</div>
 										</div>
-										<Markdown className="text-break">
-											{message.text}
-										</Markdown>
+										<MessageText>{message.text}</MessageText>
 									</div>
 								)
 							default:
@@ -186,6 +180,10 @@ function CopyButton({ text }) {
 	const [copied, setCopied] = useState(false);
 	
 	const copyToClipboard = (text) => {
+		if (!navigator.clipboard) {
+			console.error('Clipboard API not available');
+			return;
+		}
 		navigator.clipboard.writeText(text).then(() => {
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
