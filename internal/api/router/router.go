@@ -91,7 +91,7 @@ func NewRouter(
 	router.Get("/api/messages/{id}", messagesController.HandleGetEntityByIdRequest)
 
 	if frontend {
-		webHandler := web_handler.NewWebHandler("web/build", "index.html")
+		webHandler := web_handler.NewWebHandler("web/dist", "index.html")
 		router.HandleFunc("/*", webHandler.Handler)
 	}
 

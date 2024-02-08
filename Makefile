@@ -39,23 +39,17 @@ vulns:
 
 pipeline: build test lint ci-lint coverages
 
-api:
-	go run ./cmd/api/main.go
-
-frontend:
-	cd ./web && npm i && npm start && cd ../
-
 app: build
 	./bin/api
 
-app-dev-api:
+backend-dev:
 	FRONTEND=false nodemon --watch './**/*.go' --signal SIGTERM --exec go run ./cmd/api/main.go
 
-app-dev-frontend:
-	cd ./web && npm i && npm start && cd ../
+frontend-dev:
+	cd ./web && npm i && npm run dev && cd ../
 
 app-dev:
-	make -j 2 app-dev-api app-dev-frontend
+	make -j 2 backend-dev frontend-dev
 
 app-local:
 	DEVCONTAINER_COMMAND="make app" docker-compose up
