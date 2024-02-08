@@ -29,7 +29,7 @@ const chatsSlice = createSlice({
 export const getChats = () => async dispatch => {
 	dispatch(chatsSlice.actions.setChatsLoading(true))
 	dispatch(chatsSlice.actions.setChatsError(null))
-	fetch(process.env.REACT_APP_API_HOST+'/api/chats')
+	fetch(import.meta.env.VITE_API_HOST+'/api/chats')
 	.then(response => response.json())
 	.then(
 		chats => {
@@ -52,7 +52,7 @@ export const getChats = () => async dispatch => {
 // thunk
 export const persistChat = (chat) => async dispatch => {
 	chat.memory_duration = parseInt(chat.memory_duration);
-	return axios[chat.ID ? "put" : "post"](process.env.REACT_APP_API_HOST+'/api/chats', chat)
+	return axios[chat.ID ? "put" : "post"](import.meta.env.VITE_API_HOST+'/api/chats', chat)
 	.then(response => {
 		dispatch(chatsSlice.actions.addChat(response.data));
 		return response.data;

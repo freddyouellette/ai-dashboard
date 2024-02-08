@@ -49,7 +49,7 @@ export const getBots = (useCache = true) => async (dispatch, getState) => {
 	}
 	dispatch(botsSlice.actions.setBotsLoading(true));
 	dispatch(botsSlice.actions.setBotsError(null));
-	axios.get(process.env.REACT_APP_API_HOST+'/api/bots')
+	axios.get(import.meta.env.VITE_API_HOST+'/api/bots')
 	.then(
 		res => {
 			let botsById = {};
@@ -71,7 +71,7 @@ export const getBots = (useCache = true) => async (dispatch, getState) => {
 }
 
 export const getBot = (botId) => async (dispatch, getState) => {
-	axios.get(process.env.REACT_APP_API_HOST+'/api/bots/'+botId)
+	axios.get(import.meta.env.VITE_API_HOST+'/api/bots/'+botId)
 	.then(
 		res => {
 			dispatch(botsSlice.actions.setBot(res.data));
@@ -91,7 +91,7 @@ export const getBot = (botId) => async (dispatch, getState) => {
 export const addOrUpdateBot = (bot) => async (dispatch, getState) => {
 	dispatch(botsSlice.actions.setBotsLoading(true));
 	dispatch(botsSlice.actions.setBotsError(null));
-	return axios[bot.ID ? "put" : "post"](process.env.REACT_APP_API_HOST+"/api/bots", bot)
+	return axios[bot.ID ? "put" : "post"](import.meta.env.VITE_API_HOST+"/api/bots", bot)
 	.then(
 		res => {
 			dispatch(botsSlice.actions.setBotsLoading(false));
@@ -114,7 +114,7 @@ export const getBotModels = () => async (dispatch, getState) => {
 	}
 	dispatch(botsSlice.actions.setBotModelsLoading(true));
 	dispatch(botsSlice.actions.setBotModelsError(null));
-	axios.get(process.env.REACT_APP_API_HOST+'/api/bots/models')
+	axios.get(import.meta.env.VITE_API_HOST+'/api/bots/models')
 	.then(
 		res => {
 			let botModelsById = {};

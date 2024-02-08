@@ -48,7 +48,7 @@ export const sendMessage = (chatId, botId, message) => async dispatch => {
 			chat_id: chatId,
 			text: message,
 		}
-		await axios.post(process.env.REACT_APP_API_HOST+'/api/messages', newMessageData)
+		await axios.post(import.meta.env.VITE_API_HOST+'/api/messages', newMessageData)
 		.then(response => {
 			dispatch(messagesSlice.actions.addMessage(response.data))
 			dispatch(messagesSlice.actions.setWaitingForResponse(true))
@@ -59,7 +59,7 @@ export const sendMessage = (chatId, botId, message) => async dispatch => {
 	} else {
 		dispatch(messagesSlice.actions.setWaitingForResponse(true))
 	}
-	axios.get(process.env.REACT_APP_API_HOST+"/api/chats/"+chatId+"/response")
+	axios.get(import.meta.env.VITE_API_HOST+"/api/chats/"+chatId+"/response")
 	.then(response => {
 		dispatch(messagesSlice.actions.setWaitingForResponse(false))
 		dispatch(messagesSlice.actions.addMessage(response.data))
@@ -72,7 +72,7 @@ export const getMessageCorrection = (chatId, messageId) => async (dispatch, getS
 	let bot = getState().bots.bots[chat.bot_id]
 	if (bot.correction_prompt) {
 		dispatch(messagesSlice.actions.setWaitingForCorrectionId(messageId))
-		axios.get(process.env.REACT_APP_API_HOST+"/api/messages/"+messageId+"/correction")
+		axios.get(import.meta.env.VITE_API_HOST+"/api/messages/"+messageId+"/correction")
 		.then(response => {
 			dispatch(messagesSlice.actions.addMessage(response.data))
 			dispatch(messagesSlice.actions.setWaitingForCorrectionId(null))
@@ -88,7 +88,7 @@ export const getChatMessages = (chat, page) => async dispatch => {
 		chat_id: chat.ID,
 		page,
 	};
-	axios.get(process.env.REACT_APP_API_HOST+`/api/messages`, { params })
+	axios.get(import.meta.env.VITE_API_HOST+`/api/messages`, { params })
 	.then(response => {
 		dispatch(messagesSlice.actions.setMessagesLoading(false));
 		dispatch(messagesSlice.actions.setMessagesError(null));
