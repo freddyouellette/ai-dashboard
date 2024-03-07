@@ -20,7 +20,7 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/entity_repository"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/messages_repository"
-	"github.com/freddyouellette/ai-dashboard/internal/services/ai_api.go"
+	"github.com/freddyouellette/ai-dashboard/internal/services/ai_api"
 	"github.com/freddyouellette/ai-dashboard/internal/services/chats_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/messages_service"
@@ -35,6 +35,7 @@ import (
 func main() {
 	API_PORT := os.Getenv("API_PORT")
 	OPENAI_ACCESS_TOKEN := os.Getenv("OPENAI_ACCESS_TOKEN")
+	ANTHROPIC_ACCESS_TOKEN := os.Getenv("ANTHROPIC_ACCESS_TOKEN")
 	frontendStr, ok := os.LookupEnv("FRONTEND")
 	if !ok {
 		frontendStr = "true"
@@ -73,7 +74,7 @@ func main() {
 		LogResponseBody:    true,
 		PrettyJson:         true,
 	})
-	aiApi := ai_api.NewAiApi(httpClient, 4096, OPENAI_ACCESS_TOKEN)
+	aiApi := ai_api.NewAiApi(httpClient, 4096, OPENAI_ACCESS_TOKEN, ANTHROPIC_ACCESS_TOKEN)
 
 	botsRepository := entity_repository.NewRepository[models.Bot](db)
 	botsService := entity_service.NewEntityService[models.Bot](botsRepository)
