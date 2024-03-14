@@ -15,6 +15,7 @@ import (
 const (
 	ANTHROPIC_CLAUDE_3_OPUS   = "claude-3-opus-20240229"
 	ANTHROPIC_CLAUDE_3_SONNET = "claude-3-sonnet-20240229"
+	ANTHROPIC_CLAUDE_3_HAIKU  = "claude-3-haiku-20240307"
 )
 
 type HttpClient interface {
@@ -276,11 +277,14 @@ func (api *AiApi) GetBotModels() ([]*models.BotModel, error) {
 
 	botModels = append(botModels, &models.BotModel{
 		ID:        ANTHROPIC_CLAUDE_3_OPUS,
-		CreatedAt: time.Date(2024, 02, 29, 0, 0, 0, 2, time.UTC),
+		CreatedAt: time.Date(2024, 02, 29, 0, 0, 0, 3, time.UTC),
 	})
-
 	botModels = append(botModels, &models.BotModel{
 		ID:        ANTHROPIC_CLAUDE_3_SONNET,
+		CreatedAt: time.Date(2024, 02, 29, 0, 0, 0, 2, time.UTC),
+	})
+	botModels = append(botModels, &models.BotModel{
+		ID:        ANTHROPIC_CLAUDE_3_HAIKU,
 		CreatedAt: time.Date(2024, 02, 29, 0, 0, 0, 1, time.UTC),
 	})
 
