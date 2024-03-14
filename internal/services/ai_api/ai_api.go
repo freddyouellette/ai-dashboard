@@ -245,7 +245,7 @@ func (api *AiApi) getAnthropicResponse(aiModel string, randomness float64, messa
 }
 
 func isAnthropic(model string) bool {
-	return model == ANTHROPIC_CLAUDE_3_OPUS || model == ANTHROPIC_CLAUDE_3_SONNET
+	return model == ANTHROPIC_CLAUDE_3_OPUS || model == ANTHROPIC_CLAUDE_3_SONNET || model == ANTHROPIC_CLAUDE_3_HAIKU
 }
 
 func (api *AiApi) GetBotModels() ([]*models.BotModel, error) {
