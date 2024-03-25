@@ -33,6 +33,7 @@ export const goToChatEditPage = (chat) => dispatch => {
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CREATE_CHAT))
 	dispatch(pageSlice.actions.setSelectedBot(null))
 	dispatch(pageSlice.actions.setSelectedChat(chat || null))
+	document.title = chat ? ("Edit: " + chat.name) : "Create Chat"
 }
 
 // thunk
@@ -40,6 +41,7 @@ export const goToBotListPage = () => dispatch => {
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.BOT_LIST))
 	dispatch(pageSlice.actions.setSelectedBot(null))
 	dispatch(pageSlice.actions.setSelectedChat(null))
+	document.title = "AI Dashboard"
 }
 
 // thunk
@@ -47,20 +49,23 @@ export const goToChatListPage = () => dispatch => {
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CHAT_LIST))
 	dispatch(pageSlice.actions.setSelectedBot(null))
 	dispatch(pageSlice.actions.setSelectedChat(null))
+	document.title = "AI Dashboard"
 }
 
 // thunk
-export const goToChatPage = (chat) => (dispatch, getState) => {
+export const goToChatPage = (chat) => (dispatch) => {
 	dispatch(pageSlice.actions.setSelectedChat(chat))
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.BOT_CHAT))
 	dispatch(pageSlice.actions.setSelectedBot(null))
+	document.title = chat.name
 }
 
 // thunk
-export const goToBotEditPage = (bot) => (dispatch, getState) => {
+export const goToBotEditPage = (bot) => (dispatch) => {
 	dispatch(pageSlice.actions.setStatus(PAGE_STATUSES.CREATE_BOT))
 	dispatch(pageSlice.actions.setSelectedChat(null))
 	dispatch(pageSlice.actions.setSelectedBot(bot))
+	document.title = bot ? ("Edit: " + bot.name) : "Create Bot"
 }
 
 export const selectPageStatus = state => state.page.status;
