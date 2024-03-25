@@ -40,6 +40,7 @@ export default function ChatList() {
 								<div className="flex-grow-1">
 									<div><strong>{chat.name || chat.ID}</strong></div>
 									<div>{bot?.name ?? <i>unknown</i>}</div>
+									<div className="text-muted"><i><small>{bot?.model}</small></i></div>
 								</div>
 								<div className="d-flex align-items-center">
 									<FontAwesomeIcon 
