@@ -38,8 +38,9 @@ export default function BotList() {
 						<Container className="text-start">
 							<div className="d-flex justify-content-between">
 								<div className="flex-grow-1">
-									<strong>{bot.name}</strong>
-									<div>{bot.description}</div>
+									<div><strong>{bot.name}</strong></div>
+									<div><div>{bot.description}</div></div>
+									<div className="text-muted"><i><small>{bot.model}</small></i></div>
 								</div>
 								<div className="d-flex align-items-center">
 									<FontAwesomeIcon 
