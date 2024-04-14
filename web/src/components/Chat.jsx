@@ -64,6 +64,15 @@ export default function Chat() {
 			dispatchSendMessage()
 		}
 	}
+
+	const focusTextArea = () => {
+		const textArea = document.querySelector("#chat-message");
+		if (textArea) {
+		  textArea.focus();
+		}
+	  };
+	
+	  focusTextArea();
 	
 	let personalityMessage = "";
 	if (chatBot.personality) {
