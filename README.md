@@ -6,6 +6,10 @@
 
 ![AI Dashboard](docs/1.png)
 
+## Plugins
+* You can add custom API plugins to the `plugins/custom` directory, just add the built `.so` file(s) to the `AI_API_PLUGINS` env var.
+* You can see examples of this in [`plugins/ai_apis/anthropic/anthropic.go`](plugins/ai_apis/anthropic/anthropic.go) and [`plugins/ai_apis/openai/openai.go`](plugins/ai_apis/openai/openai.go)
+
 ## Problems, Questions, Suggestions? 
 * I encourage all issues or suggestions to be submitted through the [**Issues** tab on GitHub](https://github.com/freddyouellette/ai-dashboard/issues).
 * Pull requests are welcome.

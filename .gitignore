@@ -6,6 +6,7 @@
 /error.log
 /data
 /bin
+/plugins/**/*.so
 
 /web/node_modules
 /web/build

@@ -6,9 +6,17 @@ build-frontend:
 	cd ./web && npm i && npm run build && cd ../
 
 build-backend:
-	mkdir -p ./bin && go build -v -o ./bin ./...
+	mkdir -p ./bin && go build -v -o ./bin ./cmd/api/main.go
 
-build: build-frontend build-backend
+build-plugins:
+	@for file in $$(find ./plugins -name '*.go'); do \
+		if grep -q "^package main" "$$file"; then \
+			echo "Building plugin: $$file"; \
+			go build -buildmode=plugin -v -o "$${file%.go}.so" "$$file"; \
+		fi; \
+	done
+
+build: build-plugins build-backend build-frontend
 
 test:
 	go test ./... -coverprofile=coverage.out
@@ -42,8 +50,8 @@ pipeline: build test lint ci-lint coverages
 app: build
 	./bin/api
 
-backend-dev:
-	FRONTEND=false nodemon --watch './**/*.go' --signal SIGTERM --exec go run ./cmd/api/main.go
+backend-dev: 
+	FRONTEND=false nodemon --watch './**/*.go' --signal SIGTERM --exec 'make build-plugins && go run ./cmd/api/main.go'
 
 frontend-dev:
 	cd ./web && npm i && npm run dev && cd ../

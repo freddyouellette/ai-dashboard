@@ -11,6 +11,7 @@ type Bot struct {
 	Name             string     `json:"name"`
 	Description      string     `json:"description"`
 	SendName         bool       `json:"send_name"`
+	AiApiPluginName  string     `json:"ai_api_plugin_name"`
 	AiModel          string     `json:"model"`
 	Personality      string     `json:"personality"`
 	CorrectionPrompt string     `json:"correction_prompt"`

@@ -7,6 +7,7 @@ import (
 
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
+	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
 )
 
 type MessagesService interface {
@@ -28,20 +29,20 @@ type ChatsService struct {
 	*entity_service.EntityService[models.Chat]
 	botService      BotService
 	messagesService MessagesService
-	aiApi           AiApi
+	aiApis          map[string]plugin_models.AiApiPlugin
 }
 
 func NewChatsService(
 	entityService *entity_service.EntityService[models.Chat],
 	botService BotService,
 	messagesService MessagesService,
-	aiApi AiApi,
+	aiApis map[string]plugin_models.AiApiPlugin,
 ) *ChatsService {
 	return &ChatsService{
 		EntityService:   entityService,
 		botService:      botService,
 		messagesService: messagesService,
-		aiApi:           aiApi,
+		aiApis:          aiApis,
 	}
 }
 
@@ -75,26 +76,26 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	}
 
 	// Add bot name, bot personality, and user history to list of messages to be sent
-	requestMessages := make([]*models.Message, 0)
+	requestMessages := make([]*plugin_models.ChatCompletionMessage, 0)
 
 	if bot.SendName {
-		requestMessages = append(requestMessages, &models.Message{
-			Text: "Your name is " + bot.Name + ".",
-			Role: models.MESSAGE_ROLE_SYSTEM,
+		requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
+			Content: "Your name is " + bot.Name + ".",
+			Role:    plugin_models.ChatCompletionRoleSystem,
 		})
 	}
 
 	if bot.Personality != "" {
-		requestMessages = append(requestMessages, &models.Message{
-			Text: "Your personality: " + bot.Personality,
-			Role: models.MESSAGE_ROLE_SYSTEM,
+		requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
+			Content: "Your personality: " + bot.Personality,
+			Role:    plugin_models.ChatCompletionRoleSystem,
 		})
 	}
 
 	if bot.UserHistory != "" {
-		requestMessages = append(requestMessages, &models.Message{
-			Text: "Information about me: " + bot.UserHistory,
-			Role: models.MESSAGE_ROLE_SYSTEM,
+		requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
+			Content: "Information about me: " + bot.UserHistory,
+			Role:    plugin_models.ChatCompletionRoleSystem,
 		})
 	}
 
@@ -103,23 +104,39 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 		// Add previous messages to list only if they are within the memory duration
 		for i := len(messagesDTO.Messages) - 1; i >= 1; i-- {
 			if messagesDTO.Messages[i].CreatedAt.After(time.Now().Add(-(chat.MemoryDuration * time.Second))) {
-				requestMessages = append(requestMessages, messagesDTO.Messages[i])
+				message := messagesDTO.Messages[i]
+				requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
+					Content: message.Text,
+					Role:    plugin_models.ChatCompletionRoleUser,
+				})
 			}
 		}
 
 		// ALWAYS add the last message to the list
-		requestMessages = append(requestMessages, messagesDTO.Messages[0])
+		message := messagesDTO.Messages[0]
+		requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
+			Content: message.Text,
+			Role:    plugin_models.ChatCompletionRoleUser,
+		})
 	}
 
-	var responseMessage *models.Message
-	responseMessage, err = s.aiApi.GetResponse(bot.AiModel, bot.Randomness, requestMessages)
+	aiApi := s.aiApis[bot.AiApiPluginName]
+
+	chatCompletionResponse, err := aiApi.CompleteChat(&plugin_models.ChatCompletionRequest{
+		Model:       bot.AiModel,
+		Temperature: bot.Randomness,
+		Messages:    requestMessages,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	// add this response to DB
-	responseMessage.ChatID = chatId
-	responseMessage.Role = models.MESSAGE_ROLE_BOT
+	responseMessage := &models.Message{
+		ChatID: chatId,
+		Text:   chatCompletionResponse.Message.Content,
+		Role:   models.MESSAGE_ROLE_BOT,
+	}
 	responseMessage, err = s.messagesService.Create(responseMessage)
 	if err != nil {
 		return nil, err
@@ -150,22 +167,29 @@ func (s *ChatsService) GetMessageCorrection(messageId uint) (*models.Message, er
 		return nil, errors.New("bot does not have a correction prompt")
 	}
 
-	requestMessages := make([]*models.Message, 0)
+	requestMessages := make([]*plugin_models.ChatCompletionMessage, 0)
 
-	requestMessages = append(requestMessages, &models.Message{
-		Text: bot.CorrectionPrompt,
-		Role: models.MESSAGE_ROLE_SYSTEM,
+	requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
+		Content: bot.CorrectionPrompt,
+		Role:    plugin_models.ChatCompletionRoleSystem,
 	})
 
-	requestMessages = append(requestMessages, message)
+	requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
+		Content: message.Text,
+		Role:    plugin_models.ChatCompletionRoleUser,
+	})
 
-	var responseMessage *models.Message
-	responseMessage, err = s.aiApi.GetResponse(bot.AiModel, bot.Randomness, requestMessages)
+	aiApi := s.aiApis[bot.AiApiPluginName]
+	responseMessage, err := aiApi.CompleteChat(&plugin_models.ChatCompletionRequest{
+		Model:       bot.AiModel,
+		Temperature: bot.Randomness,
+		Messages:    requestMessages,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	message.Correction = responseMessage.Text
+	message.Correction = responseMessage.Message.Content
 	message, err = s.messagesService.Update(message)
 	if err != nil {
 		return nil, err

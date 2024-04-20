@@ -12,7 +12,7 @@ export default function CreateBotForm() {
 		name: '',
 		description: '',
 		send_name: true,
-		model: 'gpt-4-1106-preview',
+		model: '',
 		randomness: 1,
 		personality: '',
 		user_history: '',
@@ -29,16 +29,21 @@ export default function CreateBotForm() {
 	if (botModelsError) return <div>Error loading bot models...</div>;
 	
 	let handleChange = (event) => {
-		dispatch(goToBotEditPage({
-			...botFormData,
-			[event.target.name]: event.target.value
-		}));
+		let newBotFormData = {...botFormData};
+		if (event.target.name === 'model') {
+			let selectedOption = event.target.options[event.target.selectedIndex];
+			let optGroupLabel = selectedOption.parentNode.label;
+			newBotFormData.ai_api_plugin_name = optGroupLabel;
+		}
+		newBotFormData[event.target.name] = event.target.value;
+		dispatch(goToBotEditPage(newBotFormData));
 	}
 	
 	let handleSubmit = async (event) => {
 		event.preventDefault();
 		
 		let createBotData = Object.assign({}, botFormData);
+		createBotData.ai_api_plugin_name = '???';
 		createBotData.randomness = parseFloat(createBotData.randomness);
 		let newBot = await dispatch(addOrUpdateBot(createBotData));
 		if (createBotData.ID) {
@@ -55,6 +60,13 @@ export default function CreateBotForm() {
 	
 	let botModelsList = Object.values(botModels);
 	botModelsList.sort((a, b) => moment(b.created_at) - moment(a.created_at))
+	
+	let modelsByAuthor = {};
+	for (let botModel of botModelsList) {
+		modelsByAuthor[botModel.author] = modelsByAuthor[botModel.author] || [];
+		modelsByAuthor[botModel.author].push(botModel);
+	}
+	let authorsAlphabetical = Object.keys(modelsByAuthor).sort();
 	
 	return (
 		<div className="mx-3 mt-3">
@@ -83,8 +95,12 @@ export default function CreateBotForm() {
 					<label htmlFor="model" className="form-label">Model <RequiredStar/></label>
 					<select onChange={handleChange} id="create-bot-form-model" name="model" className="form-control" value={botFormData?.model ?? 'gpt-4'}>
 						<option value="">Select AI Model</option>
-						{botModelsList.map(botModel => {
-							return <option key={botModel.id} value={botModel.id}>{botModel.id}</option>
+						{authorsAlphabetical.map(author => {
+							return <optgroup key={author} label={author}>
+								{modelsByAuthor[author].map(botModel => {
+									return <option key={botModel.id} value={botModel.id}>{botModel.id}</option>
+								})}
+							</optgroup>
 						})}
 					</select>
 				</div>

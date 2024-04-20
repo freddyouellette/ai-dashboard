@@ -119,7 +119,7 @@ export const getBotModels = () => async (dispatch, getState) => {
 		res => {
 			let botModelsById = {};
 			res.data.forEach(model => {
-				botModelsById[model.id] = model;
+				botModelsById[model.author + '-' + model.id] = model;
 			});
 			dispatch(botsSlice.actions.setBotModelsLoading(false));
 			dispatch(botsSlice.actions.setBotModelsLoaded(true));

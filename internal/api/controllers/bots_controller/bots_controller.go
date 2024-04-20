@@ -5,35 +5,40 @@ import (
 
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
+	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
 )
 
 type ResponseHandler interface {
 	HandleResponseObject(w http.ResponseWriter, response interface{}, err error)
 }
 
-type AiApi interface {
-	GetBotModels() ([]*models.BotModel, error)
-}
-
 type BotsController struct {
 	*entity_request_controller.EntityRequestController[models.Bot]
 	responseHandler ResponseHandler
-	aiApi           AiApi
+	aiApis          map[string]plugin_models.AiApiPlugin
 }
 
 func NewBotsController(
 	entityRequestController *entity_request_controller.EntityRequestController[models.Bot],
 	responseHandler ResponseHandler,
-	aiApi AiApi,
+	aiApis map[string]plugin_models.AiApiPlugin,
 ) *BotsController {
 	return &BotsController{
 		EntityRequestController: entityRequestController,
 		responseHandler:         responseHandler,
-		aiApi:                   aiApi,
+		aiApis:                  aiApis,
 	}
 }
 
 func (h *BotsController) HandleGetBotModelsRequest(w http.ResponseWriter, r *http.Request) {
-	botModels, err := h.aiApi.GetBotModels()
-	h.responseHandler.HandleResponseObject(w, botModels, err)
+	botModels := make([]*plugin_models.AiModel, 0)
+	for _, aiApi := range h.aiApis {
+		models, err := aiApi.GetModels()
+		if err != nil {
+			h.responseHandler.HandleResponseObject(w, nil, err)
+			return
+		}
+		botModels = append(botModels, models.Models...)
+	}
+	h.responseHandler.HandleResponseObject(w, botModels, nil)
 }

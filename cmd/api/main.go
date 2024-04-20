@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"plugin"
 	"strconv"
+	"strings"
 
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/bots_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/chats_controller"
@@ -20,11 +22,11 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/entity_repository"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/messages_repository"
-	"github.com/freddyouellette/ai-dashboard/internal/services/ai_api"
 	"github.com/freddyouellette/ai-dashboard/internal/services/chats_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/messages_service"
 	"github.com/freddyouellette/ai-dashboard/internal/util/logger"
+	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
@@ -34,8 +36,6 @@ import (
 
 func main() {
 	API_PORT := os.Getenv("API_PORT")
-	OPENAI_ACCESS_TOKEN := os.Getenv("OPENAI_ACCESS_TOKEN")
-	ANTHROPIC_ACCESS_TOKEN := os.Getenv("ANTHROPIC_ACCESS_TOKEN")
 	frontendStr, ok := os.LookupEnv("FRONTEND")
 	if !ok {
 		frontendStr = "true"
@@ -56,7 +56,9 @@ func main() {
 	db.AutoMigrate(&models.Chat{})
 	db.AutoMigrate(&models.Message{})
 
-	errorFile, err := os.OpenFile("error.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	ERROR_LOG := os.Getenv("ERROR_LOG")
+
+	errorFile, err := os.OpenFile(ERROR_LOG, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +76,33 @@ func main() {
 		LogResponseBody:    true,
 		PrettyJson:         true,
 	})
-	aiApi := ai_api.NewAiApi(httpClient, 4096, OPENAI_ACCESS_TOKEN, ANTHROPIC_ACCESS_TOKEN)
+	aiApis := make(map[string]plugin_models.AiApiPlugin, 0)
+	for _, soFilePath := range strings.Split(os.Getenv("AI_API_PLUGINS"), ",") {
+		plug, err := plugin.Open(soFilePath)
+		if err != nil {
+			panic("Error loading plugin: " + err.Error())
+		}
+		plugSymbol, err := plug.Lookup("AiApiPlugin")
+		if err != nil {
+			panic(fmt.Sprintf("Error finding AiApiPlugin in plugin %s: %v", soFilePath, err))
+		}
+
+		aiApi, ok := plugSymbol.(plugin_models.AiApiPlugin)
+		if !ok {
+			panic("Unexpected type from module symbol")
+		}
+
+		aiApi.Initialize(&plugin_models.AiApiPluginOptions{
+			Client: httpClient,
+			Logger: logger,
+		})
+
+		if _, ok := aiApis[aiApi.GetPluginName()]; ok {
+			panic("Duplicate plugin name: " + aiApi.GetPluginName())
+		}
+
+		aiApis[aiApi.GetPluginName()] = aiApi
+	}
 
 	botsRepository := entity_repository.NewRepository[models.Bot](db)
 	botsService := entity_service.NewEntityService[models.Bot](botsRepository)
@@ -84,7 +112,7 @@ func main() {
 			botsService,
 		),
 		responseHandler,
-		aiApi,
+		aiApis,
 	)
 	messagesRepository := messages_repository.NewMessagesRepository(
 		entity_repository.NewRepository[models.Message](db),
@@ -100,7 +128,7 @@ func main() {
 		entity_service.NewEntityService[models.Chat](chatsRepository),
 		botsService,
 		messagesService,
-		aiApi,
+		aiApis,
 	)
 	chatsController := chats_controller.NewChatsController(
 		entity_request_controller.NewEntityRequestController[models.Chat](
