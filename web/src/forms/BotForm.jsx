@@ -126,11 +126,11 @@ export default function CreateBotForm() {
 						placeholder="Randomness"
 						type="number"
 						min="0"
-						max="2"
+						max="1"
 						step="any"
 						required
 						value={botFormData?.randomness ?? 1} />
-					<small><em>Between 0 and 2. 0 = deterministic. 2 = very random</em></small>
+					<small><em>Between 0 and 1. 0 = deterministic. 1 = very random.</em></small>
 				</div>
 				<Button className="btn-secondary me-3" onClick={() => dispatch(goToBotListPage())}>Cancel</Button>
 				<button type="submit" className="btn btn-primary">{botFormData?.ID ? 'Update' : 'Create'} Bot</button>
