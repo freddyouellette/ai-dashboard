@@ -2,6 +2,9 @@
 
 COVERAGE_REQUIREMENT := 90
 
+clear-build:
+	rm -rf ./bin
+
 build-frontend:
 	cd ./web && npm i && npm run build && cd ../
 
@@ -12,11 +15,11 @@ build-plugins:
 	@for file in $$(find ./plugins -name '*.go'); do \
 		if grep -q "^package main" "$$file"; then \
 			echo "Building plugin: $$file"; \
-			go build -buildmode=plugin -v -o "$${file%.go}.so" "$$file"; \
+			go build -buildmode=plugin -modfile go.mod -v -x -o "$${file%.go}.so" "$$file"; \
 		fi; \
 	done
 
-build: build-plugins build-backend build-frontend
+build: clear-build build-plugins build-backend build-frontend
 
 test:
 	go test ./... -coverprofile=coverage.out
@@ -48,7 +51,7 @@ vulns:
 pipeline: build test lint ci-lint coverages
 
 app: build
-	./bin/api
+	./bin/main
 
 backend-dev: 
 	FRONTEND=false nodemon --watch './**/*.go' --signal SIGTERM --exec 'make build-plugins && go run ./cmd/api/main.go'
