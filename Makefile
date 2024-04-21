@@ -15,7 +15,7 @@ build-plugins:
 	@for file in $$(find ./plugins -name '*.go'); do \
 		if grep -q "^package main" "$$file"; then \
 			echo "Building plugin: $$file"; \
-			go build -buildmode=plugin -modfile go.mod -v -x -o "$${file%.go}.so" "$$file"; \
+			go build -buildmode=plugin -modfile go.mod -o "$${file%.go}.so" "$$file"; \
 		fi; \
 	done
 
