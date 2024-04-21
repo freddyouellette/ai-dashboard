@@ -59,7 +59,7 @@ backend-dev:
 frontend-dev:
 	cd ./web && npm i && npm run dev && cd ../
 
-app-dev:
+app-dev: build-plugins
 	make -j 2 backend-dev frontend-dev
 
 app-local:
