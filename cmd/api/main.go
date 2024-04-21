@@ -27,6 +27,7 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/services/messages_service"
 	"github.com/freddyouellette/ai-dashboard/internal/util/logger"
 	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
+	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
@@ -35,6 +36,8 @@ import (
 )
 
 func main() {
+	checkEnv()
+
 	API_PORT := os.Getenv("API_PORT")
 	frontendStr, ok := os.LookupEnv("FRONTEND")
 	if !ok {
@@ -172,5 +175,17 @@ func makeDir(dir string) {
 	err := os.MkdirAll(dir, 0755)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func checkEnv() {
+	myEnv, err := godotenv.Read(".env.dist")
+	if err != nil {
+		panic("Error loading .env.dist file")
+	}
+	for key := range myEnv {
+		if _, ok := os.LookupEnv(key); !ok {
+			panic("Missing .env var " + key)
+		}
 	}
 }
