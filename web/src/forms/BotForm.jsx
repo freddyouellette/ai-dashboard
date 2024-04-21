@@ -43,7 +43,6 @@ export default function CreateBotForm() {
 		event.preventDefault();
 		
 		let createBotData = Object.assign({}, botFormData);
-		createBotData.ai_api_plugin_name = '???';
 		createBotData.randomness = parseFloat(createBotData.randomness);
 		let newBot = await dispatch(addOrUpdateBot(createBotData));
 		if (createBotData.ID) {
