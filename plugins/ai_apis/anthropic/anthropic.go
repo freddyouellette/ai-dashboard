@@ -90,7 +90,7 @@ func (api *Anthropic) CompleteChat(chatCompletionRequest *plugin_models.ChatComp
 	requestBody := anthropicChatCompletionRequest{
 		Model:       chatCompletionRequest.Model,
 		MaxTokens:   api.maxTokens,
-		Temperature: chatCompletionRequest.Temperature * 2,
+		Temperature: chatCompletionRequest.Temperature,
 	}
 
 	requestMessages := make([]anthropicChatCompletionMessage, 0)
