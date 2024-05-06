@@ -100,11 +100,11 @@ func main() {
 			Logger: logger,
 		})
 
-		if _, ok := aiApis[aiApi.GetPluginName()]; ok {
-			panic("Duplicate plugin name: " + aiApi.GetPluginName())
+		if _, ok := aiApis[aiApi.GetPluginId()]; ok {
+			panic("Duplicate plugin name: " + aiApi.GetPluginId())
 		}
 
-		aiApis[aiApi.GetPluginName()] = aiApi
+		aiApis[aiApi.GetPluginId()] = aiApi
 	}
 
 	botsRepository := entity_repository.NewRepository[models.Bot](db)

@@ -32,7 +32,7 @@ export default function CreateBotForm() {
 		let newBotFormData = {...botFormData};
 		if (event.target.name === 'model') {
 			let selectedOption = event.target.options[event.target.selectedIndex];
-			let optGroupKey = selectedOption.parentNode.key;
+			let optGroupKey = selectedOption.dataset.authorId;
 			newBotFormData.ai_api_plugin_name = optGroupKey;
 		}
 		newBotFormData[event.target.name] = event.target.value;
@@ -97,7 +97,7 @@ export default function CreateBotForm() {
 						{authorsAlphabetical.map(author_id => {
 							return <optgroup key={author_id} label={modelsByAuthor[author_id][0].author_name}>
 								{modelsByAuthor[author_id].map(botModel => {
-									return <option key={botModel.id} value={botModel.id}>{botModel.id}</option>
+									return <option key={botModel.id} value={botModel.id} data-author-id={author_id}>{botModel.id}</option>
 								})}
 							</optgroup>
 						})}
