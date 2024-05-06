@@ -38,8 +38,9 @@ type GetModelsResponse struct {
 type AiModel struct {
 	Id string `json:"id"`
 	// Person or Organization that created the model, e.g. "OpenAI"
-	Author    string    `json:"author"`
-	CreatedAt time.Time `json:"created_at"`
+	AuthorId   string    `json:"author_id"`
+	AuthorName string    `json:"author_name"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type AiApiPluginOptions struct {
@@ -49,6 +50,7 @@ type AiApiPluginOptions struct {
 
 type AiApiPlugin interface {
 	Initialize(options *AiApiPluginOptions) error
+	GetPluginId() string
 	GetPluginName() string
 	CompleteChat(chatCompletionRequest *ChatCompletionRequest) (*ChatCompletionResponse, error)
 	GetModels() (*GetModelsResponse, error)

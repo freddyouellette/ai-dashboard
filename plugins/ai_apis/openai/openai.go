@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	PLUGIN_ID   = "openai"
 	PLUGIN_NAME = "OpenAI"
 )
 
@@ -181,15 +182,20 @@ func (api *OpenAi) GetModels() (*plugin_models.GetModelsResponse, error) {
 
 	for _, model := range responseBody.Data {
 		botModels = append(botModels, &plugin_models.AiModel{
-			Id:        model.Id,
-			Author:    PLUGIN_NAME,
-			CreatedAt: time.Unix(model.Created, 0),
+			Id:         model.Id,
+			AuthorId:   PLUGIN_ID,
+			AuthorName: PLUGIN_NAME,
+			CreatedAt:  time.Unix(model.Created, 0),
 		})
 	}
 
 	return &plugin_models.GetModelsResponse{
 		Models: botModels,
 	}, nil
+}
+
+func (api *OpenAi) GetPluginId() string {
+	return PLUGIN_ID
 }
 
 func (api *OpenAi) GetPluginName() string {

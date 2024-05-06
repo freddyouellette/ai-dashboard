@@ -32,8 +32,8 @@ export default function CreateBotForm() {
 		let newBotFormData = {...botFormData};
 		if (event.target.name === 'model') {
 			let selectedOption = event.target.options[event.target.selectedIndex];
-			let optGroupLabel = selectedOption.parentNode.label;
-			newBotFormData.ai_api_plugin_name = optGroupLabel;
+			let optGroupKey = selectedOption.parentNode.key;
+			newBotFormData.ai_api_plugin_name = optGroupKey;
 		}
 		newBotFormData[event.target.name] = event.target.value;
 		dispatch(goToBotEditPage(newBotFormData));
@@ -62,8 +62,8 @@ export default function CreateBotForm() {
 	
 	let modelsByAuthor = {};
 	for (let botModel of botModelsList) {
-		modelsByAuthor[botModel.author] = modelsByAuthor[botModel.author] || [];
-		modelsByAuthor[botModel.author].push(botModel);
+		modelsByAuthor[botModel.author_id] = modelsByAuthor[botModel.author_id] || [];
+		modelsByAuthor[botModel.author_id].push(botModel);
 	}
 	let authorsAlphabetical = Object.keys(modelsByAuthor).sort();
 	
@@ -94,9 +94,9 @@ export default function CreateBotForm() {
 					<label htmlFor="model" className="form-label">Model <RequiredStar/></label>
 					<select onChange={handleChange} id="create-bot-form-model" name="model" className="form-control" value={botFormData?.model ?? 'gpt-4'}>
 						<option value="">Select AI Model</option>
-						{authorsAlphabetical.map(author => {
-							return <optgroup key={author} label={author}>
-								{modelsByAuthor[author].map(botModel => {
+						{authorsAlphabetical.map(author_id => {
+							return <optgroup key={author_id} label={modelsByAuthor[author_id][0].author_name}>
+								{modelsByAuthor[author_id].map(botModel => {
 									return <option key={botModel.id} value={botModel.id}>{botModel.id}</option>
 								})}
 							</optgroup>

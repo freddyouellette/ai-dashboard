@@ -15,6 +15,7 @@ import (
 )
 
 const (
+	PLUGIN_ID   = "anthropic"
 	PLUGIN_NAME = "Anthropic"
 )
 
@@ -168,19 +169,26 @@ func (api *Anthropic) GetModels() (*plugin_models.GetModelsResponse, error) {
 	return &plugin_models.GetModelsResponse{
 		Models: []*plugin_models.AiModel{
 			{
-				Id:     "claude-3-opus-20240229",
-				Author: PLUGIN_NAME,
+				Id:         "claude-3-opus-20240229",
+				AuthorId:   PLUGIN_ID,
+				AuthorName: PLUGIN_NAME,
 			},
 			{
-				Id:     "claude-3-sonnet-20240229",
-				Author: PLUGIN_NAME,
+				Id:         "claude-3-sonnet-20240229",
+				AuthorId:   PLUGIN_ID,
+				AuthorName: PLUGIN_NAME,
 			},
 			{
-				Id:     "claude-3-haiku-20240307",
-				Author: PLUGIN_NAME,
+				Id:         "claude-3-haiku-20240307",
+				AuthorId:   PLUGIN_ID,
+				AuthorName: PLUGIN_NAME,
 			},
 		},
 	}, nil
+}
+
+func (api *Anthropic) GetPluginId() string {
+	return PLUGIN_ID
 }
 
 func (api *Anthropic) GetPluginName() string {
