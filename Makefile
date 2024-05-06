@@ -4,7 +4,6 @@ COVERAGE_REQUIREMENT := 90
 
 clear-build:
 	rm -rf ./bin
-	rm plugins/**/*.so
 
 build-frontend:
 	cd ./web && npm i && npm run build && cd ../
