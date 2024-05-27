@@ -58,18 +58,6 @@ type openAiModelsResponse struct {
 	Data []openAiModel `json:"data"`
 }
 
-func NewOpenAi(
-	client HttpClient,
-	maxTokens int,
-	chatGptAccessToken string,
-) *OpenAi {
-	return &OpenAi{
-		client:             client,
-		maxTokens:          maxTokens,
-		chatGptAccessToken: chatGptAccessToken,
-	}
-}
-
 var (
 	ErrBadResponse = errors.New("received bad response")
 )

@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"plugin"
 	"strconv"
-	"strings"
 
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/bots_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/chats_controller"
@@ -22,10 +20,13 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/models"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/entity_repository"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/messages_repository"
+	"github.com/freddyouellette/ai-dashboard/internal/repositories/users_repository"
 	"github.com/freddyouellette/ai-dashboard/internal/services/chats_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/messages_service"
+	"github.com/freddyouellette/ai-dashboard/internal/services/users_service"
 	"github.com/freddyouellette/ai-dashboard/internal/util/logger"
+	"github.com/freddyouellette/ai-dashboard/internal/util/plugin_loader"
 	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
@@ -58,6 +59,7 @@ func main() {
 	db.AutoMigrate(&models.Bot{})
 	db.AutoMigrate(&models.Chat{})
 	db.AutoMigrate(&models.Message{})
+	db.AutoMigrate(&models.User{})
 
 	ERROR_LOG := os.Getenv("ERROR_LOG")
 
@@ -79,32 +81,16 @@ func main() {
 		LogResponseBody:    true,
 		PrettyJson:         true,
 	})
-	aiApis := make(map[string]plugin_models.AiApiPlugin, 0)
-	for _, soFilePath := range strings.Split(os.Getenv("AI_API_PLUGINS"), ",") {
-		plug, err := plugin.Open(soFilePath)
-		if err != nil {
-			panic("Error loading plugin: " + err.Error())
-		}
-		plugSymbol, err := plug.Lookup("AiApiPlugin")
-		if err != nil {
-			panic(fmt.Sprintf("Error finding AiApiPlugin in plugin %s: %v", soFilePath, err))
-		}
+	aiApis, err := plugin_loader.LoadPlugins[plugin_models.AiApiPlugin](os.Getenv("AI_API_PLUGINS"), "AiApiPlugin")
+	if err != nil {
+		panic(err)
+	}
 
-		aiApi, ok := plugSymbol.(plugin_models.AiApiPlugin)
-		if !ok {
-			panic("Unexpected type from module symbol")
-		}
-
+	for _, aiApi := range aiApis {
 		aiApi.Initialize(&plugin_models.AiApiPluginOptions{
 			Client: httpClient,
 			Logger: logger,
 		})
-
-		if _, ok := aiApis[aiApi.GetPluginId()]; ok {
-			panic("Duplicate plugin name: " + aiApi.GetPluginId())
-		}
-
-		aiApis[aiApi.GetPluginId()] = aiApi
 	}
 
 	botsRepository := entity_repository.NewRepository[models.Bot](db)
@@ -153,13 +139,29 @@ func main() {
 	eventHandler := event_handler.NewEventHandler(chatsService, botsService)
 	eventDispatcher.Register(models.EVENT_TYPE_MESSAGE_CREATED, eventHandler.HandleMessageCreatedEvent)
 
+	usersRepository := users_repository.NewUsersRepository(entity_repository.NewRepository[models.User](db), db)
+	usersService := users_service.NewUsersService(entity_service.NewEntityService[models.User](usersRepository), usersRepository)
+
+	apiMiddlewares, err := plugin_loader.LoadPlugins[plugin_models.ApiMiddlewareFactory](os.Getenv("API_MIDDLEWARE_PLUGINS"), "ApiMiddleware")
+	if err != nil {
+		panic(err)
+	}
+
+	middlewareFuncs := make(map[string]func(http.Handler) http.Handler)
+	for _, apiMiddleware := range apiMiddlewares {
+		apiMiddleware.Initialize(&plugin_models.ApiMiddlewareOptions{
+			UsersService: usersService,
+		})
+		middlewareFuncs[apiMiddleware.GetPluginId()] = apiMiddleware.Create
+	}
+
 	requestLogger := request_logger.NewRequestLogger(logger, request_logger.Options{
 		LogHeaders:      false,
 		LogRequestBody:  true,
 		LogResponseBody: true,
 		PrettyJson:      false,
 	})
-	apiRouter := router.NewRouter(FRONTEND, botsController, chatsController, messagesController, requestLogger)
+	apiRouter := router.NewRouter(FRONTEND, middlewareFuncs, botsController, chatsController, messagesController, requestLogger)
 
 	apiRouter = cors.AllowAll().Handler(apiRouter)
 	// router = cors.Default().Handler(router)

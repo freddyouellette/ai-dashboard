@@ -1,11 +1,17 @@
 package plugin_models
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/freddyouellette/ai-dashboard/internal/api/logged_client"
+	"github.com/freddyouellette/ai-dashboard/internal/services/users_service"
 	"github.com/freddyouellette/ai-dashboard/internal/util/logger"
 )
+
+type Plugin interface {
+	GetPluginId() string
+}
 
 type ChatCompletionRole string
 
@@ -54,4 +60,16 @@ type AiApiPlugin interface {
 	GetPluginName() string
 	CompleteChat(chatCompletionRequest *ChatCompletionRequest) (*ChatCompletionResponse, error)
 	GetModels() (*GetModelsResponse, error)
+}
+
+type UserIdContextKey struct{}
+
+type ApiMiddlewareOptions struct {
+	UsersService *users_service.UsersService
+}
+
+type ApiMiddlewareFactory interface {
+	Initialize(options *ApiMiddlewareOptions) error
+	GetPluginId() string
+	Create(next http.Handler) http.Handler
 }

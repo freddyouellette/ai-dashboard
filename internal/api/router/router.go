@@ -41,12 +41,17 @@ type RequestLogger interface {
 
 func NewRouter(
 	frontend bool,
+	middlewares map[string]func(http.Handler) http.Handler,
 	botsController BotsController,
 	chatsController ChatsController,
 	messagesController MessagesController,
 	requestLogger RequestLogger,
 ) http.Handler {
 	router := chi.NewRouter()
+
+	for _, middleware := range middlewares {
+		router.Use(middleware)
+	}
 
 	// A good base middleware stack
 	router.Use(middleware.RequestID)
