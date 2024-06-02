@@ -194,7 +194,7 @@ func main() {
 		LogRequestBody:  true,
 		LogResponseBody: true,
 		PrettyJson:      false,
-	})
+	}, requestUtils)
 	apiRouter := router.NewRouter(FRONTEND, middlewareFuncs, botsController, chatsController, messagesController, requestLogger)
 
 	apiRouter = cors.AllowAll().Handler(apiRouter)

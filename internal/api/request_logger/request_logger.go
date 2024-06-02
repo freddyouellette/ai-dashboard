@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
 )
 
 type Logger interface {
@@ -15,9 +17,14 @@ type Logger interface {
 	Info(msg string, fields map[string]interface{})
 }
 
+type RequestUtils interface {
+	GetContextInt(r *http.Request, key any, def int) int
+}
+
 type RequestLogger struct {
-	logger  Logger
-	options Options
+	logger       Logger
+	options      Options
+	requestUtils RequestUtils
 }
 
 type Options struct {
@@ -30,10 +37,12 @@ type Options struct {
 func NewRequestLogger(
 	logger Logger,
 	options Options,
+	requestUtils RequestUtils,
 ) *RequestLogger {
 	return &RequestLogger{
-		logger:  logger,
-		options: options,
+		logger:       logger,
+		options:      options,
+		requestUtils: requestUtils,
 	}
 }
 
@@ -56,6 +65,7 @@ func (wo *responseWriterObserver) WriteHeader(statusCode int) {
 func (l *RequestLogger) CreateRequestLoggerHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		info := map[string]interface{}{}
+		info["user_id"] = l.requestUtils.GetContextInt(r, plugin_models.UserIdContextKey{}, 0)
 		info["start"] = time.Now()
 		info["method"] = r.Method
 		info["url"] = r.URL.Path
