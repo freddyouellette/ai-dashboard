@@ -18,7 +18,7 @@ type UserScopedEntityInterfacePointer[T any] interface {
 
 type UserScopedEntity struct {
 	BaseEntity
-	UserId uint
+	UserId uint `json:"user_id"`
 }
 
 func (e *UserScopedEntity) SetUserId(userId uint) {

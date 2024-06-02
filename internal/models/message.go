@@ -4,7 +4,6 @@ type Message struct {
 	BaseEntity
 	UserScopedEntity
 	ChatID     uint        `json:"chat_id"`
-	UserId     uint        `json:"user_id"`
 	Text       string      `json:"text"`
 	Correction string      `json:"correction"`
 	Role       MessageRole `json:"role"`
