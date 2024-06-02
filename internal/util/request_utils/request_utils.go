@@ -24,13 +24,9 @@ func (u *RequestUtils) GetQueryInt(r *http.Request, param string, def int) (int,
 }
 
 func (u *RequestUtils) GetContextInt(r *http.Request, key any, def int) int {
-	paramStr := r.Context().Value(key)
-	if paramStr == nil {
+	i, ok := r.Context().Value(key).(int)
+	if !ok {
 		return def
 	}
-	paramInt, ok := paramStr.(int)
-	if !ok {
-		return 0
-	}
-	return paramInt
+	return i
 }

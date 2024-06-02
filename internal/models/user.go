@@ -2,7 +2,6 @@ package models
 
 type User struct {
 	BaseEntity
-	ID    string `json:"id"`
 	Email string `json:"email"`
 }
 
