@@ -2,26 +2,26 @@ package messages_repository
 
 import (
 	"github.com/freddyouellette/ai-dashboard/internal/models"
-	"github.com/freddyouellette/ai-dashboard/internal/repositories/entity_repository"
+	"github.com/freddyouellette/ai-dashboard/internal/repositories/user_scoped_repository"
 	"gorm.io/gorm"
 )
 
 type MessagesRepository struct {
-	*entity_repository.EntityRepository[models.Message]
+	*user_scoped_repository.UserScopedRepository[*models.Message]
 	db *gorm.DB
 }
 
 func NewMessagesRepository(
-	entityRepository *entity_repository.EntityRepository[models.Message],
+	entityRepository *user_scoped_repository.UserScopedRepository[*models.Message],
 	db *gorm.DB,
 ) *MessagesRepository {
 	return &MessagesRepository{
-		EntityRepository: entityRepository,
-		db:               db,
+		UserScopedRepository: entityRepository,
+		db:                   db,
 	}
 }
 
-func (r *MessagesRepository) GetAllPaginated(options *models.GetMessagesOptions) (*models.MessagesDTO, error) {
+func (r *MessagesRepository) GetAllPaginated(userId uint, options *models.GetMessagesOptions) (*models.MessagesDTO, error) {
 	dto := &models.MessagesDTO{
 		Page:     options.Page,
 		PerPage:  options.PerPage,
@@ -31,7 +31,7 @@ func (r *MessagesRepository) GetAllPaginated(options *models.GetMessagesOptions)
 	offset := (options.Page - 1) * options.PerPage
 	query := r.db.Model(&models.Message{})
 	if options.ChatID != 0 {
-		query = query.Where("chat_id = ?", options.ChatID)
+		query = query.Where("chat_id = ? AND user_id = ?", options.ChatID, userId)
 	}
 	query.
 		Order("created_at DESC").

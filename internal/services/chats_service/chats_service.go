@@ -6,12 +6,12 @@ import (
 	"time"
 
 	"github.com/freddyouellette/ai-dashboard/internal/models"
-	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
+	"github.com/freddyouellette/ai-dashboard/internal/services/user_scoped_service"
 	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
 )
 
 type MessagesService interface {
-	GetAllPaginated(options *models.GetMessagesOptions) (*models.MessagesDTO, error)
+	GetAllPaginated(userId uint, options *models.GetMessagesOptions) (*models.MessagesDTO, error)
 	Create(message *models.Message) (*models.Message, error)
 	GetById(messageId uint) (*models.Message, error)
 	Update(message *models.Message) (*models.Message, error)
@@ -26,23 +26,23 @@ type AiApi interface {
 }
 
 type ChatsService struct {
-	*entity_service.EntityService[models.Chat]
+	*user_scoped_service.UserScopedService[*models.Chat]
 	botService      BotService
 	messagesService MessagesService
 	aiApis          map[string]plugin_models.AiApiPlugin
 }
 
 func NewChatsService(
-	entityService *entity_service.EntityService[models.Chat],
+	entityService *user_scoped_service.UserScopedService[*models.Chat],
 	botService BotService,
 	messagesService MessagesService,
 	aiApis map[string]plugin_models.AiApiPlugin,
 ) *ChatsService {
 	return &ChatsService{
-		EntityService:   entityService,
-		botService:      botService,
-		messagesService: messagesService,
-		aiApis:          aiApis,
+		UserScopedService: entityService,
+		botService:        botService,
+		messagesService:   messagesService,
+		aiApis:            aiApis,
 	}
 }
 
@@ -53,12 +53,12 @@ var (
 	ErrGettingChatMessages = errors.New("error getting chat messages")
 )
 
-func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
+func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Message, error) {
 	var chat *models.Chat
 	var bot *models.Bot
 	var err error
 
-	chat, err = s.EntityService.GetById(chatId)
+	chat, err = s.UserScopedService.GetById(chatId)
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatById, chatId, err)
 	}
@@ -66,7 +66,7 @@ func (s *ChatsService) GetChatResponse(chatId uint) (*models.Message, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingBotById, chat.BotID, err)
 	}
-	messagesDTO, err := s.messagesService.GetAllPaginated(&models.GetMessagesOptions{
+	messagesDTO, err := s.messagesService.GetAllPaginated(userId, &models.GetMessagesOptions{
 		ChatID:  chatId,
 		PerPage: 50,
 		Page:    1,
@@ -154,7 +154,7 @@ func (s *ChatsService) GetMessageCorrection(messageId uint) (*models.Message, er
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingMessageById, messageId, err)
 	}
-	chat, err = s.EntityService.GetById(message.ChatID)
+	chat, err = s.UserScopedService.GetById(message.ChatID)
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatById, message.ChatID, err)
 	}

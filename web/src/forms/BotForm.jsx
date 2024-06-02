@@ -13,7 +13,7 @@ export default function CreateBotForm() {
 		description: '',
 		send_name: true,
 		model: '',
-		randomness: 1,
+		randomness: 0.5,
 		personality: '',
 		user_history: '',
 	};

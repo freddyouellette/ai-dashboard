@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 
-	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
+	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/user_scoped_request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
+	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
 )
 
 const (
@@ -19,26 +19,34 @@ type ResponseHandler interface {
 }
 
 type MessagesService interface {
-	GetAllPaginated(options *models.GetMessagesOptions) (*models.MessagesDTO, error)
+	GetAllPaginated(userId uint, options *models.GetMessagesOptions) (*models.MessagesDTO, error)
 	GetById(id uint) (*models.Message, error)
 	Create(entity *models.Message) (*models.Message, error)
 }
 
+type RequestUtils interface {
+	GetQueryInt(r *http.Request, param string, def int) (int, error)
+	GetContextInt(r *http.Request, key any, def int) int
+}
+
 type MessagesController struct {
-	*entity_request_controller.EntityRequestController[models.Message]
+	*user_scoped_request_controller.UserScopedRequestController[*models.Message]
 	responseHandler ResponseHandler
 	messagesService MessagesService
+	requestUtils    RequestUtils
 }
 
 func NewMessagesController(
-	entityRequestController *entity_request_controller.EntityRequestController[models.Message],
+	userScopedRequestController *user_scoped_request_controller.UserScopedRequestController[*models.Message],
 	responseHandler ResponseHandler,
 	messagesService MessagesService,
+	requestUtils RequestUtils,
 ) *MessagesController {
 	return &MessagesController{
-		EntityRequestController: entityRequestController,
-		responseHandler:         responseHandler,
-		messagesService:         messagesService,
+		UserScopedRequestController: userScopedRequestController,
+		responseHandler:             responseHandler,
+		messagesService:             messagesService,
+		requestUtils:                requestUtils,
 	}
 }
 
@@ -53,6 +61,8 @@ func (h *MessagesController) HandleCreateEntityRequest(w http.ResponseWriter, r 
 		h.responseHandler.HandleResponseObject(w, nil, models.ErrInvalidResourceSyntax)
 		return
 	}
+	userId := h.requestUtils.GetContextInt(r, plugin_models.UserIdContextKey{}, 0)
+	message.SetUserId(uint(userId))
 	message.Role = models.MESSAGE_ROLE_USER
 	responseObject, err := h.messagesService.Create(&message)
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
@@ -60,36 +70,25 @@ func (h *MessagesController) HandleCreateEntityRequest(w http.ResponseWriter, r 
 
 func (h *MessagesController) HandleGetAllPaginatedRequest(w http.ResponseWriter, r *http.Request) {
 	options := &models.GetMessagesOptions{}
-	chatID, err := h.parseQueryParamToInt(r, "chat_id", 0)
+	chatID, err := h.requestUtils.GetQueryInt(r, "chat_id", 0)
 	if err != nil {
 		h.responseHandler.HandleResponseObject(w, nil, models.ErrInvalidResourceSyntax)
 		return
 	}
 	options.ChatID = uint(chatID)
-	page, err := h.parseQueryParamToInt(r, "page", 1)
+	page, err := h.requestUtils.GetQueryInt(r, "page", 1)
 	if err != nil {
 		h.responseHandler.HandleResponseObject(w, nil, models.ErrInvalidResourceSyntax)
 		return
 	}
 	options.Page = page
-	perPage, err := h.parseQueryParamToInt(r, "per_page", DEFAULT_PAGE_SIZE)
+	perPage, err := h.requestUtils.GetQueryInt(r, "per_page", DEFAULT_PAGE_SIZE)
 	if err != nil {
 		h.responseHandler.HandleResponseObject(w, nil, models.ErrInvalidResourceSyntax)
 		return
 	}
 	options.PerPage = perPage
-	responseObject, err := h.messagesService.GetAllPaginated(options)
+	userId := h.requestUtils.GetContextInt(r, plugin_models.UserIdContextKey{}, 0)
+	responseObject, err := h.messagesService.GetAllPaginated(uint(userId), options)
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
-}
-
-func (h *MessagesController) parseQueryParamToInt(r *http.Request, param string, def int) (int, error) {
-	paramStr := r.URL.Query().Get(param)
-	if paramStr == "" {
-		return def, nil
-	}
-	paramInt, err := strconv.Atoi(paramStr)
-	if err != nil {
-		return 0, err
-	}
-	return paramInt, nil
 }

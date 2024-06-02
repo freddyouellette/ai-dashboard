@@ -2,7 +2,6 @@ package entity_request_controller
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -35,10 +34,6 @@ func NewEntityRequestController[e any](responseHandler ResponseHandler, entitySe
 	}
 }
 
-var (
-	ErrInvalidId = errors.New("invalid id")
-)
-
 func (h *EntityRequestController[e]) HandleGetAllEntitiesRequest(w http.ResponseWriter, r *http.Request) {
 	responseObject, err := h.entityService.GetAll()
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
@@ -58,7 +53,7 @@ func (h *EntityRequestController[e]) HandleCreateEntityRequest(w http.ResponseWr
 func (h *EntityRequestController[e]) HandleGetEntityByIdRequest(w http.ResponseWriter, r *http.Request) {
 	entityId, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
-		h.responseHandler.HandleResponseObject(w, nil, fmt.Errorf("%w: %s", ErrInvalidId, err.Error()))
+		h.responseHandler.HandleResponseObject(w, nil, fmt.Errorf("%w: %s", models.ErrInvalidId, err.Error()))
 		return
 	}
 	responseObject, err := h.entityService.GetById(uint(entityId))
@@ -79,7 +74,7 @@ func (h *EntityRequestController[e]) HandleUpdateEntityRequest(w http.ResponseWr
 func (h *EntityRequestController[e]) HandleDeleteEntityByIdRequest(w http.ResponseWriter, r *http.Request) {
 	entityId, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
-		h.responseHandler.HandleResponseObject(w, nil, fmt.Errorf("%w: %s", ErrInvalidId, err.Error()))
+		h.responseHandler.HandleResponseObject(w, nil, fmt.Errorf("%w: %s", models.ErrInvalidId, err.Error()))
 		return
 	}
 	err = h.entityService.Delete(uint(entityId))

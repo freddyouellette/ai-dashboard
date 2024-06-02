@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/cors"
 )
 
-type EntityRequestController[e any] interface {
+type RequestController[e any] interface {
 	HandleGetAllEntitiesRequest(w http.ResponseWriter, r *http.Request)
 	HandleGetEntityByIdRequest(w http.ResponseWriter, r *http.Request)
 	HandleCreateEntityRequest(w http.ResponseWriter, r *http.Request)
@@ -20,18 +20,18 @@ type EntityRequestController[e any] interface {
 }
 
 type ChatsController interface {
-	EntityRequestController[models.Chat]
+	RequestController[*models.Chat]
 	HandleGetChatResponseRequest(w http.ResponseWriter, r *http.Request)
 	HandleGetMessageCorrectionRequest(w http.ResponseWriter, r *http.Request)
 }
 
 type BotsController interface {
-	EntityRequestController[models.Bot]
+	RequestController[*models.Bot]
 	HandleGetBotModelsRequest(w http.ResponseWriter, r *http.Request)
 }
 
 type MessagesController interface {
-	EntityRequestController[models.Message]
+	RequestController[*models.Message]
 	HandleGetAllPaginatedRequest(w http.ResponseWriter, r *http.Request)
 }
 

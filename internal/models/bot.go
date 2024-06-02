@@ -2,13 +2,13 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Bot struct {
-	gorm.Model
+	BaseEntity
+	UserScopedEntity
 	Name             string     `json:"name"`
+	UserId           uint       `json:"user_id"`
 	Description      string     `json:"description"`
 	SendName         bool       `json:"send_name"`
 	AiApiPluginName  string     `json:"ai_api_plugin_name"`

@@ -8,8 +8,8 @@ import (
 
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/bots_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/chats_controller"
-	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/messages_controller"
+	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/user_scoped_request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/api/error_handler"
 	"github.com/freddyouellette/ai-dashboard/internal/api/logged_client"
 	"github.com/freddyouellette/ai-dashboard/internal/api/request_logger"
@@ -18,15 +18,20 @@ import (
 	"github.com/freddyouellette/ai-dashboard/internal/events/event_dispatcher"
 	"github.com/freddyouellette/ai-dashboard/internal/events/event_handler"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
+	"github.com/freddyouellette/ai-dashboard/internal/repositories/bots_repository"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/entity_repository"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/messages_repository"
+	"github.com/freddyouellette/ai-dashboard/internal/repositories/user_scoped_repository"
 	"github.com/freddyouellette/ai-dashboard/internal/repositories/users_repository"
+	"github.com/freddyouellette/ai-dashboard/internal/services/bots_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/chats_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/entity_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/messages_service"
+	"github.com/freddyouellette/ai-dashboard/internal/services/user_scoped_service"
 	"github.com/freddyouellette/ai-dashboard/internal/services/users_service"
 	"github.com/freddyouellette/ai-dashboard/internal/util/logger"
 	"github.com/freddyouellette/ai-dashboard/internal/util/plugin_loader"
+	"github.com/freddyouellette/ai-dashboard/internal/util/request_utils"
 	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
@@ -93,54 +98,83 @@ func main() {
 		})
 	}
 
-	botsRepository := entity_repository.NewRepository[models.Bot](db)
-	botsService := entity_service.NewEntityService[models.Bot](botsRepository)
+	requestUtils := request_utils.NewRequestUtils()
+
+	botsRepository := bots_repository.NewBotsRepository(
+		user_scoped_repository.NewUserScopedRepository[*models.Bot](
+			entity_repository.NewRepository[*models.Bot](db),
+			db,
+		),
+	)
+	botsService := bots_service.NewBotsService(
+		user_scoped_service.NewUserScopedService[*models.Bot](
+			entity_service.NewEntityService[*models.Bot](botsRepository),
+			botsRepository,
+		),
+	)
 	botsController := bots_controller.NewBotsController(
-		entity_request_controller.NewEntityRequestController[models.Bot](
+		user_scoped_request_controller.NewUserScopedRequestController[*models.Bot](
 			responseHandler,
 			botsService,
+			requestUtils,
 		),
 		responseHandler,
 		aiApis,
 	)
 	messagesRepository := messages_repository.NewMessagesRepository(
-		entity_repository.NewRepository[models.Message](db),
+		user_scoped_repository.NewUserScopedRepository[*models.Message](
+			entity_repository.NewRepository[*models.Message](db),
+			db,
+		),
 		db,
 	)
 	messagesService := messages_service.NewMessagesService(
-		entity_service.NewEntityService[models.Message](messagesRepository),
+		user_scoped_service.NewUserScopedService[*models.Message](
+			entity_service.NewEntityService[*models.Message](messagesRepository),
+			messagesRepository,
+		),
 		messagesRepository,
 		eventDispatcher,
 	)
-	chatsRepository := entity_repository.NewRepository[models.Chat](db)
+	chatsRepository := user_scoped_repository.NewUserScopedRepository[*models.Chat](
+		entity_repository.NewRepository[*models.Chat](db),
+		db,
+	)
 	chatsService := chats_service.NewChatsService(
-		entity_service.NewEntityService[models.Chat](chatsRepository),
+		user_scoped_service.NewUserScopedService[*models.Chat](
+			entity_service.NewEntityService[*models.Chat](chatsRepository),
+			chatsRepository,
+		),
 		botsService,
 		messagesService,
 		aiApis,
 	)
 	chatsController := chats_controller.NewChatsController(
-		entity_request_controller.NewEntityRequestController[models.Chat](
+		user_scoped_request_controller.NewUserScopedRequestController[*models.Chat](
 			responseHandler,
 			chatsService,
+			requestUtils,
 		),
 		responseHandler,
 		chatsService,
+		requestUtils,
 	)
 	messagesController := messages_controller.NewMessagesController(
-		entity_request_controller.NewEntityRequestController[models.Message](
+		user_scoped_request_controller.NewUserScopedRequestController[*models.Message](
 			responseHandler,
 			messagesService,
+			requestUtils,
 		),
 		responseHandler,
 		messagesService,
+		requestUtils,
 	)
 
 	eventHandler := event_handler.NewEventHandler(chatsService, botsService)
 	eventDispatcher.Register(models.EVENT_TYPE_MESSAGE_CREATED, eventHandler.HandleMessageCreatedEvent)
 
-	usersRepository := users_repository.NewUsersRepository(entity_repository.NewRepository[models.User](db), db)
-	usersService := users_service.NewUsersService(entity_service.NewEntityService[models.User](usersRepository), usersRepository)
+	usersRepository := users_repository.NewUsersRepository(entity_repository.NewRepository[*models.User](db), db)
+	usersService := users_service.NewUsersService(entity_service.NewEntityService[*models.User](usersRepository), usersRepository)
 
 	apiMiddlewares, err := plugin_loader.LoadPlugins[plugin_models.ApiMiddlewareFactory](os.Getenv("API_MIDDLEWARE_PLUGINS"), "ApiMiddleware")
 	if err != nil {

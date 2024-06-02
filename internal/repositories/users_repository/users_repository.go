@@ -7,12 +7,12 @@ import (
 )
 
 type UsersRepository struct {
-	*entity_repository.EntityRepository[models.User]
+	*entity_repository.EntityRepository[*models.User]
 	db *gorm.DB
 }
 
 func NewUsersRepository(
-	entityRepository *entity_repository.EntityRepository[models.User],
+	entityRepository *entity_repository.EntityRepository[*models.User],
 	db *gorm.DB,
 ) *UsersRepository {
 	return &UsersRepository{

@@ -19,6 +19,15 @@ build-plugins:
 		fi; \
 	done
 
+# build plugins to work with delve debugger
+build-plugins-debug:
+	@for file in $$(find ./plugins -name '*.go'); do \
+		if grep -q "^package main" "$$file"; then \
+			echo "Building plugin: $$file"; \
+			go build -gcflags=all="-N -l" -buildmode=plugin -modfile go.mod -o "$${file%.go}.so" "$$file"; \
+		fi; \
+	done
+
 build: clear-build build-plugins build-backend build-frontend
 
 test:

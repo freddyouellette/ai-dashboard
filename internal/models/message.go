@@ -1,15 +1,17 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 type Message struct {
-	gorm.Model
+	BaseEntity
+	UserScopedEntity
 	ChatID     uint        `json:"chat_id"`
+	UserId     uint        `json:"user_id"`
 	Text       string      `json:"text"`
 	Correction string      `json:"correction"`
 	Role       MessageRole `json:"role"`
+}
+
+func (m *Message) SetUserId(userId uint) {
+	m.UserId = userId
 }
 
 type GetMessagesOptions struct {

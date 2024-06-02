@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/entity_request_controller"
+	"github.com/freddyouellette/ai-dashboard/internal/api/controllers/user_scoped_request_controller"
 	"github.com/freddyouellette/ai-dashboard/internal/models"
+	"github.com/freddyouellette/ai-dashboard/plugins/plugin_models"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -14,25 +15,32 @@ type ResponseHandler interface {
 }
 
 type ChatsService interface {
-	GetChatResponse(chatId uint) (*models.Message, error)
+	GetChatResponse(userId uint, chatId uint) (*models.Message, error)
 	GetMessageCorrection(messageId uint) (*models.Message, error)
 }
 
+type RequestUtils interface {
+	GetContextInt(r *http.Request, key any, def int) int
+}
+
 type ChatsController struct {
-	*entity_request_controller.EntityRequestController[models.Chat]
+	*user_scoped_request_controller.UserScopedRequestController[*models.Chat]
 	responseHandler ResponseHandler
 	chatsService    ChatsService
+	requestUtils    RequestUtils
 }
 
 func NewChatsController(
-	entityRequestController *entity_request_controller.EntityRequestController[models.Chat],
+	userScopedRequestController *user_scoped_request_controller.UserScopedRequestController[*models.Chat],
 	responseHandler ResponseHandler,
 	chatsService ChatsService,
+	requestUtils RequestUtils,
 ) *ChatsController {
 	return &ChatsController{
-		EntityRequestController: entityRequestController,
-		responseHandler:         responseHandler,
-		chatsService:            chatsService,
+		UserScopedRequestController: userScopedRequestController,
+		responseHandler:             responseHandler,
+		chatsService:                chatsService,
+		requestUtils:                requestUtils,
 	}
 }
 
@@ -43,7 +51,8 @@ func (h *ChatsController) HandleGetChatResponseRequest(w http.ResponseWriter, r 
 		return
 	}
 
-	responseObject, err := h.chatsService.GetChatResponse(uint(chatId))
+	userId := h.requestUtils.GetContextInt(r, plugin_models.UserIdContextKey{}, 0)
+	responseObject, err := h.chatsService.GetChatResponse(uint(userId), uint(chatId))
 
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
 }
