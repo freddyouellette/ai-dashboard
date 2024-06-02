@@ -33,8 +33,8 @@ func NewMessagesService(
 	}
 }
 
-func (s *MessagesService) Create(entity *models.Message) (*models.Message, error) {
-	message, err := s.EntityService.Create(entity)
+func (s *MessagesService) CreateWithUserId(entity *models.Message, userId uint) (*models.Message, error) {
+	message, err := s.UserScopedService.CreateWithUserId(entity, userId)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", models.ErrRepository, err.Error())
 	}

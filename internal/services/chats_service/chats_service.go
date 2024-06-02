@@ -12,13 +12,13 @@ import (
 
 type MessagesService interface {
 	GetAllPaginated(userId uint, options *models.GetMessagesOptions) (*models.MessagesDTO, error)
-	Create(message *models.Message) (*models.Message, error)
-	GetById(messageId uint) (*models.Message, error)
-	Update(message *models.Message) (*models.Message, error)
+	CreateWithUserId(entity *models.Message, userId uint) (*models.Message, error)
+	GetByIdAndUserId(id uint, userId uint) (*models.Message, error)
+	UpdateWithUserId(entity *models.Message, userId uint) (*models.Message, error)
 }
 
 type BotService interface {
-	GetById(botId uint) (*models.Bot, error)
+	GetByIdAndUserId(id uint, userId uint) (*models.Bot, error)
 }
 
 type AiApi interface {
@@ -58,11 +58,11 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 	var bot *models.Bot
 	var err error
 
-	chat, err = s.UserScopedService.GetById(chatId)
+	chat, err = s.UserScopedService.GetByIdAndUserId(chatId, userId)
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatById, chatId, err)
 	}
-	bot, err = s.botService.GetById(chat.BotID)
+	bot, err = s.botService.GetByIdAndUserId(chat.BotID, userId)
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingBotById, chat.BotID, err)
 	}
@@ -137,7 +137,7 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 		Text:   chatCompletionResponse.Message.Content,
 		Role:   models.MESSAGE_ROLE_BOT,
 	}
-	responseMessage, err = s.messagesService.Create(responseMessage)
+	responseMessage, err = s.messagesService.CreateWithUserId(responseMessage, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -145,20 +145,20 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 	return responseMessage, nil
 }
 
-func (s *ChatsService) GetMessageCorrection(messageId uint) (*models.Message, error) {
+func (s *ChatsService) GetMessageCorrection(userId uint, messageId uint) (*models.Message, error) {
 	var chat *models.Chat
 	var bot *models.Bot
 	var err error
 
-	message, err := s.messagesService.GetById(messageId)
+	message, err := s.messagesService.GetByIdAndUserId(messageId, userId)
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingMessageById, messageId, err)
 	}
-	chat, err = s.UserScopedService.GetById(message.ChatID)
+	chat, err = s.UserScopedService.GetByIdAndUserId(message.ChatID, userId)
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatById, message.ChatID, err)
 	}
-	bot, err = s.botService.GetById(chat.BotID)
+	bot, err = s.botService.GetByIdAndUserId(chat.BotID, userId)
 	if err != nil {
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingBotById, chat.BotID, err)
 	}
@@ -190,7 +190,7 @@ func (s *ChatsService) GetMessageCorrection(messageId uint) (*models.Message, er
 	}
 
 	message.Correction = responseMessage.Message.Content
-	message, err = s.messagesService.Update(message)
+	message, err = s.messagesService.UpdateWithUserId(message, userId)
 	if err != nil {
 		return nil, err
 	}

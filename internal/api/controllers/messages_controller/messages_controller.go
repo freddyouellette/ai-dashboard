@@ -20,8 +20,7 @@ type ResponseHandler interface {
 
 type MessagesService interface {
 	GetAllPaginated(userId uint, options *models.GetMessagesOptions) (*models.MessagesDTO, error)
-	GetById(id uint) (*models.Message, error)
-	Create(entity *models.Message) (*models.Message, error)
+	CreateWithUserId(entity *models.Message, userId uint) (*models.Message, error)
 }
 
 type RequestUtils interface {
@@ -62,9 +61,8 @@ func (h *MessagesController) HandleCreateEntityRequest(w http.ResponseWriter, r 
 		return
 	}
 	userId := h.requestUtils.GetContextInt(r, plugin_models.UserIdContextKey{}, 0)
-	message.SetUserId(uint(userId))
 	message.Role = models.MESSAGE_ROLE_USER
-	responseObject, err := h.messagesService.Create(&message)
+	responseObject, err := h.messagesService.CreateWithUserId(&message, uint(userId))
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
 }
 

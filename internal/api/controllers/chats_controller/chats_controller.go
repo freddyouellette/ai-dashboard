@@ -16,7 +16,7 @@ type ResponseHandler interface {
 
 type ChatsService interface {
 	GetChatResponse(userId uint, chatId uint) (*models.Message, error)
-	GetMessageCorrection(messageId uint) (*models.Message, error)
+	GetMessageCorrection(userId uint, messageId uint) (*models.Message, error)
 }
 
 type RequestUtils interface {
@@ -64,7 +64,8 @@ func (h *ChatsController) HandleGetMessageCorrectionRequest(w http.ResponseWrite
 		return
 	}
 
-	message, err := h.chatsService.GetMessageCorrection(uint(messageId))
+	userId := h.requestUtils.GetContextInt(r, plugin_models.UserIdContextKey{}, 0)
+	message, err := h.chatsService.GetMessageCorrection(uint(messageId), uint(userId))
 
 	h.responseHandler.HandleResponseObject(w, message, err)
 }
