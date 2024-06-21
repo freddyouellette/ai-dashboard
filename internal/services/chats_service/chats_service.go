@@ -105,9 +105,16 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 		for i := len(messagesDTO.Messages) - 1; i >= 1; i-- {
 			if messagesDTO.Messages[i].CreatedAt.After(time.Now().Add(-(chat.MemoryDuration * time.Second))) {
 				message := messagesDTO.Messages[i]
+				var role plugin_models.ChatCompletionRole
+				switch message.Role {
+				case models.MESSAGE_ROLE_USER:
+					role = plugin_models.ChatCompletionRoleUser
+				case models.MESSAGE_ROLE_BOT:
+					role = plugin_models.ChatCompletionRoleAssistant
+				}
 				requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
 					Content: message.Text,
-					Role:    plugin_models.ChatCompletionRoleUser,
+					Role:    role,
 				})
 			}
 		}
