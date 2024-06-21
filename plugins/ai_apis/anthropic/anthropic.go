@@ -169,6 +169,11 @@ func (api *Anthropic) GetModels() (*plugin_models.GetModelsResponse, error) {
 	return &plugin_models.GetModelsResponse{
 		Models: []*plugin_models.AiModel{
 			{
+				Id:         "claude-3-5-sonnet-20240620",
+				AuthorId:   PLUGIN_ID,
+				AuthorName: PLUGIN_NAME,
+			},
+			{
 				Id:         "claude-3-opus-20240229",
 				AuthorId:   PLUGIN_ID,
 				AuthorName: PLUGIN_NAME,
