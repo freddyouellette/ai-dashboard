@@ -65,7 +65,7 @@ func (h *ChatsController) HandleGetMessageCorrectionRequest(w http.ResponseWrite
 	}
 
 	userId := h.requestUtils.GetContextInt(r, plugin_models.UserIdContextKey{}, 0)
-	message, err := h.chatsService.GetMessageCorrection(uint(messageId), uint(userId))
+	message, err := h.chatsService.GetMessageCorrection(uint(userId), uint(messageId))
 
 	h.responseHandler.HandleResponseObject(w, message, err)
 }
