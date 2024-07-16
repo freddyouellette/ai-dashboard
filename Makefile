@@ -73,3 +73,6 @@ app-dev: build-plugins
 
 app-local:
 	DEVCONTAINER_COMMAND="make app" docker-compose up
+
+# for custom make jobs
+-include Makefile.local.mk
