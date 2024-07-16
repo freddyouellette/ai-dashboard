@@ -59,7 +59,7 @@ export const sendMessage = (chatId, botId, message) => async dispatch => {
 	} else {
 		dispatch(messagesSlice.actions.setWaitingForResponse(true))
 	}
-	axios.get(import.meta.env.VITE_API_HOST+"/api/chats/"+chatId+"/response")
+	await axios.get(import.meta.env.VITE_API_HOST+"/api/chats/"+chatId+"/response")
 	.then(response => {
 		dispatch(messagesSlice.actions.setWaitingForResponse(false))
 		dispatch(messagesSlice.actions.addMessage(response.data))
