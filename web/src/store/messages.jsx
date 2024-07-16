@@ -41,6 +41,13 @@ const messagesSlice = createSlice({
 	}
 });
 
+export const updateMessage = (message) => async dispatch => {
+	await axios.put(import.meta.env.VITE_API_HOST+'/api/messages/'+message.ID, message)
+	.then(response => {
+		dispatch(messagesSlice.actions.addMessage(response.data))
+	}, error => console.error(error))
+}
+
 // thunk
 export const sendMessage = (chatId, botId, message) => async dispatch => {
 	if (message) {

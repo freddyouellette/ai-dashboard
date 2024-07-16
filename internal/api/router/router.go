@@ -94,6 +94,7 @@ func NewRouter(
 	router.Get("/api/messages", messagesController.HandleGetAllPaginatedRequest)
 	router.Post("/api/messages", messagesController.HandleCreateEntityRequest)
 	router.Get("/api/messages/{id}", messagesController.HandleGetEntityByIdRequest)
+	router.Put("/api/messages/{id}", messagesController.HandleUpdateEntityRequest)
 
 	if frontend {
 		webHandler := web_handler.NewWebHandler("web/dist", "index.html")

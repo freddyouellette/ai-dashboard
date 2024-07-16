@@ -1,5 +1,23 @@
-.user-message {
+.user-message.active {
+	border: 1px solid #ccc;
 	background-color: #c5e9ff;
+}
+
+.user-message.inactive {
+	border: 1px dashed #ccc;
+	background-color: #eaf6fe;
+	color: #777;
+}
+
+.bot-message.active {
+	border: 1px solid #ccc;
+	background-color: #f0f0f0;
+}
+
+.bot-message.inactive {
+	border: 1px dashed #ccc;
+	background-color: #fefefe;
+	color: #777;
 }
 
 .system-message {

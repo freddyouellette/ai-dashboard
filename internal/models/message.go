@@ -7,6 +7,7 @@ type Message struct {
 	Text       string      `json:"text"`
 	Correction string      `json:"correction"`
 	Role       MessageRole `json:"role"`
+	Active     bool        `json:"active"`
 }
 
 func (m *Message) SetUserId(userId uint) {
