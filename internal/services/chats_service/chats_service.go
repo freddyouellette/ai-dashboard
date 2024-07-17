@@ -143,6 +143,7 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 		ChatID: chatId,
 		Text:   chatCompletionResponse.Message.Content,
 		Role:   models.MESSAGE_ROLE_BOT,
+		Active: true,
 	}
 	responseMessage, err = s.messagesService.CreateWithUserId(responseMessage, userId)
 	if err != nil {

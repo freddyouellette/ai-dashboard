@@ -62,6 +62,7 @@ func (h *MessagesController) HandleCreateEntityRequest(w http.ResponseWriter, r 
 	}
 	userId := h.requestUtils.GetContextInt(r, plugin_models.UserIdContextKey{}, 0)
 	message.Role = models.MESSAGE_ROLE_USER
+	message.Active = true
 	responseObject, err := h.messagesService.CreateWithUserId(&message, uint(userId))
 	h.responseHandler.HandleResponseObject(w, responseObject, err)
 }
