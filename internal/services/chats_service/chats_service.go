@@ -102,7 +102,11 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 	// NEWEST, NEWER, NEW, OLD, OLDER, OLDEST
 	if len(messagesDTO.Messages) != 0 {
 		// Add previous messages to list only if they are within the memory duration
-		for i := len(messagesDTO.Messages) - 1; i >= 1; i-- {
+		for i := 1; i < len(messagesDTO.Messages); i++ {
+			if messagesDTO.Messages[i].BreakAfter {
+				// manual break, don't include this message or any before
+				break
+			}
 			if messagesDTO.Messages[i].CreatedAt.After(time.Now().Add(-(chat.MemoryDuration * time.Second))) {
 				message := messagesDTO.Messages[i]
 				var role plugin_models.ChatCompletionRole
@@ -112,19 +116,22 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 				case models.MESSAGE_ROLE_BOT:
 					role = plugin_models.ChatCompletionRoleAssistant
 				}
-				requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
+				// prepend to the list as the messages get older
+				requestMessages = append([]*plugin_models.ChatCompletionMessage{{
 					Content: message.Text,
 					Role:    role,
-				})
+				}}, requestMessages...)
 			}
 		}
 
-		// ALWAYS add the last message to the list
-		message := messagesDTO.Messages[0]
-		requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
-			Content: message.Text,
-			Role:    plugin_models.ChatCompletionRoleUser,
-		})
+		if !messagesDTO.Messages[0].BreakAfter {
+			// ALWAYS add the last message to the list
+			message := messagesDTO.Messages[0]
+			requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
+				Content: message.Text,
+				Role:    plugin_models.ChatCompletionRoleUser,
+			})
+		}
 	}
 
 	aiApi := s.aiApis[bot.AiApiPluginName]

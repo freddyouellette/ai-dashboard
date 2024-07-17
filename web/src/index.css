@@ -32,3 +32,31 @@ code {
 	font-size: 0.7em;
 	font-style: italic;
 }
+
+.hr-with-text {
+	display: flex;
+	align-items: center;
+	text-align: center;
+	white-space: nowrap;
+  }
+  
+  .hr-with-text::before,
+  .hr-with-text::after {
+	content: '';
+	flex-grow: 1;
+	background: #aaa;
+	height: 1px;
+  }
+  
+  .hr-with-text::before {
+	margin-right: 10px;
+  }
+  
+  .hr-with-text::after {
+	margin-left: 10px;
+  }
+  
+  .hr-with-text span {
+	background: #fff;
+	padding: 0 10px;
+  }

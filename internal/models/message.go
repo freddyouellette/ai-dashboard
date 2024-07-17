@@ -8,6 +8,7 @@ type Message struct {
 	Correction string      `json:"correction"`
 	Role       MessageRole `json:"role"`
 	Active     bool        `json:"active"`
+	BreakAfter bool        `json:"break_after"`
 }
 
 func (m *Message) SetUserId(userId uint) {
