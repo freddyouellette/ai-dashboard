@@ -3,7 +3,7 @@ import { selectSelectedChat } from "../store/page";
 import { useState, useEffect, useRef } from "react"; // import useRef
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faCommentDots, faCopy, faEllipsisV, faEyeSlash, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faCaretDown, faCaretLeft, faCaretUp, faCheck, faCommentDots, faCopy, faEllipsisH, faEllipsisV, faEyeSlash, faGear, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { getChatMessages, selectMessages, selectWaitingForCorrectionId, selectWaitingForResponse, sendMessage, updateMessage } from "../store/messages";
 import './chat.css'
 import { getBots, selectBots } from "../store/bots";
@@ -48,20 +48,24 @@ export default function Chat() {
 		setMessageToSend(event.target.value)
 	}
 	
-	const dispatchSendMessage = () => {
+	const dispatchSendMessage = (role, getResponse) => {
 		if (messageToSend === "") {
-			return popup.confirm("The message field is empty. Are you sure you would like to send only previous messages?").then(ok => {
-				if (ok) dispatch(sendMessage(selectedChat.ID, selectedChat?.bot_id, messageToSend));
-			});
+			if (getResponse && role != "BOT") {
+				return popup.confirm("The message field is empty. Are you sure you would like to send only previous messages?").then(ok => {
+					if (ok) dispatch(sendMessage(selectedChat.ID, selectedChat?.bot_id, messageToSend, role, getResponse));
+				});
+			} else {
+				// do nothing
+			}
 		} else {
-			dispatch(sendMessage(selectedChat.ID, selectedChat?.bot_id, messageToSend))
+			dispatch(sendMessage(selectedChat.ID, selectedChat?.bot_id, messageToSend, role, getResponse))
 			setMessageToSend("")
 		}
 	}
 	
 	const handleMessageTextKeyDown = event => {
 		if ((event.ctrlKey || event.metaKey) && (event.keyCode === 13)) {
-			dispatchSendMessage()
+			dispatchSendMessage("USER", true)
 		}
 	}
 
@@ -199,7 +203,14 @@ export default function Chat() {
 						placeholder="Enter message" 
 						required 
 						value={messageToSend}></textarea>
-					<Button className="ms-3" onClick={dispatchSendMessage}><FontAwesomeIcon icon={faPaperPlane} /></Button>
+					<div className="btn-group-vertical ms-2">
+						<Button className="py-3 border-bottom" onClick={() => dispatchSendMessage("USER", true)}><FontAwesomeIcon icon={faPaperPlane}/></Button>
+						<Button className="py-0 border-top rounded-bottom" data-bs-toggle="dropdown"><FontAwesomeIcon icon={faEllipsisH}/></Button>
+						<ul className="dropdown-menu">
+							<li><div className="dropdown-item cursor-pointer" onClick={() => dispatchSendMessage("USER", false)}>Send Without Response</div></li>
+							<li><div className="dropdown-item cursor-pointer" onClick={() => dispatchSendMessage("BOT", false)}>Create Bot Message</div></li>
+						</ul>
+					</div>
 				</div>
 				<div className="text-start ms-2 d-none d-md-flex">
 					<small><em>Ctrl+Enter / ⌘+Enter to send message</em></small>
@@ -239,7 +250,7 @@ function MessageContextMenu({ message }) {
 		<>
 			{message.active ? "" : <FontAwesomeIcon className="text-muted" icon={faEyeSlash} size="sm"/>}
 			<div className="btn-group dropstart cursor-pointer d-flex align-items-center">
-				<FontAwesomeIcon className="ms-1 dropdown-toggle text-muted ms-2 me-1" data-bs-toggle="dropdown" icon={faEllipsisV} size="lg"/>
+				<FontAwesomeIcon className="dropdown-toggle text-muted ps-2 pe-1" data-bs-toggle="dropdown" icon={faEllipsisV} size="lg"/>
 				<ul className="dropdown-menu">
 					<div className="dropdown-item" onClick={() => copyToClipboard(() => {}, message.text)}>Copy Text</div>
 					{

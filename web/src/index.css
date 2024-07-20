@@ -38,25 +38,29 @@ code {
 	align-items: center;
 	text-align: center;
 	white-space: nowrap;
-  }
-  
-  .hr-with-text::before,
-  .hr-with-text::after {
+}
+
+.hr-with-text::before,
+.hr-with-text::after {
 	content: '';
 	flex-grow: 1;
 	background: #aaa;
 	height: 1px;
-  }
-  
-  .hr-with-text::before {
+}
+
+.hr-with-text::before {
 	margin-right: 10px;
-  }
-  
-  .hr-with-text::after {
+}
+
+.hr-with-text::after {
 	margin-left: 10px;
-  }
-  
-  .hr-with-text span {
+}
+
+.hr-with-text span {
 	background: #fff;
 	padding: 0 10px;
-  }
+}
+
+.dropdown-menu.bg-light .dropdown-item:hover {
+	background-color: #eee;
+}

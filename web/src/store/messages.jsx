@@ -49,28 +49,29 @@ export const updateMessage = (message) => async dispatch => {
 }
 
 // thunk
-export const sendMessage = (chatId, botId, message) => async dispatch => {
+export const sendMessage = (chatId, botId, message, role, getResponse) => async dispatch => {
 	if (message) {
 		let newMessageData = {
 			chat_id: chatId,
 			text: message,
+			role: role,
 		}
 		await axios.post(import.meta.env.VITE_API_HOST+'/api/messages', newMessageData)
 		.then(response => {
 			dispatch(messagesSlice.actions.addMessage(response.data))
-			dispatch(messagesSlice.actions.setWaitingForResponse(true))
 			dispatch(getMessageCorrection(chatId, response.data.ID))
 			// refresh bots so the order corrects itself
 			dispatch(getBot(botId))
 		}, error => console.error(error))
-	} else {
-		dispatch(messagesSlice.actions.setWaitingForResponse(true))
 	}
-	await axios.get(import.meta.env.VITE_API_HOST+"/api/chats/"+chatId+"/response")
-	.then(response => {
-		dispatch(messagesSlice.actions.setWaitingForResponse(false))
-		dispatch(messagesSlice.actions.addMessage(response.data))
-	}, error => console.error(error))
+	if (getResponse) {
+		dispatch(messagesSlice.actions.setWaitingForResponse(true))
+		await axios.get(import.meta.env.VITE_API_HOST+"/api/chats/"+chatId+"/response")
+		.then(response => {
+			dispatch(messagesSlice.actions.setWaitingForResponse(false))
+			dispatch(messagesSlice.actions.addMessage(response.data))
+		}, error => console.error(error))
+	}
 }
 
 // thunk
