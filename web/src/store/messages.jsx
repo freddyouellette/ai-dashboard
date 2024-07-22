@@ -89,6 +89,18 @@ export const getMessageCorrection = (chatId, messageId) => async (dispatch, getS
 }
 
 // thunk
+export const updateMessageActive = (message, active) => async (dispatch, getState) => {
+	const updatedMessage = { ...message, active };
+	dispatch(updateMessage(updatedMessage));
+}
+
+// thunk
+export const updateMessageBreakAfter = (message, break_after) => async (dispatch, getState) => {
+	const updatedMessage = { ...message, break_after };
+	dispatch(updateMessage(updatedMessage));
+}
+
+// thunk
 export const getChatMessages = (chat, page) => async dispatch => {
 	dispatch(messagesSlice.actions.setMessagesLoading(true));
 	dispatch(messagesSlice.actions.setMessagesError(null));

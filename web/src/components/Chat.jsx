@@ -3,8 +3,8 @@ import { selectSelectedChat } from "../store/page";
 import { useState, useEffect, useRef } from "react"; // import useRef
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretDown, faCaretLeft, faCaretUp, faCheck, faCommentDots, faCopy, faEllipsisH, faEllipsisV, faEyeSlash, faGear, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-import { getChatMessages, selectMessages, selectWaitingForCorrectionId, selectWaitingForResponse, sendMessage, updateMessage } from "../store/messages";
+import { faCheck, faCommentDots, faCopy, faEllipsisH, faEllipsisV, faEyeSlash, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { getChatMessages, selectMessages, selectWaitingForCorrectionId, selectWaitingForResponse, sendMessage, updateMessageActive, updateMessageBreakAfter } from "../store/messages";
 import './chat.css'
 import { getBots, selectBots } from "../store/bots";
 import moment from "moment";
@@ -105,6 +105,15 @@ export default function Chat() {
 	}
 	
 	let messagesArr = Object.values(messages);
+	let lastMessage = messagesArr[messagesArr.length - 1] || null;
+	let lastMessageBreakAfter = ""
+	if (lastMessage) {
+		if (!lastMessage.break_after) {
+			lastMessageBreakAfter = <li><div className="dropdown-item cursor-pointer" onClick={() => dispatch(updateMessageBreakAfter(lastMessage, true))}>Add Break</div></li>
+		} else {
+			lastMessageBreakAfter = <li><div className="dropdown-item cursor-pointer" onClick={() => dispatch(updateMessageBreakAfter(lastMessage, false))}>Remove Break</div></li>
+		}
+	}
 	return (
 		<div className="d-flex flex-column flex-grow-1">
 			<div className="message-list flex-grow-1 overflow-auto mb-2 border-bottom px-2" style={{height: '0px'}} ref={messageListRef}>
@@ -209,6 +218,7 @@ export default function Chat() {
 						<ul className="dropdown-menu">
 							<li><div className="dropdown-item cursor-pointer" onClick={() => dispatchSendMessage("USER", false)}>Send Without Response</div></li>
 							<li><div className="dropdown-item cursor-pointer" onClick={() => dispatchSendMessage("BOT", false)}>Create Bot Message</div></li>
+							{lastMessageBreakAfter}
 						</ul>
 					</div>
 				</div>
@@ -234,18 +244,6 @@ const copyToClipboard = (setCopied, text) => {
 }
 
 function MessageContextMenu({ message }) {
-	const dispatch = useDispatch();
-	
-	const updateActive = (active) => {
-		const updatedMessage = { ...message, active };
-		dispatch(updateMessage(updatedMessage));
-	}
-	
-	const setBreakAfter = (break_after) => {
-		const updatedMessage = { ...message, break_after };
-		dispatch(updateMessage(updatedMessage));
-	}
-	
 	return (
 		<>
 			{message.active ? "" : <FontAwesomeIcon className="text-muted" icon={faEyeSlash} size="sm"/>}
@@ -255,13 +253,13 @@ function MessageContextMenu({ message }) {
 					<div className="dropdown-item" onClick={() => copyToClipboard(() => {}, message.text)}>Copy Text</div>
 					{
 						message.active 
-						? <div className="dropdown-item" onClick={() => updateActive(false)}>Hide from Bot</div>
-						: <div className="dropdown-item" onClick={() => updateActive(true)}>Show to Bot</div>
+						? <div className="dropdown-item" onClick={() => updateMessageActive(message, false)}>Hide from Bot</div>
+						: <div className="dropdown-item" onClick={() => updateMessageActive(message, true)}>Show to Bot</div>
 					}
 					{
 						message.break_after 
-						? <div className="dropdown-item" onClick={() => setBreakAfter(false)}>Remove Break After</div>
-						: <div className="dropdown-item" onClick={() => setBreakAfter(true)}>Add Break After</div>
+						? <div className="dropdown-item" onClick={() => updateMessageBreakAfter(message, false)}>Remove Break After</div>
+						: <div className="dropdown-item" onClick={() => updateMessageBreakAfter(message, true)}>Add Break After</div>
 					}
 				</ul>
 			</div>
