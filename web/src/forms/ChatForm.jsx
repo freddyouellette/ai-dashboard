@@ -12,7 +12,8 @@ export default function ChatForm() {
 	const [formData, setFormData] = useState(selectedChat ?? {
 		bot_id: null,
 		name: 'New Chat',
-		memory_duration: 60 * 60 * 24,
+		instructions: '',
+		memory_duration: 60 * 60,
 	});
 	useEffect(() => {
 		dispatch(getBots());
@@ -63,6 +64,11 @@ export default function ChatForm() {
 				<div className="mb-3">
 					<label htmlFor="name" className="form-label">Name of Chat</label>
 					<input onChange={handleChange} type="text" name="name" className="form-control" id="create-chat-form-name" value={formData?.name ?? ''}/>
+				</div>
+				<div className="mb-3">
+					<label htmlFor="instructions" className="form-label">Chat Instructions</label>
+					<textarea onChange={handleChange} className="form-control" id="create-bot-form-instructions" name="instructions" rows="3" placeholder="Enter chat instructions" value={formData?.instructions ??  ''} ></textarea>
+					<div className="help-text text-start">This prompt will be sent to the bot as instructions for how to act in the chat.</div>
 				</div>
 				<div className="mb-3">
 					<label htmlFor="memory_duration" className="form-label">Memory <RequiredStar/></label>

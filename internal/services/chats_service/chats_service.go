@@ -75,29 +75,14 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 		return nil, fmt.Errorf("%w (ID %d): %v", ErrGettingChatMessages, chatId, err)
 	}
 
-	// Add bot name, bot personality, and user history to list of messages to be sent
+	// Add bot name, bot personality, and user history to list of messages to be sent (if they exist)
 	requestMessages := make([]*plugin_models.ChatCompletionMessage, 0)
-
 	if bot.SendName {
-		requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
-			Content: "Your name is " + bot.Name + ".",
-			Role:    plugin_models.ChatCompletionRoleSystem,
-		})
+		requestMessages = addMessageIfExists(requestMessages, "Your name is:", bot.Name, plugin_models.ChatCompletionRoleSystem)
 	}
-
-	if bot.Personality != "" {
-		requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
-			Content: "Your personality: " + bot.Personality,
-			Role:    plugin_models.ChatCompletionRoleSystem,
-		})
-	}
-
-	if bot.UserHistory != "" {
-		requestMessages = append(requestMessages, &plugin_models.ChatCompletionMessage{
-			Content: "Information about me: " + bot.UserHistory,
-			Role:    plugin_models.ChatCompletionRoleSystem,
-		})
-	}
+	requestMessages = addMessageIfExists(requestMessages, "Your personality is:", bot.Personality, plugin_models.ChatCompletionRoleSystem)
+	requestMessages = addMessageIfExists(requestMessages, "Information about me:", bot.UserHistory, plugin_models.ChatCompletionRoleSystem)
+	requestMessages = addMessageIfExists(requestMessages, "", chat.Instructions, plugin_models.ChatCompletionRoleSystem)
 
 	// NEWEST, NEWER, NEW, OLD, OLDER, OLDEST
 	if len(messagesDTO.Messages) != 0 {
@@ -136,6 +121,10 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 
 	aiApi := s.aiApis[bot.AiApiPluginName]
 
+	if aiApi == nil {
+		return nil, errors.New("ai api plugin not found: " + bot.AiApiPluginName)
+	}
+
 	chatCompletionResponse, err := aiApi.CompleteChat(&plugin_models.ChatCompletionRequest{
 		Model:       bot.AiModel,
 		Temperature: bot.Randomness,
@@ -158,6 +147,19 @@ func (s *ChatsService) GetChatResponse(userId uint, chatId uint) (*models.Messag
 	}
 
 	return responseMessage, nil
+}
+
+func addMessageIfExists(messages []*plugin_models.ChatCompletionMessage, prefix string, message string, role plugin_models.ChatCompletionRole) []*plugin_models.ChatCompletionMessage {
+	if message != "" {
+		if prefix != "" {
+			message = prefix + " " + message
+		}
+		messages = append(messages, &plugin_models.ChatCompletionMessage{
+			Content: message,
+			Role:    role,
+		})
+	}
+	return messages
 }
 
 func (s *ChatsService) GetMessageCorrection(userId uint, messageId uint) (*models.Message, error) {
