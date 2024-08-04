@@ -78,32 +78,6 @@ export default function Chat() {
 	
 	  focusTextArea();
 	
-	let personalityMessage = "";
-	if (chatBot.personality) {
-		personalityMessage = (
-			<div className="text-start system-message p-2 m-2 rounded border text-muted">
-				<div className="d-flex justify-content-between">
-					<b className="">Bot Personality:</b>
-					<CopyButton text={chatBot.personality} />
-				</div>
-				<MessageText>{chatBot.personality}</MessageText>
-			</div>
-		)
-	}
-	
-	let userHistoryMessage = "";
-	if (chatBot.user_history) {
-		userHistoryMessage = (
-			<div className="text-start system-message p-2 m-2 rounded border text-muted">
-				<div className="d-flex justify-content-between">
-					<b className="">User History:</b>
-					<CopyButton text={chatBot.user_history} />
-				</div>
-				<MessageText>{chatBot.user_history}</MessageText>
-			</div>
-		)
-	}
-	
 	let messagesArr = Object.values(messages);
 	let lastMessage = messagesArr[messagesArr.length - 1] || null;
 	let lastMessageBreakAfter = ""
@@ -118,8 +92,9 @@ export default function Chat() {
 		<div className="d-flex flex-column flex-grow-1">
 			<div className="message-list flex-grow-1 overflow-auto mb-2 border-bottom px-2" style={{height: '0px'}} ref={messageListRef}>
 				<div>
-					{personalityMessage}
-					{userHistoryMessage}
+					<SystemMessage title="Bot Personality:" content={chatBot.personality} />
+					<SystemMessage title="User History:" content={chatBot.user_history} />
+					<SystemMessage title="Chat Instructions:" content={selectedChat.instructions} />
 					{messagesArr.map((message, i) => {
 						let barrier = "";
 						const memory = moment().subtract(selectedChat.memory_duration, 'seconds');
@@ -226,6 +201,19 @@ export default function Chat() {
 					<small><em>Ctrl+Enter / ⌘+Enter to send message</em></small>
 				</div>
 			</div>
+		</div>
+	);
+}
+
+function SystemMessage({ title, content }) {
+	if (!content) return "";
+	return (
+		<div className="text-start system-message p-2 m-2 rounded border text-muted">
+			<div className="d-flex justify-content-between">
+				<b className="">{title}</b>
+				<CopyButton text={content} />
+			</div>
+			<MessageText>{content}</MessageText>
 		</div>
 	);
 }
