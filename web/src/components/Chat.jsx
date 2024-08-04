@@ -244,6 +244,8 @@ const copyToClipboard = (setCopied, text) => {
 }
 
 function MessageContextMenu({ message }) {
+	const dispatch = useDispatch();
+	
 	return (
 		<>
 			{message.active ? "" : <FontAwesomeIcon className="text-muted" icon={faEyeSlash} size="sm"/>}
@@ -253,13 +255,13 @@ function MessageContextMenu({ message }) {
 					<div className="dropdown-item" onClick={() => copyToClipboard(() => {}, message.text)}>Copy Text</div>
 					{
 						message.active 
-						? <div className="dropdown-item" onClick={() => updateMessageActive(message, false)}>Hide from Bot</div>
-						: <div className="dropdown-item" onClick={() => updateMessageActive(message, true)}>Show to Bot</div>
+						? <div className="dropdown-item" onClick={() => dispatch(updateMessageActive(message, false))}>Hide from Bot</div>
+						: <div className="dropdown-item" onClick={() => dispatch(updateMessageActive(message, true))}>Show to Bot</div>
 					}
 					{
 						message.break_after 
-						? <div className="dropdown-item" onClick={() => updateMessageBreakAfter(message, false)}>Remove Break After</div>
-						: <div className="dropdown-item" onClick={() => updateMessageBreakAfter(message, true)}>Add Break After</div>
+						? <div className="dropdown-item" onClick={() => dispatch(updateMessageBreakAfter(message, false))}>Remove Break After</div>
+						: <div className="dropdown-item" onClick={() => dispatch(updateMessageBreakAfter(message, true))}>Add Break After</div>
 					}
 				</ul>
 			</div>
