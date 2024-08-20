@@ -35,7 +35,7 @@ export default function ChatList() {
 						className="border-bottom" 
 						style={{ "cursor": "pointer" }}
 						onClick={() => dispatch(goToChatPage(chat))}>
-						<Container className="text-start">
+						<div className="text-start mx-3 my-1">
 							<div className="d-flex justify-content-between">
 								<div className="flex-grow-1">
 									<div><strong>{chat.name || chat.ID}</strong></div>
@@ -50,7 +50,7 @@ export default function ChatList() {
 										/>
 								</div>
 							</div>
-						</Container>
+						</div>
 					</div>
 				);
 			})}
