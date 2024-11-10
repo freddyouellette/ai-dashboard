@@ -64,3 +64,8 @@ code {
 .dropdown-menu.bg-light .dropdown-item:hover {
 	background-color: #eee;
 }
+
+.katex .katex-html .base {
+	overflow-x: auto;
+	width: 100%;
+}
