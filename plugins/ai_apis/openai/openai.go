@@ -23,9 +23,9 @@ type HttpClient interface {
 }
 
 type OpenAi struct {
-	client             HttpClient
-	maxTokens          int
-	chatGptAccessToken string
+	client              HttpClient
+	maxCompletionTokens int
+	chatGptAccessToken  string
 }
 
 type openAiMessage struct {
@@ -34,10 +34,10 @@ type openAiMessage struct {
 }
 
 type openAiChatCompletionRequest struct {
-	Model       string          `json:"model"`
-	Messages    []openAiMessage `json:"messages"`
-	MaxTokens   int             `json:"max_tokens"`
-	Temperature float64         `json:"temperature"`
+	Model               string          `json:"model"`
+	Messages            []openAiMessage `json:"messages"`
+	MaxCompletionTokens int             `json:"max_completion_tokens"`
+	Temperature         float64         `json:"temperature"`
 }
 
 type openAiChatCompletionResponse struct {
@@ -64,20 +64,20 @@ var (
 
 func (api *OpenAi) Initialize(options *plugin_models.AiApiPluginOptions) error {
 	api.client = options.Client
-	maxTokens, err := strconv.Atoi(os.Getenv("OPENAI_MAX_TOKENS"))
+	maxCompletionTokens, err := strconv.Atoi(os.Getenv("OPENAI_MAX_COMPLETION_TOKENS"))
 	if err != nil {
 		return err
 	}
-	api.maxTokens = maxTokens
+	api.maxCompletionTokens = maxCompletionTokens
 	api.chatGptAccessToken = os.Getenv("OPENAI_ACCESS_TOKEN")
 	return nil
 }
 
 func (api *OpenAi) CompleteChat(chatCompletionRequest *plugin_models.ChatCompletionRequest) (*plugin_models.ChatCompletionResponse, error) {
 	requestBody := openAiChatCompletionRequest{
-		Model:       chatCompletionRequest.Model,
-		MaxTokens:   api.maxTokens,
-		Temperature: chatCompletionRequest.Temperature * 2,
+		Model:               chatCompletionRequest.Model,
+		MaxCompletionTokens: api.maxCompletionTokens,
+		Temperature:         chatCompletionRequest.Temperature * 2,
 	}
 
 	requestMessages := make([]openAiMessage, 0)
