@@ -1,5 +1,14 @@
+#root {
+	background-color: #ddd;
+}
+
 .App {
   text-align: center;
+  margin: auto;
+  max-width: 1024px;
+  background-color: #fff;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
 }
 
 .App-logo {
