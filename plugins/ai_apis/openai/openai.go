@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -37,7 +38,7 @@ type openAiChatCompletionRequest struct {
 	Model               string          `json:"model"`
 	Messages            []openAiMessage `json:"messages"`
 	MaxCompletionTokens int             `json:"max_completion_tokens"`
-	Temperature         float64         `json:"temperature"`
+	Temperature         *float64        `json:"temperature,omitempty"`
 }
 
 type openAiChatCompletionResponse struct {
@@ -74,10 +75,19 @@ func (api *OpenAi) Initialize(options *plugin_models.AiApiPluginOptions) error {
 }
 
 func (api *OpenAi) CompleteChat(chatCompletionRequest *plugin_models.ChatCompletionRequest) (*plugin_models.ChatCompletionResponse, error) {
+	modelRegex := regexp.MustCompile(`^o[0-9]+-`)
+	// o1 family doesn't use system prompts, or temperature, for some reason
+	supportsSystemRole := modelRegex.MatchString(chatCompletionRequest.Model)
+	supportsTemperature := !modelRegex.MatchString(chatCompletionRequest.Model)
+
 	requestBody := openAiChatCompletionRequest{
 		Model:               chatCompletionRequest.Model,
 		MaxCompletionTokens: api.maxCompletionTokens,
-		Temperature:         chatCompletionRequest.Temperature * 2,
+	}
+
+	if supportsTemperature {
+		t := chatCompletionRequest.Temperature * 2
+		requestBody.Temperature = &t
 	}
 
 	requestMessages := make([]openAiMessage, 0)
@@ -89,7 +99,11 @@ func (api *OpenAi) CompleteChat(chatCompletionRequest *plugin_models.ChatComplet
 		case plugin_models.ChatCompletionRoleAssistant:
 			messageRole = "assistant"
 		case plugin_models.ChatCompletionRoleSystem:
-			messageRole = "system"
+			if supportsSystemRole {
+				messageRole = "user"
+			} else {
+				messageRole = "developer"
+			}
 		default:
 			continue
 		}
