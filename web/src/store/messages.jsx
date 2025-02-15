@@ -12,6 +12,7 @@ const messagesSlice = createSlice({
 		messagesTotal: 0,
 		waitingForCorrectionId: null,
 		waitingForResponse: false,
+		responseFailed: false,
 	},
 	reducers: {
 		addMessage: (state, action) => {
@@ -38,6 +39,9 @@ const messagesSlice = createSlice({
 		setWaitingForResponse: (state, action) => {
 			state.waitingForResponse = action.payload
 		},
+		setResponseFailed: (state, action) => {
+			state.responseFailed = action.payload
+		},
 	}
 });
 
@@ -50,6 +54,7 @@ export const updateMessage = (message) => async dispatch => {
 
 // thunk
 export const sendMessage = (chatId, botId, message, role, getResponse) => async dispatch => {
+	dispatch(messagesSlice.actions.setResponseFailed(false))
 	if (message) {
 		let newMessageData = {
 			chat_id: chatId,
@@ -62,7 +67,10 @@ export const sendMessage = (chatId, botId, message, role, getResponse) => async 
 			dispatch(getMessageCorrection(chatId, response.data.ID))
 			// refresh bots so the order corrects itself
 			dispatch(getBot(botId))
-		}, error => console.error(error))
+		}, error => {
+			console.error(error)
+			dispatch(messagesSlice.actions.setResponseFailed(true))
+		})
 	}
 	if (getResponse) {
 		dispatch(messagesSlice.actions.setWaitingForResponse(true))
@@ -70,7 +78,11 @@ export const sendMessage = (chatId, botId, message, role, getResponse) => async 
 		.then(response => {
 			dispatch(messagesSlice.actions.setWaitingForResponse(false))
 			dispatch(messagesSlice.actions.addMessage(response.data))
-		}, error => console.error(error))
+		}, error => {
+			console.error(error)
+			dispatch(messagesSlice.actions.setWaitingForResponse(false))
+			dispatch(messagesSlice.actions.setResponseFailed(true))
+		})
 	}
 }
 
@@ -104,6 +116,7 @@ export const updateMessageBreakAfter = (message, break_after) => async (dispatch
 export const getChatMessages = (chat, page) => async dispatch => {
 	dispatch(messagesSlice.actions.setMessagesLoading(true));
 	dispatch(messagesSlice.actions.setMessagesError(null));
+	dispatch(messagesSlice.actions.setResponseFailed(false))
 	let params = {
 		chat_id: chat.ID,
 		page,
@@ -132,7 +145,8 @@ export const selectMessages = createSelector(
 	state => state.messages.messagesError,
 	state => state.messages.messagesPage,
 	state => state.messages.messagesTotal,
-	(messages, messagesLoading, messagesError, messagesPage, messagesTotal) => ({ messages, messagesLoading, messagesError, messagesPage, messagesTotal })
+	state => state.messages.responseFailed,
+	(messages, messagesLoading, messagesError, messagesPage, messagesTotal, responseFailed) => ({ messages, messagesLoading, messagesError, messagesPage, messagesTotal, responseFailed })
 );
 export const selectWaitingForResponse = state => state.messages.waitingForResponse
 export const selectWaitingForCorrectionId = state => state.messages.waitingForCorrectionId

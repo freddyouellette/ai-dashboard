@@ -3,7 +3,7 @@ import { selectSelectedChat } from "../store/page";
 import { useState, useEffect, useRef } from "react"; // import useRef
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faCommentDots, faCopy, faEllipsisH, faEllipsisV, faEyeSlash, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faCommentDots, faCopy, faEllipsisH, faEllipsisV, faEyeSlash, faPaperPlane, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 import { getChatMessages, selectMessages, selectWaitingForCorrectionId, selectWaitingForResponse, sendMessage, updateMessageActive, updateMessageBreakAfter } from "../store/messages";
 import './chat.css'
 import { getBots, selectBots } from "../store/bots";
@@ -15,7 +15,7 @@ import MessageText from "./MessageText";
 export default function Chat() {
 	const dispatch = useDispatch();
 	const selectedChat = useSelector(selectSelectedChat);
-	const { messages, messagesLoading, messagesError } = useSelector(selectMessages);
+	const { messages, messagesLoading, messagesError, responseFailed } = useSelector(selectMessages);
 	const waitingForResponse = useSelector(selectWaitingForResponse);
 	const [messageToSend, setMessageToSend] = useState("");
 	const { bots, botsLoading, botsError } = useSelector(selectBots);
@@ -171,6 +171,14 @@ export default function Chat() {
 							<div className="m-2 p-3 border rounded bg-light">
 								🤖 <FontAwesomeIcon className="ms-1 mb-2" icon={faCommentDots} bounce />
 							</div>
+						</div>
+					) : ""}
+					{responseFailed ? (
+						<div className={"text-start bot-message p-2 m-2 me-5 rounded active border border-danger"}>
+							<div className="d-flex justify-content-between align-items-center">
+								<div><b>🤖 {chatBot.name}:</b></div>
+							</div>
+							<div className="text-danger"><FontAwesomeIcon icon={faExclamationTriangle} /> Failed to get response. Please try again</div>
 						</div>
 					) : ""}
 				</div>
