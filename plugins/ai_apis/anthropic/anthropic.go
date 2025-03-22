@@ -29,6 +29,14 @@ type Anthropic struct {
 	anthropicAccessToken string
 }
 
+type anthropicGetModelsResponse struct {
+	Data []struct {
+		Id          string `json:"id"`
+		DisplayName string `json:"display_name"`
+		CreatedAt   string `json:"created_at"`
+	} `json:"data"`
+}
+
 type anthropicChatCompletionMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
@@ -166,29 +174,48 @@ func (api *Anthropic) CompleteChat(chatCompletionRequest *plugin_models.ChatComp
 }
 
 func (api *Anthropic) GetModels() (*plugin_models.GetModelsResponse, error) {
+	request, err := http.NewRequest(http.MethodGet, "https://api.anthropic.com/v1/models", nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("x-api-key", api.anthropicAccessToken)
+	request.Header.Set("anthropic-version", "2023-06-01")
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "application/json")
+
+	response, err := api.client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	var responseBody anthropicGetModelsResponse
+	err = json.NewDecoder(response.Body).Decode(&responseBody)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("%w: [%d] %v", ErrBadResponse, response.StatusCode, responseBody)
+	}
+
+	botModels := make([]*plugin_models.AiModel, 0)
+	for _, model := range responseBody.Data {
+		createdAt, err := time.Parse(time.RFC3339, model.CreatedAt)
+		if err != nil {
+			createdAt = time.Now()
+		}
+		botModels = append(botModels, &plugin_models.AiModel{
+			Id:         model.Id,
+			Name:       model.DisplayName,
+			AuthorId:   PLUGIN_ID,
+			AuthorName: PLUGIN_NAME,
+			CreatedAt:  createdAt,
+		})
+	}
+
 	return &plugin_models.GetModelsResponse{
-		Models: []*plugin_models.AiModel{
-			{
-				Id:         "claude-3-5-sonnet-latest",
-				AuthorId:   PLUGIN_ID,
-				AuthorName: PLUGIN_NAME,
-			},
-			{
-				Id:         "claude-3-opus-latest",
-				AuthorId:   PLUGIN_ID,
-				AuthorName: PLUGIN_NAME,
-			},
-			{
-				Id:         "claude-3-sonnet-latest",
-				AuthorId:   PLUGIN_ID,
-				AuthorName: PLUGIN_NAME,
-			},
-			{
-				Id:         "claude-3-haiku-latest",
-				AuthorId:   PLUGIN_ID,
-				AuthorName: PLUGIN_NAME,
-			},
-		},
+		Models: botModels,
 	}, nil
 }
 
