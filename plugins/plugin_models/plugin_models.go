@@ -44,6 +44,7 @@ type GetModelsResponse struct {
 type AiModel struct {
 	Id string `json:"id"`
 	// Person or Organization that created the model, e.g. "OpenAI"
+	Name       string    `json:"name"`
 	AuthorId   string    `json:"author_id"`
 	AuthorName string    `json:"author_name"`
 	CreatedAt  time.Time `json:"created_at"`

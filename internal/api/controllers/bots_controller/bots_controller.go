@@ -25,20 +25,20 @@ func NewBotsController(
 ) *BotsController {
 	return &BotsController{
 		UserScopedRequestController: userScopedRequestController,
-		responseHandler:         responseHandler,
-		aiApis:                  aiApis,
+		responseHandler:             responseHandler,
+		aiApis:                      aiApis,
 	}
 }
 
 func (h *BotsController) HandleGetBotModelsRequest(w http.ResponseWriter, r *http.Request) {
 	botModels := make([]*plugin_models.AiModel, 0)
 	for _, aiApi := range h.aiApis {
-		models, err := aiApi.GetModels()
+		modelsResponse, err := aiApi.GetModels()
 		if err != nil {
 			h.responseHandler.HandleResponseObject(w, nil, err)
 			return
 		}
-		botModels = append(botModels, models.Models...)
+		botModels = append(botModels, modelsResponse.Models...)
 	}
 	h.responseHandler.HandleResponseObject(w, botModels, nil)
 }

@@ -97,7 +97,7 @@ export default function CreateBotForm() {
 						{authorsAlphabetical.map(author_id => {
 							return <optgroup key={author_id} label={modelsByAuthor[author_id][0].author_name}>
 								{modelsByAuthor[author_id].map(botModel => {
-									return <option key={botModel.id} value={botModel.id} data-author-id={author_id}>{botModel.id}</option>
+									return <option key={botModel.id} value={botModel.id} data-author-id={author_id}>{botModel.name || botModel.id}</option>
 								})}
 							</optgroup>
 						})}
