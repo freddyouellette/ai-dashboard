@@ -9,7 +9,7 @@ build-frontend:
 	cd ./web && npm i && npm run build && cd ../
 
 build-backend:
-	mkdir -p ./bin && go build -v -o ./bin ./cmd/api/main.go
+	mkdir -p ./bin && CGO_CFLAGS="-D_LARGEFILE64_SOURCE" go build -v -o ./bin ./cmd/api/main.go
 
 build-plugins:
 	@for file in $$(find ./plugins -name '*.go'); do \
