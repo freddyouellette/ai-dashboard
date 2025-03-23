@@ -1,11 +1,12 @@
-FROM alpine:3.17.0
+FROM alpine:3.21.3
 
 RUN apk add --no-cache \
 	go \
 	git \
 	make \
 	npm \
-	openssh
+	openssh \
+	sqlite
 
 RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.52.2
 
