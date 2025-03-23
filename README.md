@@ -6,6 +6,17 @@
 
 ![AI Dashboard](docs/1.png)
 
+## Installation & Usage
+```
+make app
+```
+
+## Development
+There is a dev container already set up for development with VSCode. Just use the action `Remote-Containers: Reopen in Container`. Then you can run the following command:
+```
+make app-dev
+```
+
 ## Plugins
 * You can add custom API plugins to the `plugins/custom` directory, just add the built `.so` file(s) to the `AI_API_PLUGINS` env var.
 * You can see examples of this in [`plugins/ai_apis/anthropic/anthropic.go`](plugins/ai_apis/anthropic/anthropic.go) and [`plugins/ai_apis/openai/openai.go`](plugins/ai_apis/openai/openai.go)
