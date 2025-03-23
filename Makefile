@@ -63,7 +63,7 @@ app: build
 	./bin/main
 
 backend-dev: 
-	FRONTEND=false nodemon --watch './**/*.go' --signal SIGTERM --exec 'make build-plugins && go run ./cmd/api/main.go'
+	FRONTEND=false nodemon --watch './**/*.go' --signal SIGTERM --exec 'make build-plugins && CGO_CFLAGS="-D_LARGEFILE64_SOURCE" go run ./cmd/api/main.go'
 
 frontend-dev:
 	cd ./web && npm i && npm run dev && cd ../

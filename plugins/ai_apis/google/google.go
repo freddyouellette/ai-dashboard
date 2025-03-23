@@ -35,7 +35,7 @@ type googleContents struct {
 }
 
 type googleGenerateContentRequest struct {
-	SystemInstruction []googleContents `json:"systemInstruction,omitempty"`
+	SystemInstruction googleContents   `json:"systemInstruction,omitempty"`
 	Contents          []googleContents `json:"contents"`
 	GenerationConfig  struct {
 		Temperature float64 `json:"temperature,omitempty"`
@@ -74,7 +74,7 @@ func (api *Google) Initialize(options *plugin_models.AiApiPluginOptions) error {
 func (api *Google) CompleteChat(chatCompletionRequest *plugin_models.ChatCompletionRequest) (*plugin_models.ChatCompletionResponse, error) {
 	requestBody := googleGenerateContentRequest{}
 
-	systemInstructionMessages := make([]googleContents, 0)
+	systemInstructionMessages := make([]googleMessage, 0)
 	requestMessages := make([]googleContents, 0)
 	for _, message := range chatCompletionRequest.Messages {
 		var messageRole string
@@ -85,13 +85,8 @@ func (api *Google) CompleteChat(chatCompletionRequest *plugin_models.ChatComplet
 			messageRole = "model"
 		case plugin_models.ChatCompletionRoleSystem:
 			messageRole = "model"
-			systemInstructionMessages = append(systemInstructionMessages, googleContents{
-				Role: messageRole,
-				Parts: []googleMessage{
-					{
-						Text: message.Content,
-					},
-				},
+			systemInstructionMessages = append(systemInstructionMessages, googleMessage{
+				Text: message.Content,
 			})
 			continue
 		default:
@@ -109,7 +104,10 @@ func (api *Google) CompleteChat(chatCompletionRequest *plugin_models.ChatComplet
 	}
 
 	if len(systemInstructionMessages) > 0 {
-		requestBody.SystemInstruction = append(requestBody.SystemInstruction, systemInstructionMessages...)
+		requestBody.SystemInstruction = googleContents{
+			Parts: systemInstructionMessages,
+			Role:  "system",
+		}
 	}
 	if len(requestMessages) > 0 {
 		requestBody.Contents = append(requestBody.Contents, requestMessages...)
