@@ -114,7 +114,8 @@ func (api *Google) CompleteChat(chatCompletionRequest *plugin_models.ChatComplet
 	if len(requestMessages) > 0 {
 		requestBody.Contents = append(requestBody.Contents, requestMessages...)
 	}
-	requestBody.GenerationConfig.Temperature = chatCompletionRequest.Temperature
+	// google temperature goes from 0 to 2
+	requestBody.GenerationConfig.Temperature = chatCompletionRequest.Temperature * 2
 
 	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
